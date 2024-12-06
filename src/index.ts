@@ -1,6 +1,6 @@
-import dedent from 'dedent'
+import prompt from 'dedent'
 import OpenAI from 'openai'
-import { zodResponseFormat } from 'openai/helpers/zod'
+import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 import { z } from 'zod'
 
@@ -59,33 +59,37 @@ export class Agent {
     this.protocol = protocol
   }
 
-  async executeTask(messages: ChatCompletionMessageParam[]): Promise<string> {
+  async executeTask(
+    messages: Message[],
+    delegate: (task: string) => Promise<Message[]>
+  ): Promise<string> {
     const response = await openai.beta.chat.completions.parse({
       model: this.model,
       messages: [
         {
           role: 'system',
-          content: dedent`
+          content: prompt`
             ${this.prompt}
             
-            Your task is to complete the assigned work by:
-            1. Breaking down the task into steps
-            2. Using available tools when needed
-            3. Requesting user input if required
-            4. Providing clear progress updates
+            Your job is to complete the assigned task.
+            1. Break down the task into steps
+            2. Use available tools when needed
+            3. Provide clear progress updates
+            
+            If the task requires tools, expertise, or input you lack, send a delegation request to your Supervisor
           `,
         },
         ...messages,
       ],
       // tbd: only add tools if there are any
-      // tools: this.tools.map(zodFunction),
+      tools: this.tools.length > 0 ? this.tools.map(zodFunction) : undefined,
       response_format: zodResponseFormat(
         z.object({
           response: z.discriminatedUnion('kind', [
             z.object({
-              kind: z.literal('user_input'),
-              prompt: z.string().describe('The question to ask the user'),
-              reasoning: z.string().describe('The reasoning for asking this question'),
+              kind: z.literal('delegate'),
+              task: z.string().describe('The task to delegate to another agent'),
+              reasoning: z.string().describe('The reasoning for delegating the task'),
             }),
             z.object({
               kind: z.literal('complete'),
@@ -120,7 +124,7 @@ export class Agent {
         })
       )
 
-      return this.executeTask([...messages, response.choices[0].message, ...toolResults])
+      return this.executeTask([...messages, response.choices[0].message, ...toolResults], delegate)
     }
 
     // tbd: verify shape of response
@@ -129,19 +133,22 @@ export class Agent {
       throw new Error('No parsed response received')
     }
 
-    if (result.response.kind === 'user_input') {
-      const userInput = await this.requestUserInput(result.response.prompt)
-      return this.executeTask([
-        ...messages,
-        {
-          role: 'assistant',
-          content: result.response.prompt,
-        },
-        {
-          role: 'user',
-          content: userInput,
-        },
-      ])
+    if (result.response.kind === 'delegate') {
+      const delegatedWorkflow = await delegate(result.response.task)
+      return this.executeTask(
+        [
+          ...messages,
+          {
+            role: 'assistant',
+            content: prompt`
+              Delegating task: "${result.response.task}"
+              Reason for delegation: "${result.response.reasoning}"
+            `,
+          },
+          ...delegatedWorkflow,
+        ],
+        delegate
+      )
     }
 
     if (result.response.kind === 'complete') {
@@ -161,180 +168,60 @@ export class Agent {
   }
 }
 
-interface WorkflowState {
-  workflow: string
-  messages: ChatCompletionMessageParam[]
-}
+type Message = ChatCompletionMessageParam
 
 class Supervisor {
   private agents: Agent[] = []
-  private state: WorkflowState | null = null
 
   constructor(agents: Agent[]) {
     this.agents = agents
   }
 
-  private async getNextTask(state: WorkflowState): Promise<string | null> {
-    const response = await openai.beta.chat.completions.parse({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          // tbd: improve prompt for generic workflow
-          // tbd: handle subsequent failures
-          content: dedent`
-            You are a workflow planner that breaks down complex tasks into smaller, actionable steps.
-            Your job is to determine the next task that needs to be done based on the original workflow and what has been completed so far.
-            If all required tasks are completed, return null.
-
-            Rules:
-            1. Each task should be self-contained and achievable
-            2. Tasks should be specific and actionable
-            3. Return null when the workflow is complete
-            4. Consider dependencies and order of operations
-            5. Use context from completed tasks to inform next steps
-          `,
-        },
-        ...state.messages,
-        {
-          role: 'user',
-          content: 'What is the next task that needs to be done?',
-        },
-      ],
-      temperature: 0.2,
-      response_format: zodResponseFormat(
-        z.object({
-          nextTask: z
-            .string()
-            .describe('The next task to be completed or null if the workflow is complete'),
-          reasoning: z
-            .string()
-            .describe('The reasoning for selecting the next task or why the workflow is complete'),
-        }),
-        'next_task'
-      ),
-    })
-
-    try {
-      const content = response.choices[0].message.parsed
-      if (!content) {
-        throw new Error('No content in response')
-      }
-
-      if (!content.nextTask) {
-        return null
-      }
-
-      return content.nextTask
-    } catch (error) {
-      throw new Error('Failed to determine next task')
-    }
-  }
-
-  private async selectAgent(task: string): Promise<Agent> {
-    const response = await openai.beta.chat.completions.parse({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: dedent`
-            You are an agent selector that matches tasks to the most capable agent.
-            Analyze the task requirements and each agent's capabilities to select the best match.
-            
-            Consider:
-            1. Required tools and skills
-            2. Agent's specialization
-            3. Model capabilities
-            4. Previous task context if available
-          `,
-        },
-        {
-          // tbd: we need role, experience etc., for agent, and to stringify this array properly, otherwise it doesn't know which one to choose
-          role: 'user',
-          content: dedent`
-            Task:
-            ${task}
-
-            Available agents:
-            ${this.agents}
-
-            Select the most suitable agent for this task.
-          `,
-        },
-      ],
-      temperature: 0.1,
-      response_format: zodResponseFormat(
-        z.object({
-          agentIndex: z.number(),
-          reasoning: z.string(),
-        }),
-        'agent_selection'
-      ),
-    })
-
-    const content = response.choices[0].message.parsed
-    if (!content) {
-      throw new Error('No content in response')
-    }
-
-    const agent = this.agents[content.agentIndex]
-    if (!agent) {
-      throw new Error('Invalid agent')
-    }
-
-    return agent
-  }
-
-  async executeWorkflow(workflow: string): Promise<void> {
-    this.state = {
-      workflow,
-      messages: [
-        {
-          role: 'user',
-          content: workflow,
-        },
-      ],
-    }
-
+  async executeWorkflow(workflow: Message[]): Promise<Message[]> {
     // tbd: set reasonable max iterations
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const task = await this.getNextTask(this.state)
+      const task = await getNextTask(workflow)
 
       if (!task) {
-        break
+        return workflow
       }
 
-      this.state.messages.push({
+      workflow.push({
         role: 'assistant',
         content: task,
       })
 
       // tbd: this throws, handle it
-      const selectedAgent = await this.selectAgent(task)
+      const selectedAgent = await selectAgent(task, this.agents)
 
       // tbd: this should just be a try/catch
       // tbd: do not return string, but more information or keep memory in agent
       try {
-        const result = await selectedAgent.executeTask([
-          {
-            role: 'user',
-            content: task,
-          },
-        ])
-
-        this.state.messages.push({
+        const result = await selectedAgent.executeTask(
+          [
+            {
+              role: 'user',
+              content: task,
+            },
+          ],
+          async (delegateTask) => {
+            return this.executeWorkflow([
+              {
+                role: 'assistant',
+                content: delegateTask,
+              },
+            ])
+          }
+        )
+        workflow.push({
           role: 'assistant',
           content: result,
         })
       } catch (error) {
-        console.log('💬', error)
-        this.state.messages.push({
+        workflow.push({
           role: 'assistant',
-          content: dedent`
-            An error occurred while executing the task:
-            ${error instanceof Error ? error.message : 'Unknown error'}
-          `,
+          content: error instanceof Error ? error.message : 'Unknown error',
         })
       }
     }
@@ -351,6 +238,127 @@ export class Team {
   }
 
   async ask(workflow: string): Promise<void> {
-    await this.supervisor.executeWorkflow(workflow)
+    await this.supervisor.executeWorkflow([
+      {
+        role: 'user',
+        content: workflow,
+      },
+    ])
   }
+}
+
+async function selectAgent(task: string, agents: Agent[]): Promise<Agent> {
+  const response = await openai.beta.chat.completions.parse({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: prompt`
+          You are an agent selector that matches tasks to the most capable agent.
+          Analyze the task requirements and each agent's capabilities to select the best match.
+          
+          Consider:
+          1. Required tools and skills
+          2. Agent's specialization
+          3. Model capabilities
+          4. Previous task context if available
+        `,
+      },
+      {
+        // tbd: we need role, experience etc., for agent, and to stringify this array properly, otherwise it doesn't know which one to choose
+        role: 'user',
+        content: prompt`
+          Task:
+          ${task}
+
+          Available agents:
+          ${agents}
+
+          Select the most suitable agent for this task.
+        `,
+      },
+    ],
+    temperature: 0.1,
+    response_format: zodResponseFormat(
+      z.object({
+        agentIndex: z.number(),
+        reasoning: z.string(),
+      }),
+      'agent_selection'
+    ),
+  })
+
+  const content = response.choices[0].message.parsed
+  if (!content) {
+    throw new Error('No content in response')
+  }
+
+  const agent = agents[content.agentIndex]
+  if (!agent) {
+    throw new Error('Invalid agent')
+  }
+
+  return agent
+}
+
+async function getNextTask(history: Message[]): Promise<string | null> {
+  const response = await openai.beta.chat.completions.parse({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        // tbd: improve prompt for generic workflow
+        // tbd: handle subsequent failures
+        content: prompt`
+          You are a workflow planner that breaks down complex tasks into smaller, actionable steps.
+          Your job is to determine the next task that needs to be done based on the original workflow and what has been completed so far.
+          If all required tasks are completed, return null.
+
+          Rules:
+          1. Each task should be self-contained and achievable
+          2. Tasks should be specific and actionable
+          3. Return null when the workflow is complete
+          4. Consider dependencies and order of operations
+          5. Use context from completed tasks to inform next steps
+        `,
+      },
+      ...history,
+      {
+        role: 'user',
+        content: 'What is the next task that needs to be done?',
+      },
+    ],
+    temperature: 0.2,
+    response_format: zodResponseFormat(
+      z.object({
+        task: z
+          .string()
+          .describe('The next task to be completed or null if the workflow is complete'),
+        reasoning: z
+          .string()
+          .describe('The reasoning for selecting the next task or why the workflow is complete'),
+      }),
+      'next_task'
+    ),
+  })
+
+  try {
+    const content = response.choices[0].message.parsed
+    if (!content) {
+      throw new Error('No content in response')
+    }
+
+    if (!content.task) {
+      return null
+    }
+
+    return content.task
+  } catch (error) {
+    throw new Error('Failed to determine next task')
+  }
+}
+
+// tbd: integrate telemetry
+function debug(...args: any[]) {
+  console.log('🐞', ...args)
 }

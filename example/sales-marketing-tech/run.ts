@@ -1,4 +1,27 @@
+import { z } from 'zod'
+
 import { Agent, Team } from '../../src/index.js'
+
+const human = new Agent({
+  prompt: `You are a human. You can answer questions that you are asked.`,
+  tools: [
+    {
+      name: 'prompt',
+      description: 'Prompt the human with a question',
+      parameters: z.object({
+        question: z.string(),
+      }),
+      execute: async ({ question }) => {
+        return new Promise((resolve) => {
+          console.log(question)
+          process.stdin.once('data', (data) => {
+            resolve(data.toString().trim())
+          })
+        })
+      },
+    },
+  ],
+})
 
 // Business Team Agents
 const marketingManager = new Agent({
@@ -30,7 +53,7 @@ const technicalManager = new Agent({
 
 // Create team
 const team = new Team({
-  agents: [marketingManager, salesManager, technicalManager],
+  agents: [human, marketingManager, salesManager, technicalManager],
 })
 
 // Business alignment workflow
