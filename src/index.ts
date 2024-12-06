@@ -155,6 +155,10 @@ export class Agent {
   async requestUserInput(prompt: string): Promise<string> {
     return this.protocol.requestUserInput(prompt)
   }
+
+  toString(): string {
+    return this.prompt
+  }
 }
 
 interface WorkflowState {
@@ -239,12 +243,13 @@ class Supervisor {
             
             Consider:
             1. Required tools and skills
-            2. Agent's specialization (via prompt)
+            2. Agent's specialization
             3. Model capabilities
             4. Previous task context if available
           `,
         },
         {
+          // tbd: we need role, experience etc., for agent, and to stringify this array properly, otherwise it doesn't know which one to choose
           role: 'user',
           content: dedent`
             Task:
