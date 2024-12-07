@@ -21,3 +21,4 @@ export type RequiredOptionals<T> = Required<OptionalProperties<T>>
  * Basic message type for agent completion
  */
 export type Message = ChatCompletionMessageParam
+export type MessageContent = Message['content']

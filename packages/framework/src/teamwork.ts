@@ -1,25 +1,23 @@
 import { executeTaskWithAgent } from './executor.js'
 import { getNextTask } from './supervisor/nextTask.js'
 import { selectAgent } from './supervisor/selectAgent.js'
-import { Message } from './types.js'
-import { Workflow } from './workflow.js'
+import { Message, MessageContent } from './types.js'
+import { Workflow, WorkflowState, workflowState } from './workflow.js'
 
-export async function iterate(workflow: Workflow): Promise<Workflow> {
-  const { messages, provider, members } = workflow
+export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
+  const { provider, members } = workflow
+  const { messages } = state
 
   const task = await getNextTask(provider, messages)
   if (!task) {
     return {
-      ...workflow,
       messages,
       status: 'finished',
     }
   }
 
-  // tbd: implement `final answer` flow to generate output message
   if (messages.length > workflow.maxIterations) {
     return {
-      ...workflow,
       messages,
       status: 'interrupted',
     }
@@ -42,7 +40,6 @@ export async function iterate(workflow: Workflow): Promise<Workflow> {
   try {
     const result = await executeTaskWithAgent(selectedAgent, agentRequest, members)
     return {
-      ...workflow,
       messages: [
         ...agentRequest,
         {
@@ -54,7 +51,6 @@ export async function iterate(workflow: Workflow): Promise<Workflow> {
     }
   } catch (error) {
     return {
-      ...workflow,
       messages: [
         ...agentRequest,
         {
@@ -67,15 +63,18 @@ export async function iterate(workflow: Workflow): Promise<Workflow> {
   }
 }
 
-export async function teamwork(workflow: Workflow): Promise<string> {
-  const result = await iterate(workflow)
+export async function teamwork(
+  workflow: Workflow,
+  state: WorkflowState = workflowState(workflow)
+): Promise<MessageContent> {
+  const { status, messages } = state
 
-  if (result.status === 'running') {
-    return teamwork(result)
+  if (status === 'pending' || status === 'running') {
+    return teamwork(workflow, await iterate(workflow, state))
   }
 
-  if (result.status === 'finished') {
-    return result.messages.at(-1)!.content as string
+  if (status === 'finished') {
+    return messages.at(-1)!.content
   }
 
   // tbd: recover from errors
