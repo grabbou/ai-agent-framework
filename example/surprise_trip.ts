@@ -2,6 +2,7 @@
  * Example borrowed from CrewAI.
  */
 import { Agent, Team } from '@dead-simple-ai-agent/framework'
+import { tool } from '@dead-simple-ai-agent/framework/tool'
 import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
 import { z } from 'zod'
 
@@ -9,15 +10,6 @@ const wikipedia = new WikipediaQueryRun({
   topKResults: 3,
   maxDocContentLength: 4000,
 })
-
-const wikipediaTool = {
-  name: 'wikipedia',
-  description: 'Tool for querying Wikipedia',
-  parameters: z.object({
-    query: z.string().describe('The query to search Wikipedia with'),
-  }),
-  function: ({ query }) => wikipedia.invoke(query),
-}
 
 const personalizedActivityPlanner = new Agent({
   role: 'Activity Planner',
@@ -35,7 +27,15 @@ const landmarkScout = new Agent({
     You are skilled at researching and finding interesting landmarks at the destination.
     Your goal is to find historical landmarks, museums, and other interesting places.
   `,
-  tools: [wikipediaTool],
+  tools: {
+    wikipedia: tool({
+      description: 'Tool for querying Wikipedia',
+      parameters: z.object({
+        query: z.string().describe('The query to search Wikipedia with'),
+      }),
+      execute: ({ query }) => wikipedia.invoke(query),
+    }),
+  },
 })
 
 const restaurantScout = new Agent({

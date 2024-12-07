@@ -6,6 +6,9 @@
   "exports": {
     ".": {
       "bun": "./src/index.ts"
+    },
+    "./tool": {
+      "bun": "./src/tool.ts"
     }
   },
   "type": "module",
