@@ -27,6 +27,9 @@
     },
     "./teamwork": {
       "bun": "./src/teamwork.ts"
+    },
+    "./models/openai": {
+      "bun": "./src/models/openai.ts"
     }
   },
   "type": "module",

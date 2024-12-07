@@ -18,7 +18,6 @@ export async function executeTaskWithAgent(
           zodFunction({
             name,
             parameters: tool.parameters,
-            function: tool.execute,
             description: tool.description,
           })
         )
@@ -74,7 +73,9 @@ export async function executeTaskWithAgent(
             throw new Error(`Unknown tool: ${toolCall.function.name}`)
           }
 
-          const content = await tool.execute(toolCall.function.parsed_arguments)
+          const content = await tool.execute(toolCall.function.parsed_arguments, {
+            provider: agent.provider,
+          })
           return {
             role: 'tool' as const,
             tool_call_id: toolCall.id,
