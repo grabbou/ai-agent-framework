@@ -176,30 +176,30 @@ export class Agent {
   }
 }
 
-
-
-export async function teamwork(workflow: Workflow, context: WorkflowContext = {
-  messages: [
-    {
-      role: 'assistant',
-      content: s`
+export async function teamwork(
+  workflow: Workflow,
+  context: WorkflowContext = {
+    messages: [
+      {
+        role: 'assistant',
+        content: s`
         Here is description of the workflow and expected output by the user:
         <workflow>${workflow.description}</workflow>
         <output>${workflow.output}</output>
       `,
-    },
-  ]    
-}): Promise<string> {
-
-// tbd: set reasonable max iterations
-// eslint-disable-next-line no-constant-condition
+      },
+    ],
+  }
+): Promise<string> {
+  // tbd: set reasonable max iterations
+  // eslint-disable-next-line no-constant-condition
   const task = await getNextTask(context.messages)
   if (!task) {
     return context.messages.at(-1)!.content as string // end of the recursion
   }
 
   if (workflow.maxIterations && context.messages.length > workflow.maxIterations) {
-    console.debug('Max iterations exceeded ', workflow.maxIterations);
+    console.debug('Max iterations exceeded ', workflow.maxIterations)
     return context.messages.at(-1)!.content as string
   }
 
@@ -230,9 +230,8 @@ export async function teamwork(workflow: Workflow, context: WorkflowContext = {
     })
   }
 
-  return teamwork(workflow, context);// next iteration
+  return teamwork(workflow, context) // next iteration
 }
-
 
 type Workflow = {
   description: string
