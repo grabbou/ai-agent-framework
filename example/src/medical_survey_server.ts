@@ -62,4 +62,7 @@ server.listen({
   port,
 })
 console.log(`🚀 Server running at http://localhost:${port}`)
-console.log(` Server running at http://localhost:${port}`)
+console.log(`Run 'curl -X POST http://localhost:${port}/start' to start the workflow`)
+console.log(
+  `Run 'curl -X POST http://localhost:${port}/iterate/ID -d '{"message":"Hello"}' to iterate the workflow with the message provided optionally as an answer added to the state`
+)
