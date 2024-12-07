@@ -1,0 +1,20 @@
+{
+  "name": "@dead-simple-ai-agent/tools",
+  "version": "0.0.1",
+  "description": "A dead simple AI agent tools",
+  "author": "Piotr Karwatka <piotr@catchthetornado.com>",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts"
+    },
+    "./tools": {
+      "bun": "./src/index.ts"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "dedent": "^1.5.3",
+    "openai": "^4.76.0",
+    "zod": "^3.23.8"
+  }
+}
