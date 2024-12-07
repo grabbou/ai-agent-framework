@@ -1,17 +1,19 @@
 /**
  * Example borrowed from CrewAI.
  */
-import { Agent, teamwork } from '@dead-simple-ai-agent/framework'
+import { teamwork } from '@dead-simple-ai-agent/framework'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
 import { z } from 'zod'
+
+import { agent } from '../packages/framework/src/agent.js'
 
 const wikipedia = new WikipediaQueryRun({
   topKResults: 3,
   maxDocContentLength: 4000,
 })
 
-const personalizedActivityPlanner = new Agent({
+const personalizedActivityPlanner = agent({
   role: 'Activity Planner',
   description: `
     You are skilled at creating personalized itineraries that cater to
@@ -21,7 +23,7 @@ const personalizedActivityPlanner = new Agent({
   `,
 })
 
-const landmarkScout = new Agent({
+const landmarkScout = agent({
   role: 'Landmark Scout',
   description: `
     You are skilled at researching and finding interesting landmarks at the destination.
@@ -38,7 +40,7 @@ const landmarkScout = new Agent({
   },
 })
 
-const restaurantScout = new Agent({
+const restaurantScout = agent({
   role: 'Restaurant Scout',
   description: `
     As a food lover, you know the best spots in town for a delightful culinary experience.
@@ -48,7 +50,7 @@ const restaurantScout = new Agent({
   `,
 })
 
-const itineraryCompiler = new Agent({
+const itineraryCompiler = agent({
   role: 'Itinerary Compiler',
   description: `
     With an eye for detail, you organize all the information into a coherent and enjoyable travel plan.
