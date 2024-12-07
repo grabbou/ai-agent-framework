@@ -15,7 +15,8 @@ export async function finalizeQuery(workflow: Workflow, messages: Message[]): Pr
         role: 'system',
         content: s`
             You exceeded max steps.
-            Please summarize and your best achieving the main goal with single answer`,
+            Please summarize all executed steps and do your best to achieve 
+            the main goal while responding with the final answer`,
       },
       ...messages,
     ],
