@@ -24,7 +24,7 @@ export const openai = (options?: OpenAIOptions) => {
   const client = new OpenAI(config.options)
 
   return {
-    name: config.model,
+    model: config.model,
     completions: client.beta.chat.completions.parse.bind(client.beta.chat.completions),
     client,
   }

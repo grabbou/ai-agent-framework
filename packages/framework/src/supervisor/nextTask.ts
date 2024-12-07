@@ -7,7 +7,7 @@ import { Message } from '../types.js'
 
 export async function getNextTask(provider: Provider, history: Message[]): Promise<string | null> {
   const response = await provider.completions({
-    model: provider.name,
+    model: provider.model,
     messages: [
       {
         role: 'system',
