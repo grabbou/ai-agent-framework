@@ -40,7 +40,6 @@ const verifyDockerImage = async (): Promise<void> => {
         throw new Error(`Dockerfile not found in ${dockerfilePath}`)
       }
     }
-
     await client.buildImage(
       {
         context: dockerfilePath,
@@ -92,7 +91,13 @@ const installLibraries = async (
 const runCodeInDocker = async (code: string, librariesUsed: string[]): Promise<string> => {
   await verifyDockerImage()
   const container = await initDockerContainer()
-  await installLibraries(container, librariesUsed)
+  await container.start()
+
+  try {
+    await installLibraries(container, librariesUsed)
+  } catch (error) {
+    console.log('Failed to install libraries:', error)
+  }
 
   const exec = await container.exec({
     Cmd: ['python3', '-c', code],
