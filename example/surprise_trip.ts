@@ -1,17 +1,13 @@
 /**
  * Example borrowed from CrewAI.
  */
-import { Agent, teamwork } from '@dead-simple-ai-agent/framework'
-import { tool } from '@dead-simple-ai-agent/framework/tool'
-import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
-import { z } from 'zod'
+import { teamwork } from '@dead-simple-ai-agent/framework'
+import { agent } from '@dead-simple-ai-agent/framework/agent'
+import { workflow } from '@dead-simple-ai-agent/framework/workflow'
 
-const wikipedia = new WikipediaQueryRun({
-  topKResults: 3,
-  maxDocContentLength: 4000,
-})
+import { lookupWikipedia } from './tools.js'
 
-const personalizedActivityPlanner = new Agent({
+const personalizedActivityPlanner = agent({
   role: 'Activity Planner',
   description: `
     You are skilled at creating personalized itineraries that cater to
@@ -21,24 +17,18 @@ const personalizedActivityPlanner = new Agent({
   `,
 })
 
-const landmarkScout = new Agent({
+const landmarkScout = agent({
   role: 'Landmark Scout',
   description: `
     You are skilled at researching and finding interesting landmarks at the destination.
     Your goal is to find historical landmarks, museums, and other interesting places.
   `,
   tools: {
-    wikipedia: tool({
-      description: 'Tool for querying Wikipedia',
-      parameters: z.object({
-        query: z.string().describe('The query to search Wikipedia with'),
-      }),
-      execute: ({ query }) => wikipedia.invoke(query),
-    }),
+    lookupWikipedia,
   },
 })
 
-const restaurantScout = new Agent({
+const restaurantScout = agent({
   role: 'Restaurant Scout',
   description: `
     As a food lover, you know the best spots in town for a delightful culinary experience.
@@ -48,7 +38,7 @@ const restaurantScout = new Agent({
   `,
 })
 
-const itineraryCompiler = new Agent({
+const itineraryCompiler = agent({
   role: 'Itinerary Compiler',
   description: `
     With an eye for detail, you organize all the information into a coherent and enjoyable travel plan.
@@ -57,7 +47,7 @@ const itineraryCompiler = new Agent({
   `,
 })
 
-const result = await teamwork({
+const researchTripWorkflow = workflow({
   members: [personalizedActivityPlanner, restaurantScout, landmarkScout, itineraryCompiler],
   description: `
     Research and find cool things to do in Wrocław, Poland.
@@ -81,5 +71,7 @@ const result = await teamwork({
     Ensure the itinerary integrates flights, hotel information, and all planned activities and dining experiences.
   `,
 })
+
+const result = await teamwork(researchTripWorkflow)
 
 console.log(result)
