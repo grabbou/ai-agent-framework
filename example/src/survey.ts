@@ -2,15 +2,13 @@
  * Example borrowed from CrewAI.
  */
 import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
+import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import { workflow, workflowState } from '@dead-simple-ai-agent/framework/workflow'
 import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { z } from 'zod'
-
-import { lookupWikipedia } from './tools.js'
 
 async function requestUserInput(prompt: string): Promise<string> {
   return new Promise((resolve) => {
@@ -51,9 +49,7 @@ const reporter = agent({
     Add info about the patient's health and symptoms.
     If something is not clear use Wikipedia to check.
   `,
-  tools: {
-    lookupWikipedia,
-  },
+  tools: {},
 })
 
 const preVisitNoteWorkflow = workflow({
@@ -92,6 +88,6 @@ if (await fs.exists(dbPath)) {
   }
 }
 
-const nextState = await iterate(preVisitNoteWorkflow, state)
+const nextState = await teamwork(preVisitNoteWorkflow, state)
 
 await fs.writeFile(dbPath, JSON.stringify(nextState, null, 2), 'utf-8')
