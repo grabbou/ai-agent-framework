@@ -92,12 +92,7 @@ const runCodeInDocker = async (code: string, librariesUsed: string[]): Promise<s
   await verifyDockerImage()
   const container = await initDockerContainer()
   await container.start()
-
-  try {
-    await installLibraries(container, librariesUsed)
-  } catch (error) {
-    console.log('Failed to install libraries:', error)
-  }
+  await installLibraries(container, librariesUsed)
 
   const exec = await container.exec({
     Cmd: ['python3', '-c', code],
