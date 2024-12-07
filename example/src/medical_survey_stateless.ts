@@ -1,6 +1,7 @@
 /**
  * Example borrowed from CrewAI.
  */
+
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
@@ -20,7 +21,8 @@ async function requestUserInput(prompt: string): Promise<string> {
     })
   })
 }
-export const askPatient = tool({
+
+const askPatient = tool({
   description: 'Tool for asking patient a question',
   parameters: z.object({
     query: z.string().describe('The question to ask the patient'),
@@ -56,7 +58,7 @@ const reporter = agent({
   },
 })
 
-const preVisitNoteWorkflow = workflow({
+export const preVisitNoteWorkflow = workflow({
   members: [nurse, reporter],
   description: `
     Create a pre-visit note for a patient that is about to come for a visit.
