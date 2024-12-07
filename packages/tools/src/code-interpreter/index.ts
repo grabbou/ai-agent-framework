@@ -33,7 +33,7 @@ const verifyDockerImage = async (): Promise<void> => {
     ) {
       dockerfilePath = interpreterOptions.userDockerfilePath
     } else {
-      dockerfilePath = import.meta.resolve('.')
+      dockerfilePath = import.meta.dirname
       console.log(dockerfilePath)
 
       if (!fs.existsSync(dockerfilePath)) {
