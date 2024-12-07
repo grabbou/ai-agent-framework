@@ -1,7 +1,7 @@
 /**
  * Example borrowed from CrewAI.
  */
-import { openai } from '@dead-simple-ai-agent/framework/models/openai'
+import { Provider } from '@dead-simple-ai-agent/framework/models/openai'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import * as fs from 'fs'
 import { z } from 'zod'
@@ -10,11 +10,10 @@ const encodeImage = (imagePath: string): string => {
   const imageBuffer = fs.readFileSync(imagePath)
   return imageBuffer.toString('base64')
 }
-const visionProvider = openai()
 
-const runLocalImages = async (imagePathUrl: string): Promise<string> => {
+const runLocalImages = async (provider: Provider, imagePathUrl: string): Promise<string> => {
   const base64Image = encodeImage(imagePathUrl)
-  const response = await visionProvider.completions({
+  const response = await provider.completions({
     model: 'gpt-4o-mini',
     messages: [
       {
@@ -30,8 +29,8 @@ const runLocalImages = async (imagePathUrl: string): Promise<string> => {
   return response.choices[0].message.content as string
 }
 
-const runWebHostedImages = async (imagePathUrl: string): Promise<string> => {
-  const response = await visionProvider.completions({
+const runWebHostedImages = async (provider: Provider, imagePathUrl: string): Promise<string> => {
+  const response = await provider.completions({
     model: 'gpt-4o-mini',
     messages: [
       {
@@ -53,15 +52,15 @@ export const visionTool = tool({
   parameters: z.object({
     imagePathUrl: z.string().describe('The image path or URL'),
   }),
-  execute: ({ imagePathUrl }) => {
+  execute: ({ imagePathUrl }, { provider }) => {
     if (!imagePathUrl) {
       throw new Error('Image Path or URL is required.')
     }
 
     if (imagePathUrl.startsWith('http')) {
-      return runWebHostedImages(imagePathUrl)
+      return runWebHostedImages(provider, imagePathUrl)
     } else {
-      return runLocalImages(imagePathUrl)
+      return runLocalImages(provider, imagePathUrl)
     }
   },
 })
