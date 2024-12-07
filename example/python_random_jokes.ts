@@ -15,7 +15,6 @@ const joker = agent({
     User your skills to write the jokes.
   `,
   tools: {
-    lookupWikipedia,
     codeInterpreter,
   },
 })
@@ -27,8 +26,7 @@ const randomJokesScriptWorkflow = workflow({
     that will display single random joke.
 
     The jokes should prepared beforehand - the script will just display them.
-    Jokes should be based on real facts from Wikipedia articles.
-    Generate random 4 worlds and based on wikipedia search get teh facts and make some jokes based on that.
+    Generate two raondom jokes
     Interpret the script by code interpreter to print the last line - the joke itself.
 
     Focus:

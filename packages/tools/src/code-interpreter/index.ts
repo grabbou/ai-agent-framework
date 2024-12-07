@@ -67,7 +67,7 @@ const initDockerContainer = async (): Promise<docker.Container> => {
   return client.createContainer({
     Image: interpreterOptions.defaultImageTag,
     name: containerName,
-    Tty: true,
+    Tty: false,
     HostConfig: {
       Binds: [`${currentPath}:/workspace`],
     },
@@ -98,10 +98,11 @@ const runCodeInDocker = async (code: string, librariesUsed: string[]): Promise<s
     Cmd: ['python3', '-c', code],
     AttachStdout: true,
     AttachStderr: true,
+    AttachStdin: false,
   })
 
   const result = await exec.start({
-    hijack: true,
+    hijack: false,
     stdin: false,
   })
 
