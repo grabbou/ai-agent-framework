@@ -34,9 +34,9 @@ const verifyDockerImage = async (): Promise<void> => {
       dockerfilePath = interpreterOptions.userDockerfilePath
     } else {
       dockerfilePath = import.meta.dirname
-      console.log(dockerfilePath)
 
       if (!fs.existsSync(dockerfilePath)) {
+        console.log(dockerfilePath + ' does not exist')
         throw new Error(`Dockerfile not found in ${dockerfilePath}`)
       }
     }
