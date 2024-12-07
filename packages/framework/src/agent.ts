@@ -1,7 +1,7 @@
 import { Tool } from './tool.js'
 import { RequiredOptionals } from './types.js'
 
-export type AgentOptions = {
+type AgentOptions = {
   role: string
   description: string
   tools?: {
@@ -18,9 +18,11 @@ const defaults: RequiredOptionals<AgentOptions> = {
 /**
  * Helper utility to create an agent with defaults.
  */
-export const agent = (options: AgentOptions) => {
+export const agent = (options: AgentOptions): Agent => {
   return {
     ...defaults,
     ...options,
   }
 }
+
+export type Agent = Required<AgentOptions>
