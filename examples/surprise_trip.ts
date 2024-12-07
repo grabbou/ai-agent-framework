@@ -2,7 +2,7 @@
  * Example borrowed from CrewAI.
  */
 
-import { Agent, Team } from '../src/index.js'
+import { Agent, teamwork } from '../src/index.js'
 
 const personalizedActivityPlanner = new Agent({
   role: 'Activity Planner',
@@ -33,9 +33,8 @@ const itineraryCompiler = new Agent({
   `,
 })
 
-const team = new Team()
 
-const result = await team.execute({
+const result = await teamwork({
   members: [personalizedActivityPlanner, restaurantScout, itineraryCompiler],
   description: `
     Research and find cool things to do in Wrocław, Poland.

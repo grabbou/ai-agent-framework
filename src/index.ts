@@ -211,62 +211,62 @@ export class Agent {
 }
 
 
-export class Team {
-  async execute(workflow: Workflow, context: WorkflowContext = {
-    messages: [
-      {
-        role: 'assistant',
-        content: s`
-          Here is description of the workflow and expected output by the user:
-          <workflow>${workflow.description}</workflow>
-          <output>${workflow.output}</output>
-        `,
-      },
-    ]    
-  }): Promise<string> {
 
-  // tbd: set reasonable max iterations
-  // eslint-disable-next-line no-constant-condition
-    const task = await getNextTask(context.messages)
-    if (!task) {
-      return context.messages.at(-1)!.content as string // end of the recursion
-    }
+export async function teamwork(workflow: Workflow, context: WorkflowContext = {
+  messages: [
+    {
+      role: 'assistant',
+      content: s`
+        Here is description of the workflow and expected output by the user:
+        <workflow>${workflow.description}</workflow>
+        <output>${workflow.output}</output>
+      `,
+    },
+  ]    
+}): Promise<string> {
 
-    if (workflow.maxIterations && context.messages.length > workflow.maxIterations) {
-      console.debug('Max iterations exceeded ', workflow.maxIterations);
-      return context.messages.at(-1)!.content as string
-    }
-
-    console.log('🚀 Next task:', task)
-
-    context.messages.push({
-      role: 'user',
-      content: task,
-    })
-
-    // tbd: this throws, handle it
-    const selectedAgent = await selectAgent(task, workflow.members)
-    console.log('🚀 Selected agent:', selectedAgent.role)
-
-    // tbd: this should just be a try/catch
-    // tbd: do not return string, but more information or keep memory in agent
-    try {
-      const result = await selectedAgent.executeTask(context.messages, workflow.members)
-      context.messages.push({
-        role: 'assistant',
-        content: result,
-      })
-    } catch (error) {
-      console.log('🚀 Task error:', error)
-      context.messages.push({
-        role: 'assistant',
-        content: error instanceof Error ? error.message : 'Unknown error',
-      })
-    }
-
-    return this.execute(workflow, context);// next iteration
+// tbd: set reasonable max iterations
+// eslint-disable-next-line no-constant-condition
+  const task = await getNextTask(context.messages)
+  if (!task) {
+    return context.messages.at(-1)!.content as string // end of the recursion
   }
+
+  if (workflow.maxIterations && context.messages.length > workflow.maxIterations) {
+    console.debug('Max iterations exceeded ', workflow.maxIterations);
+    return context.messages.at(-1)!.content as string
+  }
+
+  console.log('🚀 Next task:', task)
+
+  context.messages.push({
+    role: 'user',
+    content: task,
+  })
+
+  // tbd: this throws, handle it
+  const selectedAgent = await selectAgent(task, workflow.members)
+  console.log('🚀 Selected agent:', selectedAgent.role)
+
+  // tbd: this should just be a try/catch
+  // tbd: do not return string, but more information or keep memory in agent
+  try {
+    const result = await selectedAgent.executeTask(context.messages, workflow.members)
+    context.messages.push({
+      role: 'assistant',
+      content: result,
+    })
+  } catch (error) {
+    console.log('🚀 Task error:', error)
+    context.messages.push({
+      role: 'assistant',
+      content: error instanceof Error ? error.message : 'Unknown error',
+    })
+  }
+
+  return teamwork(workflow, context);// next iteration
 }
+
 
 type Workflow = {
   description: string
