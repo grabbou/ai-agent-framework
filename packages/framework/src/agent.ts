@@ -10,8 +10,6 @@ type AgentOptions = {
   model?: string
 }
 
-export type Agent = AgentOptions
-
 const defaults: RequiredOptionals<AgentOptions> = {
   tools: {},
   model: 'gpt-4o',
