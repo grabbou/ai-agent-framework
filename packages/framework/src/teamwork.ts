@@ -1,7 +1,7 @@
 import { executeTaskWithAgent } from './executor.js'
 import { getNextTask } from './supervisor/nextTask.js'
 import { selectAgent } from './supervisor/selectAgent.js'
-import { Message } from './types.js'
+import { Message, MessageContent } from './types.js'
 import { Workflow, WorkflowState, workflowState } from './workflow.js'
 
 export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
@@ -66,7 +66,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
 export async function teamwork(
   workflow: Workflow,
   state: WorkflowState = workflowState(workflow)
-): Promise<string> {
+): Promise<MessageContent> {
   const { status, messages } = state
 
   if (status === 'pending' || status === 'running') {
@@ -74,7 +74,7 @@ export async function teamwork(
   }
 
   if (status === 'finished') {
-    return messages.at(-1)!.content as string
+    return messages.at(-1)!.content
   }
 
   // tbd: recover from errors
