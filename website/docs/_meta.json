@@ -1,16 +1,12 @@
 [
   {
-    "text": "Guide",
-    "link": "/guide/",
-    "activeMatch": "/guide/"
+    "text": "Getting Started",
+    "link": "/getting-started/",
+    "activeMatch": "/getting-started/"
   },
   {
-    "text": "Hello World",
-    "link": "/hello/",
-    "activeMatch": "/hello/"
-  },
-  {
-    "text": "API",
-    "link": "https://rspress.dev/api/index.html"
+    "text": "Concepts",
+    "link": "/concepts/",
+    "activeMatch": "/concepts/"
   }
 ]
