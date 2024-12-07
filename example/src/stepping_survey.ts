@@ -10,7 +10,7 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import { z } from 'zod'
 
-import { lookupWikipedia } from './tools.js'
+import { lookupWikipedia } from '../tools.js'
 
 async function requestUserInput(prompt: string): Promise<string> {
   return new Promise((resolve) => {
