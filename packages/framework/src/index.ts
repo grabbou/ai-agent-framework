@@ -4,7 +4,9 @@ import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 import { z, ZodType, ZodTypeAny } from 'zod'
 
+import { context, ExecutionContext } from './executor.js'
 import { Tool } from './tool.js'
+import { Workflow, WorkflowContext } from './workflow.js'
 
 // tbd: abstract this away or not? most APIs are OpenAI compatible
 const openai = new OpenAI()
@@ -176,30 +178,15 @@ export class Agent {
   }
 }
 
-export async function teamwork(
-  workflow: Workflow,
-  context: WorkflowContext = {
-    messages: [
-      {
-        role: 'assistant',
-        content: s`
-        Here is description of the workflow and expected output by the user:
-        <workflow>${workflow.description}</workflow>
-        <output>${workflow.output}</output>
-      `,
-      },
-    ],
-  }
-): Promise<string> {
-  // tbd: set reasonable max iterations
+async function execute(context: ExecutionContext): Promise<string> {
   // eslint-disable-next-line no-constant-condition
   const task = await getNextTask(context.messages)
   if (!task) {
     return context.messages.at(-1)!.content as string // end of the recursion
   }
 
-  if (workflow.maxIterations && context.messages.length > workflow.maxIterations) {
-    console.debug('Max iterations exceeded ', workflow.maxIterations)
+  if (context.workflow.maxIterations && context.messages.length > context.workflow.maxIterations) {
+    console.debug('Max iterations exceeded ', context.workflow.maxIterations)
     return context.messages.at(-1)!.content as string
   }
 
@@ -211,13 +198,13 @@ export async function teamwork(
   })
 
   // tbd: this throws, handle it
-  const selectedAgent = await selectAgent(task, workflow.members)
+  const selectedAgent = await selectAgent(task, context.workflow.members)
   console.log('🚀 Selected agent:', selectedAgent.role)
 
   // tbd: this should just be a try/catch
   // tbd: do not return string, but more information or keep memory in agent
   try {
-    const result = await selectedAgent.executeTask(context.messages, workflow.members)
+    const result = await selectedAgent.executeTask(context.messages, context.workflow.members)
     context.messages.push({
       role: 'assistant',
       content: result,
@@ -230,22 +217,15 @@ export async function teamwork(
     })
   }
 
-  return teamwork(workflow, context) // next iteration
+  return execute(context) // next iteration
 }
 
-type Workflow = {
-  description: string
-  output: string
-  members: Agent[]
-  maxIterations?: number
+export async function teamwork(workflow: Workflow): Promise<string> {
+  const ctx = context({ workflow })
+  return execute(ctx)
 }
 
 type Message = ChatCompletionMessageParam
-
-type WorkflowContext = {
-  messages: Message[]
-  // tbd: add more context like trace, callstack etc. context should be serializable
-}
 
 async function selectAgent(task: string, agents: Agent[]): Promise<Agent> {
   const response = await openai.beta.chat.completions.parse({
