@@ -4,31 +4,31 @@ import { selectAgent } from './supervisor/selectAgent.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
-async function execute(
-  workflow: Workflow,
-  messages: Message[],
-  executeOnce: boolean = false
-): Promise<Message[]> {
-  const task = await getNextTask(workflow.provider, messages)
+export async function iterate(workflow: Workflow): Promise<Workflow> {
+  const { messages, provider, members } = workflow
+
+  const task = await getNextTask(provider, messages)
   if (!task) {
-    return messages
+    return {
+      ...workflow,
+      messages,
+      status: 'finished',
+    }
   }
 
   // tbd: implement `final answer` flow to generate output message
   if (messages.length > workflow.maxIterations) {
-    return [
-      ...messages,
-      {
-        role: 'assistant',
-        content: 'Workflow reached maximum iterations',
-      },
-    ]
+    return {
+      ...workflow,
+      messages,
+      status: 'interrupted',
+    }
   }
 
   // tbd: get rid of console.logs, use telemetry instead
   console.log('🚀 Next task:', task)
 
-  const selectedAgent = await selectAgent(workflow.provider, task, workflow.members)
+  const selectedAgent = await selectAgent(provider, task, members)
   console.log('🚀 Selected agent:', selectedAgent.role)
 
   const agentRequest: Message[] = [
@@ -39,40 +39,46 @@ async function execute(
     },
   ]
 
-  // tbd: do not return string, but more information or keep memory in agent
-  let agentResponse: Message
   try {
-    const result = await executeTaskWithAgent(selectedAgent, agentRequest, workflow.members)
-    agentResponse = {
-      role: 'assistant',
-      content: result,
+    const result = await executeTaskWithAgent(selectedAgent, agentRequest, members)
+    return {
+      ...workflow,
+      messages: [
+        ...agentRequest,
+        {
+          role: 'assistant',
+          content: result,
+        },
+      ],
+      status: 'running',
     }
   } catch (error) {
-    agentResponse = {
-      role: 'assistant',
-      content: error instanceof Error ? error.message : 'Unknown error',
+    return {
+      ...workflow,
+      messages: [
+        ...agentRequest,
+        {
+          role: 'assistant',
+          content: error instanceof Error ? error.message : 'Unknown error',
+        },
+      ],
+      status: 'failed',
     }
   }
-
-  if (executeOnce) {
-    return [...messages, agentResponse]
-  }
-
-  return execute(workflow, [...messages, agentResponse])
 }
 
 export async function teamwork(workflow: Workflow): Promise<string> {
-  const history = await execute(workflow, workflow.messages)
+  const result = await iterate(workflow)
 
-  // tbd: verify shape of message
-  return history.at(-1)!.content as string
-}
-
-export async function iterate(workflow: Workflow): Promise<Workflow> {
-  // tbd: we need to add something to the workflow to track the status (e.g. finished, failed)
-  const messages = await execute(workflow, workflow.messages, true)
-  return {
-    ...workflow,
-    messages,
+  if (result.status === 'running') {
+    return teamwork(result)
   }
+
+  if (result.status === 'finished') {
+    return result.messages.at(-1)!.content as string
+  }
+
+  // tbd: recover from errors
+  // tbd: request final answer if took too long
+  throw new Error('Workflow failed. This is not implemented yet.')
 }

@@ -11,6 +11,7 @@ type WorkflowOptions = {
 
   provider?: Provider
   messages?: Message[]
+  status?: 'running' | 'finished' | 'interrupted' | 'failed' | 'pending'
 
   maxIterations?: number
 }
@@ -22,6 +23,7 @@ export const workflow = (options: WorkflowOptions): Workflow => {
   return {
     maxIterations: 50,
     provider: openai(),
+    status: 'pending',
     messages: [
       {
         role: 'assistant' as const,
