@@ -1,11 +1,15 @@
 import z, { ZodTypeAny } from 'zod'
 
 import { Provider } from './models/openai.js'
+import { Message } from './types.js'
 
 export type Tool<P extends ZodTypeAny = any> = {
   description: string
   parameters: P
-  execute: (parameters: z.infer<P>, context: { provider: Provider }) => Promise<string>
+  execute: (
+    parameters: z.infer<P>,
+    context: { provider: Provider; messages: Message[] }
+  ) => Promise<string>
 }
 
 /**

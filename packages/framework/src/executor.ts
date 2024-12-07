@@ -75,6 +75,7 @@ export async function executeTaskWithAgent(
 
           const content = await tool.execute(toolCall.function.parsed_arguments, {
             provider: agent.provider,
+            messages,
           })
           return {
             role: 'tool' as const,
