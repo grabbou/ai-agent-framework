@@ -1,8 +1,10 @@
 {
   "name": "dead-simple-ai-agent",
-  "description": "A dead simple AI agent framework",
-  "author": "Mike Grabowski <mike@callstack.com>",
-  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "example"
+  ],
   "devDependencies": {
     "@release-it-plugins/workspaces": "^4.2.0",
     "@release-it/conventional-changelog": "^9.0.3",
@@ -20,14 +22,6 @@
     "tsx": "^4.19.2",
     "typescript": "^5.1.3",
     "vitest": "^2.1.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "dedent": "^1.5.3",
-    "openai": "^4.76.0",
-    "zod": "^3.23.8"
   },
   "trustedDependencies": [
     "core-js"

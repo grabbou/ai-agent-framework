@@ -10,6 +10,6 @@
     "esModuleInterop": true,
     "outDir": "dist",
     "resolveJsonModule": true,
-    "customConditions": ["source"]
+    "customConditions": ["bun"]
   }
 }

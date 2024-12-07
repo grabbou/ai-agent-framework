@@ -1,8 +1,15 @@
 /**
  * Example borrowed from CrewAI.
  */
+import { Agent, Team } from '@dead-simple-ai-agent/framework'
+import { tool } from '@dead-simple-ai-agent/framework/tool'
+import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
+import { z } from 'zod'
 
-import { Agent, teamwork } from '../src/index.js'
+const wikipedia = new WikipediaQueryRun({
+  topKResults: 3,
+  maxDocContentLength: 4000,
+})
 
 const personalizedActivityPlanner = new Agent({
   role: 'Activity Planner',
@@ -12,6 +19,23 @@ const personalizedActivityPlanner = new Agent({
     Your goal is to research and find cool things to do at the destination,
     including activities and events that match the traveler's interests and age group.
   `,
+})
+
+const landmarkScout = new Agent({
+  role: 'Landmark Scout',
+  description: `
+    You are skilled at researching and finding interesting landmarks at the destination.
+    Your goal is to find historical landmarks, museums, and other interesting places.
+  `,
+  tools: {
+    wikipedia: tool({
+      description: 'Tool for querying Wikipedia',
+      parameters: z.object({
+        query: z.string().describe('The query to search Wikipedia with'),
+      }),
+      execute: ({ query }) => wikipedia.invoke(query),
+    }),
+  },
 })
 
 const restaurantScout = new Agent({
@@ -33,15 +57,17 @@ const itineraryCompiler = new Agent({
   `,
 })
 
+const team = new Team()
 
-const result = await teamwork({
-  members: [personalizedActivityPlanner, restaurantScout, itineraryCompiler],
+const result = await team.execute({
+  members: [personalizedActivityPlanner, restaurantScout, landmarkScout, itineraryCompiler],
   description: `
     Research and find cool things to do in Wrocław, Poland.
 
     Focus:
       - activities and events that match the traveler's interests and age group.
       - highly-rated restaurants and dining experiences.
+      - landmarks with historic context.
       - picturesque and entertaining locations.
 
     Traveler's information:

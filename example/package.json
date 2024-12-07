@@ -1,0 +1,11 @@
+{
+  "name": "@dead-simple-ai-agent/example",
+  "private": true,
+  "author": "Mike Grabowski <mike@callstack.com>",
+  "type": "module",
+  "dependencies": {
+    "@dead-simple-ai-agent/framework": "0.0.1",
+    "@dead-simple-ai-agent/tools": "0.0.1",
+    "@langchain/community": "^0.3.17"
+  }
+}

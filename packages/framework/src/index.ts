@@ -2,7 +2,9 @@ import s from 'dedent'
 import OpenAI from 'openai'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
-import { z } from 'zod'
+import { z, ZodType, ZodTypeAny } from 'zod'
+
+import { Tool } from './tool.js'
 
 // tbd: abstract this away or not? most APIs are OpenAI compatible
 const openai = new OpenAI()
@@ -25,17 +27,15 @@ class CLIProtocol implements Protocol {
   }
 }
 
-type ToolDefinition<T extends z.ZodObject<{}>> = {
-  name: string
-  description: string
-  parameters: T
-  execute: (parameters: z.infer<T>) => Promise<string>
+// tbd: make this Vercel AI SDK compatible, as it has nicest interface
+type Toolkit = {
+  [key: string]: Tool
 }
 
 interface AgentConfig {
   role: string
   description: string
-  tools?: ToolDefinition<any>[]
+  tools?: Toolkit
   model?: string
   protocol?: Protocol
 }
@@ -45,14 +45,14 @@ export class Agent {
   role: string
 
   private description: string
-  private tools: ToolDefinition<any>[]
+  private tools: Toolkit
   private model: string
   private protocol: Protocol
 
   constructor({
     role,
     description,
-    tools = [],
+    tools = {},
     model = 'gpt-4o',
     protocol = new CLIProtocol(),
   }: AgentConfig) {
@@ -64,43 +64,15 @@ export class Agent {
   }
 
   async executeTask(messages: Message[], agents: Agent[]): Promise<string> {
-    // tbd: after we implememt this, it keeps delegating
-    // const tools = [
-    //   {
-    //     name: 'ask_a_question',
-    //     description: s`
-    //       Ask a specific question to one of the following agents:
-    //       <agents>
-    //         ${agents.map((agent, index) => `<agent index="${index}">${agent.role}</agent>`)}
-    //       </agents>
-    //     `,
-    //     parameters: z.object({
-    //       agent: z.number().describe('The index of the agent to ask the question'),
-    //       question: z.string().describe('The question you want the agent to answer'),
-    //       context: z.string().describe('All context necessary to execute the task'),
-    //     }),
-    //     function: async ({ agent, question, context }) => {
-    //       console.log('ask_a_question', agent, question, context)
-    //       const selectedAgent = agents[agent]
-    //       if (!selectedAgent) {
-    //         throw new Error('Invalid agent')
-    //       }
-    //       return selectedAgent.executeTask(
-    //         [
-    //           {
-    //             role: 'user',
-    //             content: context,
-    //           },
-    //           {
-    //             role: 'user',
-    //             content: question,
-    //           },
-    //         ],
-    //         agents
-    //       )
-    //     },
-    //   },
-    // ]
+    const tools = Object.entries(this.tools).map(([name, tool]) =>
+      zodFunction({
+        name,
+        parameters: tool.parameters,
+        function: tool.execute,
+        description: tool.description,
+      })
+    )
+
     const response = await openai.beta.chat.completions.parse({
       model: this.model,
       // tbd: verify the prompt
@@ -120,10 +92,7 @@ export class Agent {
         },
         ...messages,
       ],
-      // tbd: add other tools
-      // tbd: should we include agent description in the prompt too? we need to list responsibilities
-      // but keep context window in mind
-      // tools: tools.map(zodFunction),
+      tools: tools.length > 0 ? tools : undefined,
       response_format: zodResponseFormat(
         z.object({
           response: z.discriminatedUnion('kind', [
@@ -143,32 +112,29 @@ export class Agent {
         'task_result'
       ),
     })
-    // if (response.choices[0].message.tool_calls.length > 0) {
-    //   const toolResults = await Promise.all(
-    //     response.choices[0].message.tool_calls.map(async (toolCall) => {
-    //       if (toolCall.type !== 'function') {
-    //         throw new Error('Tool call is not a function')
-    //       }
+    if (response.choices[0].message.tool_calls.length > 0) {
+      const toolResults = await Promise.all(
+        response.choices[0].message.tool_calls.map(async (toolCall) => {
+          if (toolCall.type !== 'function') {
+            throw new Error('Tool call is not a function')
+          }
 
-    //       const tool = tools.find((t) => t.name === toolCall.function.name)
-    //       if (!tool) {
-    //         throw new Error(`Unknown tool: ${toolCall.function.name}`)
-    //       }
-    //       console.log('tool call', toolCall)
-    //       const parameters = tool.parameters.parse(toolCall.function.arguments)
+          const tool = this.tools[toolCall.function.name]
+          if (!tool) {
+            throw new Error(`Unknown tool: ${toolCall.function.name}`)
+          }
 
-    //       const content = await tool.function(parameters)
+          const content = await tool.execute(toolCall.function.parsed_arguments)
+          return {
+            role: 'tool' as const,
+            tool_call_id: toolCall.id,
+            content: JSON.stringify(content),
+          }
+        })
+      )
 
-    //       return {
-    //         role: 'tool' as const,
-    //         tool_call_id: toolCall.id,
-    //         content: JSON.stringify(content),
-    //       }
-    //     })
-    //   )
-
-    //   return this.executeTask([...messages, response.choices[0].message, ...toolResults], agents)
-    // }
+      return this.executeTask([...messages, response.choices[0].message, ...toolResults], agents)
+    }
 
     // tbd: verify shape of response
     const result = response.choices[0].message.parsed
