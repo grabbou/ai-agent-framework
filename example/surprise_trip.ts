@@ -1,9 +1,8 @@
 /**
  * Example borrowed from CrewAI.
  */
-import { teamwork } from '@dead-simple-ai-agent/framework'
-
 import { agent } from '@dead-simple-ai-agent/framework/agent'
+import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { workflow } from '@dead-simple-ai-agent/framework/workflow'
 
 import { lookupWikipedia } from './tools.js'

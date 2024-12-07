@@ -1,3 +1,4 @@
+import { openai, Provider } from './models/openai.js'
 import { Tool } from './tool.js'
 import { RequiredOptionals } from './types.js'
 
@@ -7,12 +8,12 @@ type AgentOptions = {
   tools?: {
     [key: string]: Tool
   }
-  model?: string
+  provider?: Provider
 }
 
 const defaults: RequiredOptionals<AgentOptions> = {
   tools: {},
-  model: 'gpt-4o',
+  provider: openai(),
 }
 
 /**

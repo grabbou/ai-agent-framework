@@ -1,16 +1,19 @@
 import { Agent } from './agent.js'
+import { openai, Provider } from './models/openai.js'
 import { RequiredOptionals } from './types.js'
 
 type WorkflowOptions = {
   description: string
   output: string
   members: Agent[]
+
+  provider?: Provider
   maxIterations?: number
 }
 
 const defaults: RequiredOptionals<WorkflowOptions> = {
-  // tbd: set reasonable max iterations
   maxIterations: 50,
+  provider: openai(),
 }
 
 /**
