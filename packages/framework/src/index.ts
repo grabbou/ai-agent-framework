@@ -176,63 +176,76 @@ export class Agent {
   }
 }
 
-type Message = ChatCompletionMessageParam
 
-export class Team {
-  async execute(workflow: Workflow): Promise<string> {
-    const messages: Message[] = [
-      {
-        role: 'assistant',
-        content: s`
-          Here is description of the workflow and expected output by the user:
-          <workflow>${workflow.description}</workflow>
-          <output>${workflow.output}</output>
-        `,
-      },
-    ]
 
-    // tbd: set reasonable max iterations
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const task = await getNextTask(messages)
-      if (!task) {
-        return messages.at(-1)!.content as string
-      }
+export async function teamwork(workflow: Workflow, context: WorkflowContext = {
+  messages: [
+    {
+      role: 'assistant',
+      content: s`
+        Here is description of the workflow and expected output by the user:
+        <workflow>${workflow.description}</workflow>
+        <output>${workflow.output}</output>
+      `,
+    },
+  ]    
+}): Promise<string> {
 
-      console.log('🚀 Next task:', task)
-
-      messages.push({
-        role: 'user',
-        content: task,
-      })
-
-      // tbd: this throws, handle it
-      const selectedAgent = await selectAgent(task, workflow.members)
-      console.log('🚀 Selected agent:', selectedAgent.role)
-
-      // tbd: this should just be a try/catch
-      // tbd: do not return string, but more information or keep memory in agent
-      try {
-        const result = await selectedAgent.executeTask(messages, workflow.members)
-        messages.push({
-          role: 'assistant',
-          content: result,
-        })
-      } catch (error) {
-        console.log('🚀 Task error:', error)
-        messages.push({
-          role: 'assistant',
-          content: error instanceof Error ? error.message : 'Unknown error',
-        })
-      }
-    }
+// tbd: set reasonable max iterations
+// eslint-disable-next-line no-constant-condition
+  const task = await getNextTask(context.messages)
+  if (!task) {
+    return context.messages.at(-1)!.content as string // end of the recursion
   }
+
+  if (workflow.maxIterations && context.messages.length > workflow.maxIterations) {
+    console.debug('Max iterations exceeded ', workflow.maxIterations);
+    return context.messages.at(-1)!.content as string
+  }
+
+  console.log('🚀 Next task:', task)
+
+  context.messages.push({
+    role: 'user',
+    content: task,
+  })
+
+  // tbd: this throws, handle it
+  const selectedAgent = await selectAgent(task, workflow.members)
+  console.log('🚀 Selected agent:', selectedAgent.role)
+
+  // tbd: this should just be a try/catch
+  // tbd: do not return string, but more information or keep memory in agent
+  try {
+    const result = await selectedAgent.executeTask(context.messages, workflow.members)
+    context.messages.push({
+      role: 'assistant',
+      content: result,
+    })
+  } catch (error) {
+    console.log('🚀 Task error:', error)
+    context.messages.push({
+      role: 'assistant',
+      content: error instanceof Error ? error.message : 'Unknown error',
+    })
+  }
+
+  return teamwork(workflow, context);// next iteration
 }
+
 
 type Workflow = {
   description: string
   output: string
   members: Agent[]
+  maxIterations?: number
+}
+
+type Message = ChatCompletionMessageParam
+
+type WorkflowContext = {
+  messages: Message[]
+  // tbd: add more context like trace, callstack etc. context should be serializable
 }
 
 async function selectAgent(task: string, agents: Agent[]): Promise<Agent> {
