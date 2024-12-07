@@ -1,4 +1,5 @@
-import { executeTaskWithAgent, finalizeQuery } from './executor.js'
+import { executeTaskWithAgent } from './executor.js'
+import { finalizeWorkflow } from './supervisor/finalizeWorkflow.js'
 import { getNextTask } from './supervisor/nextTask.js'
 import { selectAgent } from './supervisor/selectAgent.js'
 import { Message, MessageContent } from './types.js'
@@ -87,7 +88,7 @@ export async function teamwork(
 
   if (status === 'interrupted') {
     console.log('🚨 Max iterations exceeded ', workflow.maxIterations)
-    return finalizeQuery(workflow, messages)
+    return finalizeWorkflow(workflow.provider, messages)
   }
 
   // tbd: recover from errors

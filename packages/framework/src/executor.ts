@@ -4,35 +4,8 @@ import { z } from 'zod'
 
 import { Agent } from './agent.js'
 import { Message } from './types.js'
-import { Workflow } from './workflow.js'
 
 // tbd: helper utilities to create contexts from workflows with concrete single task etc.
-
-export async function finalizeQuery(workflow: Workflow, messages: Message[]): Promise<string> {
-  const response = await workflow.provider.completions({
-    messages: [
-      {
-        role: 'system',
-        content: s`
-            You exceeded max steps.
-            Please summarize all executed steps and do your best to achieve 
-            the main goal while responding with the final answer`,
-      },
-      ...messages,
-    ],
-    response_format: zodResponseFormat(
-      z.object({
-        finalAnswer: z.string().describe('The final result of the task'),
-      }),
-      'task_result'
-    ),
-  })
-  const result = response.choices[0].message.parsed
-  if (!result) {
-    throw new Error('No parsed response received')
-  }
-  return result.finalAnswer
-}
 
 export async function executeTaskWithAgent(
   agent: Agent,
