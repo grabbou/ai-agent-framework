@@ -9,6 +9,15 @@
     },
     "./tool": {
       "bun": "./src/tool.ts"
+    },
+    "./executor": {
+      "bun": "./src/executor.ts"
+    },
+    "./workflow": {
+      "bun": "./src/workflow.ts"
+    },
+    "./agent": {
+      "bun": "./src/agent.ts"
     }
   },
   "type": "module",
