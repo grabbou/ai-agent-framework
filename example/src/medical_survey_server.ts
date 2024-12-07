@@ -17,7 +17,7 @@ const dbPath = (id: string) => join(tmpdir(), id + '_workflow_db.json')
 
 let state = workflowState(preVisitNoteWorkflow)
 
-server.get('/start', async () => {
+server.post('/start', async () => {
   const nextState = await iterate(preVisitNoteWorkflow, state)
 
   await fs.writeFile(dbPath(nextState.id), JSON.stringify(nextState, null, 2), 'utf-8')

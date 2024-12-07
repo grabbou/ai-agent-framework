@@ -86,8 +86,13 @@ export async function teamwork(
   }
 
   if (status === 'interrupted') {
+<<<<<<< HEAD
+    return await finalizeQuery(workflow, messages)
+    // return '🚨 Workflow interrupted due to max iterations limit.'
+=======
     console.log('🚨 Max iterations exceeded ', workflow.maxIterations)
     return finalizeQuery(workflow, messages)
+>>>>>>> 6abee0bdd5c5dafed0c3f5896fa408e9192e8908
   }
 
   // tbd: recover from errors
