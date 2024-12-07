@@ -8,7 +8,7 @@ import { Workflow } from './workflow.js'
 
 async function execute(workflow: Workflow, messages: Message[]): Promise<string> {
   // eslint-disable-next-line no-constant-condition
-  const task = await getNextTask(workflow.model, messages)
+  const task = await getNextTask(workflow.provider, messages)
   if (!task) {
     return messages.at(-1)!.content as string // end of the recursion
   }
@@ -26,7 +26,7 @@ async function execute(workflow: Workflow, messages: Message[]): Promise<string>
   })
 
   // tbd: this throws, handle it
-  const selectedAgent = await selectAgent(workflow.model, task, workflow.members)
+  const selectedAgent = await selectAgent(workflow.provider, task, workflow.members)
   console.log('🚀 Selected agent:', selectedAgent.role)
 
   // tbd: this should just be a try/catch

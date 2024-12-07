@@ -2,12 +2,12 @@ import s from 'dedent'
 import { zodResponseFormat } from 'openai/helpers/zod.mjs'
 import { z } from 'zod'
 
-import { Model } from '../models/openai.js'
+import { Provider } from '../models/openai.js'
 import { Message } from '../types.js'
 
-export async function getNextTask(model: Model, history: Message[]): Promise<string | null> {
-  const response = await model.completions({
-    model: model.name,
+export async function getNextTask(provider: Provider, history: Message[]): Promise<string | null> {
+  const response = await provider.completions({
+    model: provider.name,
     messages: [
       {
         role: 'system',

@@ -3,11 +3,15 @@ import { zodResponseFormat } from 'openai/helpers/zod.mjs'
 import { z } from 'zod'
 
 import { Agent } from '../agent.js'
-import { Model } from '../models/openai.js'
+import { Provider } from '../models/openai.js'
 
-export async function selectAgent(model: Model, task: string, agents: Agent[]): Promise<Agent> {
-  const response = await model.completions({
-    model: model.name,
+export async function selectAgent(
+  provider: Provider,
+  task: string,
+  agents: Agent[]
+): Promise<Agent> {
+  const response = await provider.completions({
+    model: provider.name,
     messages: [
       {
         role: 'system',

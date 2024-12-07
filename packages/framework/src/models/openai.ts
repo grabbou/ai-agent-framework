@@ -3,12 +3,12 @@ import OpenAI, { ClientOptions } from 'openai'
 import { RequiredOptionals } from '../types.js'
 
 type OpenAIOptions = {
-  name?: string
+  model?: string
   options?: ClientOptions
 }
 
 const defaults: RequiredOptionals<OpenAIOptions> = {
-  name: 'gpt-4o',
+  model: 'gpt-4o',
   options: {},
 }
 
@@ -24,10 +24,10 @@ export const openai = (options?: OpenAIOptions) => {
   const client = new OpenAI(config.options)
 
   return {
-    name: config.name,
+    name: config.model,
     completions: client.beta.chat.completions.parse.bind(client.beta.chat.completions),
     client,
   }
 }
 
-export type Model = ReturnType<typeof openai>
+export type Provider = ReturnType<typeof openai>

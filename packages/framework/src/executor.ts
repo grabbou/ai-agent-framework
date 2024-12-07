@@ -24,8 +24,8 @@ export async function executeTaskWithAgent(
         )
       : []
 
-    const response = await agent.model.completions({
-      model: agent.model.name,
+    const response = await agent.provider.completions({
+      model: agent.provider.name,
       // tbd: verify the prompt
       messages: [
         {
