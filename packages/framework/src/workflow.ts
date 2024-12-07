@@ -16,7 +16,7 @@ const defaults: RequiredOptionals<WorkflowOptions> = {
 /**
  * Helper utility to create a workflow with defaults.
  */
-export const workflow = (options: WorkflowOptions) => {
+export const workflow = (options: WorkflowOptions): Workflow => {
   return {
     ...defaults,
     ...options,

@@ -18,7 +18,7 @@ const defaults: RequiredOptionals<AgentOptions> = {
 /**
  * Helper utility to create an agent with defaults.
  */
-export const agent = (options: AgentOptions) => {
+export const agent = (options: AgentOptions): Agent => {
   return {
     ...defaults,
     ...options,

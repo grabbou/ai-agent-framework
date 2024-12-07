@@ -13,7 +13,7 @@ type ContextOptions = {
 /**
  * Helper utility to create a context with defaults.
  */
-export const context = (options: ContextOptions): ExecutionContext => {
+export const context = (options: ContextOptions): Context => {
   return {
     ...options,
     messages: [
@@ -29,6 +29,6 @@ export const context = (options: ContextOptions): ExecutionContext => {
   }
 }
 
-export type ExecutionContext = Required<ContextOptions>
+export type Context = Required<ContextOptions>
 
 // tbd: helper utilities to create contexts from workflows with concrete single task etc.

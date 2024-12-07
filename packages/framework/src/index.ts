@@ -4,7 +4,7 @@ import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 import { z, ZodType, ZodTypeAny } from 'zod'
 
-import { context, ExecutionContext } from './executor.js'
+import { Context, context } from './executor.js'
 import { Tool } from './tool.js'
 import { Workflow, WorkflowContext } from './workflow.js'
 
@@ -178,7 +178,7 @@ export class Agent {
   }
 }
 
-async function execute(context: ExecutionContext): Promise<string> {
+async function execute(context: Context): Promise<string> {
   // eslint-disable-next-line no-constant-condition
   const task = await getNextTask(context.messages)
   if (!task) {
