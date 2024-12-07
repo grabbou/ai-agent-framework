@@ -29,7 +29,7 @@ type ToolDefinition<T extends z.ZodObject<{}>> = {
   name: string
   description: string
   parameters: T
-  execute: (parameters: z.infer<T>) => Promise<string>
+  function: (parameters: z.infer<T>) => Promise<string>
 }
 
 interface AgentConfig {
@@ -123,7 +123,7 @@ export class Agent {
       // tbd: add other tools
       // tbd: should we include agent description in the prompt too? we need to list responsibilities
       // but keep context window in mind
-      // tools: tools.map(zodFunction),
+      tools: this.tools.length > 0 ? this.tools.map(zodFunction) : undefined,
       response_format: zodResponseFormat(
         z.object({
           response: z.discriminatedUnion('kind', [
@@ -143,32 +143,29 @@ export class Agent {
         'task_result'
       ),
     })
-    // if (response.choices[0].message.tool_calls.length > 0) {
-    //   const toolResults = await Promise.all(
-    //     response.choices[0].message.tool_calls.map(async (toolCall) => {
-    //       if (toolCall.type !== 'function') {
-    //         throw new Error('Tool call is not a function')
-    //       }
+    if (response.choices[0].message.tool_calls.length > 0) {
+      const toolResults = await Promise.all(
+        response.choices[0].message.tool_calls.map(async (toolCall) => {
+          if (toolCall.type !== 'function') {
+            throw new Error('Tool call is not a function')
+          }
 
-    //       const tool = tools.find((t) => t.name === toolCall.function.name)
-    //       if (!tool) {
-    //         throw new Error(`Unknown tool: ${toolCall.function.name}`)
-    //       }
-    //       console.log('tool call', toolCall)
-    //       const parameters = tool.parameters.parse(toolCall.function.arguments)
+          const tool = this.tools.find((t) => t.name === toolCall.function.name)
+          if (!tool) {
+            throw new Error(`Unknown tool: ${toolCall.function.name}`)
+          }
 
-    //       const content = await tool.function(parameters)
+          const content = await tool.function(toolCall.function.parsed_arguments)
+          return {
+            role: 'tool' as const,
+            tool_call_id: toolCall.id,
+            content: JSON.stringify(content),
+          }
+        })
+      )
 
-    //       return {
-    //         role: 'tool' as const,
-    //         tool_call_id: toolCall.id,
-    //         content: JSON.stringify(content),
-    //       }
-    //     })
-    //   )
-
-    //   return this.executeTask([...messages, response.choices[0].message, ...toolResults], agents)
-    // }
+      return this.executeTask([...messages, response.choices[0].message, ...toolResults], agents)
+    }
 
     // tbd: verify shape of response
     const result = response.choices[0].message.parsed
