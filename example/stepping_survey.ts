@@ -4,7 +4,7 @@
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { workflow, workflowState } from '@dead-simple-ai-agent/framework/workflow'
 import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
@@ -82,19 +82,16 @@ const preVisitNoteWorkflow = workflow({
 const tmpDir = tmpdir()
 const dbPath = join(tmpDir, 'stepping_survey_workflow_db.json')
 
+let state = workflowState(preVisitNoteWorkflow)
 if (await fs.exists(dbPath)) {
   try {
-    const messages = JSON.parse(await fs.readFile(dbPath, 'utf-8'))
-    preVisitNoteWorkflow.messages.push(...messages)
-
+    state = JSON.parse(await fs.readFile(dbPath, 'utf-8'))
     console.log('🛟 Loaded workflow from', dbPath)
   } catch (error) {
     console.log(`🚨Error while loading workflow from ${dbPath}. Starting new workflow.`)
   }
 }
 
-const result = await iterate(preVisitNoteWorkflow)
+const nextState = await iterate(preVisitNoteWorkflow, state)
 
-console.log(result)
-
-await fs.writeFile(dbPath, JSON.stringify(result.messages, null, 2), 'utf-8')
+await fs.writeFile(dbPath, JSON.stringify(nextState, null, 2), 'utf-8')
