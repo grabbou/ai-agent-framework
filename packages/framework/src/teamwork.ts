@@ -6,10 +6,28 @@ import { Message, MessageContent } from './types.js'
 import { Workflow, WorkflowState, workflowState } from './workflow.js'
 
 export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
-  const { provider, members } = workflow
+  const { provider, members, telemetry } = workflow
   const { messages } = state
 
+  telemetry.record({
+    type: 'iterate.start',
+    data: {
+      workflow,
+      state,
+    },
+  })
+
   const task = await getNextTask(provider, messages)
+
+  telemetry.record({
+    type: 'iterate.task',
+    data: {
+      workflow,
+      state,
+      task,
+    },
+  })
+
   if (!task) {
     return {
       ...state,

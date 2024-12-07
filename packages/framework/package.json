@@ -4,32 +4,11 @@
   "description": "A dead simple AI agent framework",
   "author": "Mike Grabowski <mike@callstack.com>",
   "exports": {
-    ".": {
-      "bun": "./src/index.ts"
+    "./*": {
+      "bun": "./src/*.ts"
     },
-    "./tool": {
-      "bun": "./src/tool.ts"
-    },
-    "./executor": {
-      "bun": "./src/executor.ts"
-    },
-    "./workflow": {
-      "bun": "./src/workflow.ts"
-    },
-    "./agent": {
-      "bun": "./src/agent.ts"
-    },
-    "./step": {
-      "bun": "./src/step.ts"
-    },
-    "./memory": {
-      "bun": "./src/memory.ts"
-    },
-    "./teamwork": {
-      "bun": "./src/teamwork.ts"
-    },
-    "./models/openai": {
-      "bun": "./src/models/openai.ts"
+    "./models/*": {
+      "bun": "./src/models/*.ts"
     }
   },
   "type": "module",
