@@ -1,20 +1,24 @@
-import s from 'dedent'
-
 import { executeTaskWithAgent } from './executor.js'
 import { getNextTask } from './supervisor/nextTask.js'
 import { selectAgent } from './supervisor/selectAgent.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
-async function execute(workflow: Workflow, messages: Message[]): Promise<string> {
+async function execute(workflow: Workflow, messages: Message[]): Promise<Message[]> {
   const task = await getNextTask(workflow.provider, messages)
   if (!task) {
-    return messages.at(-1)!.content as string
+    return messages
   }
 
-  // tbd: implement `final answer` flow
+  // tbd: implement `final answer` flow to generate output message
   if (messages.length > workflow.maxIterations) {
-    return messages.at(-1)!.content as string
+    return [
+      ...messages,
+      {
+        role: 'assistant',
+        content: 'Workflow reached maximum iterations',
+      },
+    ]
   }
 
   // tbd: get rid of console.logs, use telemetry instead
@@ -53,15 +57,8 @@ async function execute(workflow: Workflow, messages: Message[]): Promise<string>
 }
 
 export async function teamwork(workflow: Workflow): Promise<string> {
-  const messages = [
-    {
-      role: 'assistant' as const,
-      content: s`
-        Here is description of the workflow and expected output by the user:
-        <workflow>${workflow.description}</workflow>
-        <output>${workflow.output}</output>
-      `,
-    },
-  ]
-  return execute(workflow, messages)
+  const history = await execute(workflow, workflow.messages)
+
+  // tbd: verify shape of message
+  return history.at(-1)!.content as string
 }
