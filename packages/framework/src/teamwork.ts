@@ -11,6 +11,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
   const task = await getNextTask(provider, messages)
   if (!task) {
     return {
+      ...state,
       messages,
       status: 'finished',
     }
@@ -18,6 +19,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
 
   if (messages.length > workflow.maxIterations) {
     return {
+      ...state,
       messages,
       status: 'interrupted',
     }
@@ -40,6 +42,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
   try {
     const result = await executeTaskWithAgent(selectedAgent, agentRequest, members)
     return {
+      ...state,
       messages: [
         ...agentRequest,
         {
@@ -51,6 +54,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
     }
   } catch (error) {
     return {
+      ...state,
       messages: [
         ...agentRequest,
         {
