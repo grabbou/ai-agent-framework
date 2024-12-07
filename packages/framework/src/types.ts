@@ -1,5 +1,4 @@
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
-
 /**
  * Utility type to get optional keys from T.
  */

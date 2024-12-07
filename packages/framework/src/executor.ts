@@ -1,3 +1,4 @@
+import s from 'dedent'
 import OpenAI from 'openai'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
@@ -6,6 +7,38 @@ import { Agent } from './agent.js'
 import { Message } from './types.js'
 
 const openai = new OpenAI()
+
+import { Workflow } from './workflow.js'
+
+// tbd: add more context like trace, callstack etc. context should be serializable
+type ContextOptions = {
+  workflow: Workflow
+  // tbd: move messages to something such as memory
+  messages?: Message[]
+}
+
+/**
+ * Helper utility to create a context with defaults.
+ */
+export const context = (options: ContextOptions): Context => {
+  return {
+    ...options,
+    messages: [
+      {
+        role: 'assistant',
+        content: s`
+        Here is description of the workflow and expected output by the user:
+        <workflow>${options.workflow.description}</workflow>
+        <output>${options.workflow.output}</output>
+      `,
+      },
+    ],
+  }
+}
+
+export type Context = Required<ContextOptions>
+
+// tbd: helper utilities to create contexts from workflows with concrete single task etc.
 
 export async function executeTaskWithAgent(
   agent: Agent,
@@ -30,7 +63,7 @@ export async function executeTaskWithAgent(
       messages: [
         {
           role: 'system',
-          content: `
+          content: s`
                 You are ${agent.role}. ${agent.description}
                 
                 Your job is to complete the assigned task.
