@@ -210,22 +210,33 @@ export class Agent {
   }
 }
 
-type Message = ChatCompletionMessageParam
-
-export class WorkflowContext { // tbd: workflow memory?
-  messages: Message[] = []
-  iteration = 0
-  callstack: string[] = [] // todo
-  constructor() {
-    // tbd: implement memory
-  }
-}
 
 export class Team {
+  async execute(workflow: Workflow, context: WorkflowContext = {
+    messages: [
+      {
+        role: 'assistant',
+        content: s`
+          Here is description of the workflow and expected output by the user:
+          <workflow>${workflow.description}</workflow>
+          <output>${workflow.output}</output>
+        `,
+      },
+    ]    
+  }): Promise<string> {
 
-  context = new WorkflowContext()
+  // tbd: set reasonable max iterations
+  // eslint-disable-next-line no-constant-condition
+    const task = await getNextTask(context.messages)
+    if (!task) {
+      return context.messages.at(-1)!.content as string // end of the recursion
+    }
 
-  async nextTask(task: string, workflow: Workflow, context: WorkflowContext): Promise<Message[]> {
+    if (workflow.maxIterations && context.messages.length > workflow.maxIterations) {
+      console.debug('Max iterations exceeded ', workflow.maxIterations);
+      return context.messages.at(-1)!.content as string
+    }
+
     console.log('🚀 Next task:', task)
 
     context.messages.push({
@@ -252,56 +263,23 @@ export class Team {
         content: error instanceof Error ? error.message : 'Unknown error',
       })
     }
-    return context.messages;
+
+    return this.execute(workflow, context);// next iteration
   }
-
-  // tbd: expose this via async API
-  async execute(workflow: Workflow, execOptions: WorkflowExecOptions = { async: false }): Promise<string> {
-    this.context.messages = [
-      {
-        role: 'assistant',
-        content: s`
-          Here is description of the workflow and expected output by the user:
-          <workflow>${workflow.description}</workflow>
-          <output>${workflow.output}</output>
-        `,
-      },
-    ]
-
-    const context = this.context
-    const messages = this.context.messages
-
-    // tbd: set reasonable max iterations
-    // eslint-disable-next-line no-constant-condition
-    while (true) {      
-      const task = await getNextTask(messages)
-      if (!task) {
-        return messages.at(-1)!.content as string
-      }
-
-      if (execOptions.maxIterations && context.iteration >= execOptions.maxIterations) {
-        return messages.at(-1)!.content as string
-      }
-
-      this.nextTask(task, workflow, context);       
-      this.context.iteration++;
-
-      
-      if (execOptions.async) // exec one step at time, tbd: save the context in a persistence layer;
-        break;
-    }
-  }
-}
-
-type WorkflowExecOptions = {
-  maxIterations?: number
-  async: boolean;
 }
 
 type Workflow = {
   description: string
   output: string
   members: Agent[]
+  maxIterations?: number
+}
+
+type Message = ChatCompletionMessageParam
+
+type WorkflowContext = {
+  messages: Message[]
+  // tbd: add more context like trace, callstack etc. context should be serializable
 }
 
 async function selectAgent(task: string, agents: Agent[]): Promise<Agent> {
