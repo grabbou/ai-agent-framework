@@ -25,5 +25,8 @@
   },
   "trustedDependencies": [
     "core-js"
-  ]
+  ],
+  "dependencies": {
+    "nanoid": "^5.0.9"
+  }
 }

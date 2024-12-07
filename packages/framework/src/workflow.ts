@@ -1,6 +1,8 @@
+import s from 'dedent'
+
 import { Agent } from './agent.js'
 import { openai, Provider } from './models/openai.js'
-import { RequiredOptionals } from './types.js'
+import { Message } from './types.js'
 
 type WorkflowOptions = {
   description: string
@@ -8,12 +10,10 @@ type WorkflowOptions = {
   members: Agent[]
 
   provider?: Provider
-  maxIterations?: number
-}
+  messages?: Message[]
+  status?: 'running' | 'finished' | 'interrupted' | 'failed' | 'pending'
 
-const defaults: RequiredOptionals<WorkflowOptions> = {
-  maxIterations: 50,
-  provider: openai(),
+  maxIterations?: number
 }
 
 /**
@@ -21,7 +21,19 @@ const defaults: RequiredOptionals<WorkflowOptions> = {
  */
 export const workflow = (options: WorkflowOptions): Workflow => {
   return {
-    ...defaults,
+    maxIterations: 50,
+    provider: openai(),
+    status: 'pending',
+    messages: [
+      {
+        role: 'assistant' as const,
+        content: s`
+          Here is description of the workflow and expected output by the user:
+          <workflow>${options.description}</workflow>
+          <output>${options.output}</output>
+        `,
+      },
+    ],
     ...options,
   }
 }
