@@ -18,6 +18,9 @@
     },
     "./agent": {
       "bun": "./src/agent.ts"
+    },
+    "./teamwork": {
+      "bun": "./src/teamwork.ts"
     }
   },
   "type": "module",
