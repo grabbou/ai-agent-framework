@@ -14,7 +14,6 @@ const encodeImage = (imagePath: string): string => {
 const runLocalImages = async (provider: Provider, imagePathUrl: string): Promise<string> => {
   const base64Image = encodeImage(imagePathUrl)
   const response = await provider.completions({
-    model: 'gpt-4o-mini',
     messages: [
       {
         role: 'user',
@@ -31,7 +30,6 @@ const runLocalImages = async (provider: Provider, imagePathUrl: string): Promise
 
 const runWebHostedImages = async (provider: Provider, imagePathUrl: string): Promise<string> => {
   const response = await provider.completions({
-    model: 'gpt-4o-mini',
     messages: [
       {
         role: 'user',
