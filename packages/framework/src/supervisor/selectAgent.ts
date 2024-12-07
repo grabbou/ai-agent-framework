@@ -33,7 +33,10 @@ export async function selectAgent(
 
           Here are the available agents:
           <agents>
-            ${agents.map((agent, index) => `<agent index="${index}">${agent}</agent>`)}
+            ${agents.map(
+              (agent, index) =>
+                `<agent index="${index}">${agent.role} - ${agent.description}</agent>`
+            )}
           </agents>
 
           Select the most suitable agent for this task.
