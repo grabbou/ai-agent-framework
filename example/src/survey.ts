@@ -4,10 +4,7 @@
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
-import { workflow, workflowState } from '@dead-simple-ai-agent/framework/workflow'
-import { promises as fs } from 'fs'
-import { tmpdir } from 'os'
-import { join } from 'path'
+import { workflow } from '@dead-simple-ai-agent/framework/workflow'
 import { z } from 'zod'
 
 async function requestUserInput(prompt: string): Promise<string> {
@@ -29,7 +26,7 @@ export const askPatient = tool({
 })
 
 const nurse = agent({
-  role: 'Nurse,doctor assistant',
+  role: 'Nurse, doctor assistant',
   description: `
     You are skille nurse / doctor assistant.
     You role is to cooperate with reporter to create a pre-visit note for a patient that is about to come for a visit.
@@ -54,6 +51,7 @@ const reporter = agent({
 
 const preVisitNoteWorkflow = workflow({
   members: [nurse, reporter],
+  maxIterations: 2,
   description: `
     Create a pre-visit note for a patient that is about to come for a visit.
     The note should include the patient's health and symptoms.
@@ -75,19 +73,5 @@ const preVisitNoteWorkflow = workflow({
   `,
 })
 
-const tmpDir = tmpdir()
-const dbPath = join(tmpDir, 'stepping_survey_workflow_db.json')
-
-let state = workflowState(preVisitNoteWorkflow)
-if (await fs.exists(dbPath)) {
-  try {
-    state = JSON.parse(await fs.readFile(dbPath, 'utf-8'))
-    console.log('🛟 Loaded workflow from', dbPath)
-  } catch (error) {
-    console.log(`🚨Error while loading workflow from ${dbPath}. Starting new workflow.`)
-  }
-}
-
-const nextState = await teamwork(preVisitNoteWorkflow, state)
-
-await fs.writeFile(dbPath, JSON.stringify(nextState, null, 2), 'utf-8')
+const result = await teamwork(preVisitNoteWorkflow)
+console.log('🚀 Result:', result)

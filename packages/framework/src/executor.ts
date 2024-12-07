@@ -8,25 +8,6 @@ import { Workflow } from './workflow.js'
 
 // tbd: helper utilities to create contexts from workflows with concrete single task etc.
 
-const taskResponseFormat = zodResponseFormat(
-  z.object({
-    response: z.discriminatedUnion('kind', [
-      z.object({
-        kind: z.literal('step'),
-        name: z.string().describe('The name of the step'),
-        result: z.string().describe('The result of the step'),
-        reasoning: z.string().describe('The reasoning for this step'),
-      }),
-      z.object({
-        kind: z.literal('complete'),
-        result: z.string().describe('The final result of the task'),
-        reasoning: z.string().describe('The reasoning for completing the task'),
-      }),
-    ]),
-  }),
-  'task_result'
-)
-
 export async function finalizeQuery(workflow: Workflow, messages: Message[]): Promise<string> {
   const response = await workflow.provider.completions({
     messages: [
@@ -38,7 +19,24 @@ export async function finalizeQuery(workflow: Workflow, messages: Message[]): Pr
       },
       ...messages,
     ],
-    response_format: taskResponseFormat,
+    response_format: zodResponseFormat(
+      z.object({
+        response: z.discriminatedUnion('kind', [
+          z.object({
+            kind: z.literal('step'),
+            name: z.string().describe('The name of the step'),
+            result: z.string().describe('The result of the step'),
+            reasoning: z.string().describe('The reasoning for this step'),
+          }),
+          z.object({
+            kind: z.literal('complete'),
+            result: z.string().describe('The final result of the task'),
+            reasoning: z.string().describe('The reasoning for completing the task'),
+          }),
+        ]),
+      }),
+      'task_result'
+    ),
   })
   const result = response.choices[0].message.parsed
   if (!result) {
