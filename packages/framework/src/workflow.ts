@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+
 import s from 'dedent'
 
 import { Agent } from './agent.js'
@@ -27,6 +29,7 @@ export const workflow = (options: WorkflowOptions): Workflow => {
 export type Workflow = Required<WorkflowOptions>
 
 export type WorkflowState = {
+  id: string
   status: 'running' | 'finished' | 'interrupted' | 'failed' | 'pending'
   messages: Message[]
 }
@@ -36,6 +39,7 @@ export type WorkflowState = {
  */
 export const workflowState = (workflow: Workflow): WorkflowState => {
   return {
+    id: randomUUID(),
     status: 'pending',
     messages: [
       {
