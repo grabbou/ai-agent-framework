@@ -11,7 +11,6 @@ export async function selectAgent(
   agents: Agent[]
 ): Promise<Agent> {
   const response = await provider.completions({
-    model: provider.model,
     messages: [
       {
         role: 'system',

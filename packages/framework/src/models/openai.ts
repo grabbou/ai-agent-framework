@@ -1,4 +1,5 @@
 import OpenAI, { ClientOptions } from 'openai'
+import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/index.mjs'
 
 import { RequiredOptionals } from '../types.js'
 
@@ -11,6 +12,8 @@ const defaults: RequiredOptionals<OpenAIOptions> = {
   model: 'gpt-4o',
   options: {},
 }
+
+type ChatCompletionParseParams = ChatCompletionCreateParamsNonStreaming
 
 /**
  * Helper utility to create a model configuration with defaults.
@@ -25,7 +28,11 @@ export const openai = (options?: OpenAIOptions) => {
 
   return {
     model: config.model,
-    completions: client.beta.chat.completions.parse.bind(client.beta.chat.completions),
+    completions: <T extends Omit<ChatCompletionParseParams, 'model'>>(params: T) =>
+      client.beta.chat.completions.parse.bind(client.beta.chat.completions)({
+        ...params,
+        model: config.model,
+      }),
     client,
   }
 }
