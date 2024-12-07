@@ -2,45 +2,6 @@
 
 A lightweight, functional, and composable framework for building AI agents that work together to solve complex tasks. Built with TypeScript and designed to be serverless-ready.
 
-## Getting Started
-
-```bash
-npm install @dead-simple-ai-agent/framework
-```
-
-```typescript
-import { agent, teamwork, workflow } from '@dead-simple-ai-agent/framework'
-
-// Define specialized agents
-const researcher = agent({
-  role: 'Research Specialist',
-  description: 'Expert at finding and analyzing technical information',
-})
-
-const writer = agent({
-  role: 'Content Writer',
-  description: 'Skilled at creating clear, engaging content',
-})
-
-// Create a workflow
-const documentationWorkflow = workflow({
-  members: [researcher, writer],
-  description: `
-    Get all AI agent frameworks from the Internet in TypeScript and create a comprehensive guide.
-  `,
-  output: 'Clear, comprehensive guide about each AI agent framework',
-})
-
-// Execute the workflow
-const result = await teamwork(documentationWorkflow)
-console.log(result)
-```
-
-Check out more [examples on GitHub](https://github.com/username/dead-simple-ai-agent/tree/main/examples), including:
-- Product description generation
-- Medical surveys
-- Travel planning
-
 ## Why Another AI Agent Framework?
 
 Most existing AI agent frameworks are either too complex, heavily object-oriented, or tightly coupled to specific infrastructure. We wanted something different - a framework that embraces functional programming principles, remains stateless, and stays laser-focused on composability.
