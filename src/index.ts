@@ -212,9 +212,52 @@ export class Agent {
 
 type Message = ChatCompletionMessageParam
 
+export class WorkflowContext { // tbd: workflow memory?
+  messages: Message[] = []
+  iteration = 0
+  callstack: string[] = [] // todo
+  constructor() {
+    // tbd: implement memory
+  }
+}
+
 export class Team {
-  async execute(workflow: Workflow): Promise<string> {
-    const messages: Message[] = [
+
+  context = new WorkflowContext()
+
+  async nextTask(task: string, workflow: Workflow, context: WorkflowContext): Promise<Message[]> {
+    console.log('🚀 Next task:', task)
+
+    context.messages.push({
+      role: 'user',
+      content: task,
+    })
+
+    // tbd: this throws, handle it
+    const selectedAgent = await selectAgent(task, workflow.members)
+    console.log('🚀 Selected agent:', selectedAgent.role)
+
+    // tbd: this should just be a try/catch
+    // tbd: do not return string, but more information or keep memory in agent
+    try {
+      const result = await selectedAgent.executeTask(context.messages, workflow.members)
+      context.messages.push({
+        role: 'assistant',
+        content: result,
+      })
+    } catch (error) {
+      console.log('🚀 Task error:', error)
+      context.messages.push({
+        role: 'assistant',
+        content: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+    return context.messages;
+  }
+
+  // tbd: expose this via async API
+  async execute(workflow: Workflow, execOptions: WorkflowExecOptions = { async: false }): Promise<string> {
+    this.context.messages = [
       {
         role: 'assistant',
         content: s`
@@ -225,42 +268,34 @@ export class Team {
       },
     ]
 
+    const context = this.context
+    const messages = this.context.messages
+
     // tbd: set reasonable max iterations
     // eslint-disable-next-line no-constant-condition
-    while (true) {
+    while (true) {      
       const task = await getNextTask(messages)
       if (!task) {
         return messages.at(-1)!.content as string
       }
 
-      console.log('🚀 Next task:', task)
-
-      messages.push({
-        role: 'user',
-        content: task,
-      })
-
-      // tbd: this throws, handle it
-      const selectedAgent = await selectAgent(task, workflow.members)
-      console.log('🚀 Selected agent:', selectedAgent.role)
-
-      // tbd: this should just be a try/catch
-      // tbd: do not return string, but more information or keep memory in agent
-      try {
-        const result = await selectedAgent.executeTask(messages, workflow.members)
-        messages.push({
-          role: 'assistant',
-          content: result,
-        })
-      } catch (error) {
-        console.log('🚀 Task error:', error)
-        messages.push({
-          role: 'assistant',
-          content: error instanceof Error ? error.message : 'Unknown error',
-        })
+      if (execOptions.maxIterations && context.iteration >= execOptions.maxIterations) {
+        return messages.at(-1)!.content as string
       }
+
+      this.nextTask(task, workflow, context);       
+      this.context.iteration++;
+
+      
+      if (execOptions.async) // exec one step at time, tbd: save the context in a persistence layer;
+        break;
     }
   }
+}
+
+type WorkflowExecOptions = {
+  maxIterations?: number
+  async: boolean;
 }
 
 type Workflow = {
