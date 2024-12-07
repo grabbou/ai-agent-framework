@@ -2,6 +2,7 @@
  * Example borrowed from CrewAI.
  */
 import { teamwork } from '@dead-simple-ai-agent/framework'
+
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { workflow } from '@dead-simple-ai-agent/framework/workflow'
 
