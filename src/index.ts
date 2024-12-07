@@ -64,43 +64,43 @@ export class Agent {
   }
 
   async executeTask(messages: Message[], agents: Agent[]): Promise<string> {
-    const tools = [
-      {
-        name: 'ask_a_question',
-        description: s`
-          Ask a specific question to one of the following agents: 
-          <agents>
-            ${agents.map((agent, index) => `<agent index="${index}">${agent.role}</agent>`)}
-          </agents>
-        `,
-        parameters: z.object({
-          agent: z.number().describe('The index of the agent to ask the question'),
-          question: z.string().describe('The question you want the agent to answer'),
-          context: z.string().describe('All context necessary to execute the task'),
-        }),
-        function: async ({ agent, question, context }) => {
-          console.log('ask_a_question', agent, question, context)
-          const selectedAgent = agents[agent]
-          if (!selectedAgent) {
-            throw new Error('Invalid agent')
-          }
-          return selectedAgent.executeTask(
-            [
-              {
-                role: 'user',
-                content: context,
-              },
-              {
-                role: 'user',
-                content: question,
-              },
-            ],
-            agents
-          )
-        },
-      },
-    ]
-
+    // tbd: after we implememt this, it keeps delegating
+    // const tools = [
+    //   {
+    //     name: 'ask_a_question',
+    //     description: s`
+    //       Ask a specific question to one of the following agents:
+    //       <agents>
+    //         ${agents.map((agent, index) => `<agent index="${index}">${agent.role}</agent>`)}
+    //       </agents>
+    //     `,
+    //     parameters: z.object({
+    //       agent: z.number().describe('The index of the agent to ask the question'),
+    //       question: z.string().describe('The question you want the agent to answer'),
+    //       context: z.string().describe('All context necessary to execute the task'),
+    //     }),
+    //     function: async ({ agent, question, context }) => {
+    //       console.log('ask_a_question', agent, question, context)
+    //       const selectedAgent = agents[agent]
+    //       if (!selectedAgent) {
+    //         throw new Error('Invalid agent')
+    //       }
+    //       return selectedAgent.executeTask(
+    //         [
+    //           {
+    //             role: 'user',
+    //             content: context,
+    //           },
+    //           {
+    //             role: 'user',
+    //             content: question,
+    //           },
+    //         ],
+    //         agents
+    //       )
+    //     },
+    //   },
+    // ]
     const response = await openai.beta.chat.completions.parse({
       model: this.model,
       // tbd: verify the prompt
@@ -123,7 +123,7 @@ export class Agent {
       // tbd: add other tools
       // tbd: should we include agent description in the prompt too? we need to list responsibilities
       // but keep context window in mind
-      tools: tools.map(zodFunction),
+      // tools: tools.map(zodFunction),
       response_format: zodResponseFormat(
         z.object({
           response: z.discriminatedUnion('kind', [
@@ -143,32 +143,32 @@ export class Agent {
         'task_result'
       ),
     })
-    if (response.choices[0].message.tool_calls.length > 0) {
-      const toolResults = await Promise.all(
-        response.choices[0].message.tool_calls.map(async (toolCall) => {
-          if (toolCall.type !== 'function') {
-            throw new Error('Tool call is not a function')
-          }
+    // if (response.choices[0].message.tool_calls.length > 0) {
+    //   const toolResults = await Promise.all(
+    //     response.choices[0].message.tool_calls.map(async (toolCall) => {
+    //       if (toolCall.type !== 'function') {
+    //         throw new Error('Tool call is not a function')
+    //       }
 
-          const tool = tools.find((t) => t.name === toolCall.function.name)
-          if (!tool) {
-            throw new Error(`Unknown tool: ${toolCall.function.name}`)
-          }
-          console.log('tool call', toolCall)
-          const parameters = tool.parameters.parse(toolCall.function.arguments)
+    //       const tool = tools.find((t) => t.name === toolCall.function.name)
+    //       if (!tool) {
+    //         throw new Error(`Unknown tool: ${toolCall.function.name}`)
+    //       }
+    //       console.log('tool call', toolCall)
+    //       const parameters = tool.parameters.parse(toolCall.function.arguments)
 
-          const content = await tool.function(parameters)
+    //       const content = await tool.function(parameters)
 
-          return {
-            role: 'tool' as const,
-            tool_call_id: toolCall.id,
-            content: JSON.stringify(content),
-          }
-        })
-      )
+    //       return {
+    //         role: 'tool' as const,
+    //         tool_call_id: toolCall.id,
+    //         content: JSON.stringify(content),
+    //       }
+    //     })
+    //   )
 
-      return this.executeTask([...messages, response.choices[0].message, ...toolResults], agents)
-    }
+    //   return this.executeTask([...messages, response.choices[0].message, ...toolResults], agents)
+    // }
 
     // tbd: verify shape of response
     const result = response.choices[0].message.parsed
