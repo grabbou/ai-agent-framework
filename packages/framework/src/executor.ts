@@ -30,7 +30,7 @@ export async function finalizeQuery(workflow: Workflow, messages: Message[]): Pr
   if (!result) {
     throw new Error('No parsed response received')
   }
-  return Promise.resolve(result.finalAnswer)
+  return result.finalAnswer
 }
 
 export async function executeTaskWithAgent(
