@@ -4,7 +4,11 @@ import { selectAgent } from './supervisor/selectAgent.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
-async function execute(workflow: Workflow, messages: Message[]): Promise<Message[]> {
+async function execute(
+  workflow: Workflow,
+  messages: Message[],
+  executeOnce: boolean = false
+): Promise<Message[]> {
   const task = await getNextTask(workflow.provider, messages)
   if (!task) {
     return messages
@@ -36,24 +40,25 @@ async function execute(workflow: Workflow, messages: Message[]): Promise<Message
   ]
 
   // tbd: do not return string, but more information or keep memory in agent
+  let agentResponse: Message
   try {
     const result = await executeTaskWithAgent(selectedAgent, agentRequest, workflow.members)
-    return execute(workflow, [
-      ...agentRequest,
-      {
-        role: 'assistant',
-        content: result,
-      },
-    ])
+    agentResponse = {
+      role: 'assistant',
+      content: result,
+    }
   } catch (error) {
-    return execute(workflow, [
-      ...agentRequest,
-      {
-        role: 'assistant',
-        content: error instanceof Error ? error.message : 'Unknown error',
-      },
-    ])
+    agentResponse = {
+      role: 'assistant',
+      content: error instanceof Error ? error.message : 'Unknown error',
+    }
   }
+
+  if (executeOnce) {
+    return [...messages, agentResponse]
+  }
+
+  return execute(workflow, [...messages, agentResponse])
 }
 
 export async function teamwork(workflow: Workflow): Promise<string> {
@@ -61,4 +66,13 @@ export async function teamwork(workflow: Workflow): Promise<string> {
 
   // tbd: verify shape of message
   return history.at(-1)!.content as string
+}
+
+export async function iterate(workflow: Workflow): Promise<Workflow> {
+  // tbd: we need to add something to the workflow to track the status (e.g. finished, failed)
+  const messages = await execute(workflow, workflow.messages, true)
+  return {
+    ...workflow,
+    messages,
+  }
 }

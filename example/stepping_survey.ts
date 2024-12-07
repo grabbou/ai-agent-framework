@@ -2,13 +2,11 @@
  * Example borrowed from CrewAI.
  */
 import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { memory } from '@dead-simple-ai-agent/framework/memory'
-import { teamworkStep } from '@dead-simple-ai-agent/framework/step'
+import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import { workflow } from '@dead-simple-ai-agent/framework/workflow'
-import { load, save } from '@dead-simple-ai-agent/memory-lowdb'
 import { promises as fs } from 'fs'
-import { nanoid } from 'nanoid'
+import { tmpdir } from 'os'
 import { join } from 'path'
 import { z } from 'zod'
 
@@ -81,30 +79,22 @@ const preVisitNoteWorkflow = workflow({
   `,
 })
 
-let id: string
-const idFilePath = join(__dirname, 'last-run-id.txt')
+const tmpDir = tmpdir()
+const dbPath = join(tmpDir, 'stepping_survey_workflow_db.json')
 
-if (process.argv.length > 2) {
-  id = process.argv[2]
-} else {
+if (await fs.exists(dbPath)) {
   try {
-    id = await fs.readFile(idFilePath, 'utf-8')
+    const messages = JSON.parse(await fs.readFile(dbPath, 'utf-8'))
+    preVisitNoteWorkflow.messages.push(...messages)
+
+    console.log('🛟 Loaded workflow from', dbPath)
   } catch (error) {
-    id = nanoid()
+    console.log(`🚨Error while loading workflow from ${dbPath}. Starting new workflow.`)
   }
 }
-await fs.writeFile(idFilePath, id, 'utf-8')
 
-console.log('🛟 Run ID:', id)
-console.log('🛟 Executing single next step')
-
-const result = await teamworkStep(
-  id,
-  preVisitNoteWorkflow,
-  memory({
-    load,
-    save,
-  })
-) // exec the next step
+const result = await iterate(preVisitNoteWorkflow)
 
 console.log(result)
+
+await fs.writeFile(dbPath, JSON.stringify(result.messages, null, 2), 'utf-8')
