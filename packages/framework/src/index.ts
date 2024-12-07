@@ -25,6 +25,7 @@ class CLIProtocol implements Protocol {
   }
 }
 
+// tbd: make this Vercel AI SDK compatible, as it has nicest interface
 type ToolDefinition<T extends z.ZodObject<{}>> = {
   name: string
   description: string
