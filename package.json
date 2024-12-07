@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "example"
+    "example",
+    "website"
   ],
   "devDependencies": {
     "@release-it-plugins/workspaces": "^4.2.0",
