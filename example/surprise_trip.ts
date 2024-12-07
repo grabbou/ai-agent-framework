@@ -1,7 +1,7 @@
 /**
  * Example borrowed from CrewAI.
  */
-import { Agent, Team } from '@dead-simple-ai-agent/framework'
+import { Agent, teamwork } from '@dead-simple-ai-agent/framework'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
 import { z } from 'zod'
@@ -57,9 +57,7 @@ const itineraryCompiler = new Agent({
   `,
 })
 
-const team = new Team()
-
-const result = await team.execute({
+const result = await teamwork({
   members: [personalizedActivityPlanner, restaurantScout, landmarkScout, itineraryCompiler],
   description: `
     Research and find cool things to do in Wrocław, Poland.
