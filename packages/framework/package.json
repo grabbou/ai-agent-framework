@@ -25,8 +25,8 @@
     "./memory": {
       "bun": "./src/memory.ts"
     },
-    "./types": {
-      "bun": "./src/types.ts"
+    "./teamwork": {
+      "bun": "./src/teamwork.ts"
     }
   },
   "type": "module",
