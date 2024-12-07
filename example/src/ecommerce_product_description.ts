@@ -1,6 +1,7 @@
 /**
  * Example borrowed from CrewAI.
  */
+
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { workflow } from '@dead-simple-ai-agent/framework/workflow'
@@ -10,7 +11,8 @@ const techExpert = agent({
   role: 'Technical expert',
   description: `
     You are skilled at extracting and describing most detailed
-    technical information about the product from the photo.  `,
+    technical information about the product from the photo.
+  `,
   tools: {
     visionTool,
   },

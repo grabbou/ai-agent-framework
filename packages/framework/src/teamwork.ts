@@ -1,63 +1,84 @@
-import s from 'dedent'
-
 import { executeTaskWithAgent } from './executor.js'
 import { getNextTask } from './supervisor/nextTask.js'
 import { selectAgent } from './supervisor/selectAgent.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
-async function execute(workflow: Workflow, messages: Message[]): Promise<string> {
-  // eslint-disable-next-line no-constant-condition
-  const task = await getNextTask(workflow.provider, messages)
+export async function iterate(workflow: Workflow): Promise<Workflow> {
+  const { messages, provider, members } = workflow
+
+  const task = await getNextTask(provider, messages)
   if (!task) {
-    return messages.at(-1)!.content as string // end of the recursion
+    return {
+      ...workflow,
+      messages,
+      status: 'finished',
+    }
   }
 
-  if (workflow.maxIterations && messages.length > workflow.maxIterations) {
-    console.debug('Max iterations exceeded ', workflow.maxIterations)
-    return messages.at(-1)!.content as string
+  // tbd: implement `final answer` flow to generate output message
+  if (messages.length > workflow.maxIterations) {
+    return {
+      ...workflow,
+      messages,
+      status: 'interrupted',
+    }
   }
 
+  // tbd: get rid of console.logs, use telemetry instead
   console.log('🚀 Next task:', task)
 
-  messages.push({
-    role: 'user',
-    content: task,
-  })
-
-  // tbd: this throws, handle it
-  const selectedAgent = await selectAgent(workflow.provider, task, workflow.members)
+  const selectedAgent = await selectAgent(provider, task, members)
   console.log('🚀 Selected agent:', selectedAgent.role)
 
-  // tbd: this should just be a try/catch
-  // tbd: do not return string, but more information or keep memory in agent
-  try {
-    const result = await executeTaskWithAgent(selectedAgent, messages, workflow.members)
-    messages.push({
-      role: 'assistant',
-      content: result,
-    })
-  } catch (error) {
-    console.log('🚀 Task error:', error)
-    messages.push({
-      role: 'assistant',
-      content: error instanceof Error ? error.message : 'Unknown error',
-    })
-  }
+  const agentRequest: Message[] = [
+    ...messages,
+    {
+      role: 'user',
+      content: task,
+    },
+  ]
 
-  return execute(workflow, messages)
+  try {
+    const result = await executeTaskWithAgent(selectedAgent, agentRequest, members)
+    return {
+      ...workflow,
+      messages: [
+        ...agentRequest,
+        {
+          role: 'assistant',
+          content: result,
+        },
+      ],
+      status: 'running',
+    }
+  } catch (error) {
+    return {
+      ...workflow,
+      messages: [
+        ...agentRequest,
+        {
+          role: 'assistant',
+          content: error instanceof Error ? error.message : 'Unknown error',
+        },
+      ],
+      status: 'failed',
+    }
+  }
 }
 
 export async function teamwork(workflow: Workflow): Promise<string> {
-  const messages = [
-    {
-      role: 'assistant' as const,
-      content: s`
-        Here is description of the workflow and expected output by the user:
-        <workflow>${workflow.description}</workflow>
-        <output>${workflow.output}</output>
-      `,
-    },
-  ]
-  return execute(workflow, messages)
+  const result = await iterate(workflow)
+
+  if (result.status === 'running') {
+    return teamwork(result)
+  }
+
+  if (result.status === 'finished') {
+    return result.messages.at(-1)!.content as string
+  }
+
+  // tbd: recover from errors
+  // tbd: request final answer if took too long
+  throw new Error('Workflow failed. This is not implemented yet.')
 }

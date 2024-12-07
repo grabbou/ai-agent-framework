@@ -19,6 +19,12 @@
     "./agent": {
       "bun": "./src/agent.ts"
     },
+    "./step": {
+      "bun": "./src/step.ts"
+    },
+    "./memory": {
+      "bun": "./src/memory.ts"
+    },
     "./teamwork": {
       "bun": "./src/teamwork.ts"
     },
