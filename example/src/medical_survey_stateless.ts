@@ -11,11 +11,6 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import { z } from 'zod'
 
-<<<<<<<< HEAD:example/src/survey_iterate.ts
-========
-import { lookupWikipedia } from '../tools.js'
-
->>>>>>>> 4bed99e3a9907aea4d3c16e635b37119d325eccf:example/src/medical_survey_stateless.ts
 async function requestUserInput(prompt: string): Promise<string> {
   return new Promise((resolve) => {
     console.log(prompt)
@@ -54,7 +49,6 @@ const reporter = agent({
     You are skilled at preparing great looking markdown reports.
     Prepare a report for a patient that is about to come for a visit.
     Add info about the patient's health and symptoms.
-    If something is not clear use Wikipedia to check.
   `,
   tools: {},
 })

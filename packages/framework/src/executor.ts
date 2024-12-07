@@ -21,19 +21,7 @@ export async function finalizeQuery(workflow: Workflow, messages: Message[]): Pr
     ],
     response_format: zodResponseFormat(
       z.object({
-        response: z.discriminatedUnion('kind', [
-          z.object({
-            kind: z.literal('step'),
-            name: z.string().describe('The name of the step'),
-            result: z.string().describe('The result of the step'),
-            reasoning: z.string().describe('The reasoning for this step'),
-          }),
-          z.object({
-            kind: z.literal('complete'),
-            result: z.string().describe('The final result of the task'),
-            reasoning: z.string().describe('The reasoning for completing the task'),
-          }),
-        ]),
+        finalAnswer: z.string().describe('The final result of the task'),
       }),
       'task_result'
     ),
@@ -42,13 +30,7 @@ export async function finalizeQuery(workflow: Workflow, messages: Message[]): Pr
   if (!result) {
     throw new Error('No parsed response received')
   }
-
-  if (result.response.kind === 'complete') {
-    return result.response.result
-  }
-
-  // tbd: check if this is reachable
-  throw new Error('Illegal state')
+  return Promise.resolve(result.finalAnswer)
 }
 
 export async function executeTaskWithAgent(
@@ -86,7 +68,24 @@ export async function executeTaskWithAgent(
         ...messages,
       ],
       tools: tools.length > 0 ? tools : undefined,
-      response_format: taskResponseFormat,
+      response_format: zodResponseFormat(
+        z.object({
+          response: z.discriminatedUnion('kind', [
+            z.object({
+              kind: z.literal('step'),
+              name: z.string().describe('The name of the step'),
+              result: z.string().describe('The result of the step'),
+              reasoning: z.string().describe('The reasoning for this step'),
+            }),
+            z.object({
+              kind: z.literal('complete'),
+              result: z.string().describe('The final result of the task'),
+              reasoning: z.string().describe('The reasoning for completing the task'),
+            }),
+          ]),
+        }),
+        'task_result'
+      ),
     })
     if (response.choices[0].message.tool_calls.length > 0) {
       const toolResults = await Promise.all(
