@@ -78,6 +78,10 @@ export async function teamwork(workflow: Workflow): Promise<string> {
     return result.messages.at(-1)!.content as string
   }
 
+  if (result.status === 'failed') {
+    return ('🚨' + result.messages.at(-1)!.content) as string
+  }
+
   // tbd: recover from errors
   // tbd: request final answer if took too long
   throw new Error('Workflow failed. This is not implemented yet.')
