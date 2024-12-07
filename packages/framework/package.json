@@ -18,6 +18,15 @@
     },
     "./agent": {
       "bun": "./src/agent.ts"
+    },
+    "./step": {
+      "bun": "./src/step.ts"
+    },
+    "./memory": {
+      "bun": "./src/memory.ts"
+    },
+    "./types": {
+      "bun": "./src/types.ts"
     }
   },
   "type": "module",

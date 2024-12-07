@@ -1,17 +1,18 @@
 import s from 'dedent'
+import { nanoid } from 'nanoid'
 import OpenAI from 'openai'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { Agent } from './agent.js'
 import { Message } from './types.js'
+import { Workflow } from './workflow.js'
 
 const openai = new OpenAI()
 
-import { Workflow } from './workflow.js'
-
 // tbd: add more context like trace, callstack etc. context should be serializable
 type ContextOptions = {
+  id?: string
   workflow: Workflow
   // tbd: move messages to something such as memory
   messages?: Message[]
@@ -23,6 +24,7 @@ type ContextOptions = {
 export const context = (options: ContextOptions): Context => {
   return {
     ...options,
+    id: options.id || nanoid(),
     messages: [
       {
         role: 'assistant',

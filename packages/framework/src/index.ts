@@ -62,7 +62,7 @@ export async function teamwork(workflow: Workflow): Promise<string> {
   return execute(ctx)
 }
 
-async function selectAgent(task: string, agents: Agent[]): Promise<Agent> {
+export async function selectAgent(task: string, agents: Agent[]): Promise<Agent> {
   const response = await openai.beta.chat.completions.parse({
     model: 'gpt-4o',
     messages: [
@@ -117,7 +117,7 @@ async function selectAgent(task: string, agents: Agent[]): Promise<Agent> {
   return agent
 }
 
-async function getNextTask(history: Message[]): Promise<string | null> {
+export async function getNextTask(history: Message[]): Promise<string | null> {
   const response = await openai.beta.chat.completions.parse({
     model: 'gpt-4o',
     messages: [
