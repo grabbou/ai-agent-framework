@@ -63,7 +63,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
     return {
       ...state,
       messages: [...agentResponse.messages],
-      status: agentResponse.kind !== 'complete' ? 'running' : 'finished',
+      status: 'running',
     }
   } catch (error) {
     return {

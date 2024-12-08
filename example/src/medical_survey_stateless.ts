@@ -28,5 +28,6 @@ if (await fs.exists(dbPath)) {
 }
 
 const nextState = await iterate(preVisitNoteWorkflow, state)
+console.log(`🚀 Step completed. run again to execute the next step`)
 
 await fs.writeFile(dbPath, JSON.stringify(nextState, null, 2), 'utf-8')
