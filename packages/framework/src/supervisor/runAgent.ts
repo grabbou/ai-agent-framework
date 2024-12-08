@@ -2,14 +2,13 @@ import s from 'dedent'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
-import { Agent } from './agent.js'
-import { Message } from './types.js'
+import { Agent } from '../agent.js'
+import { Message } from '../types.js'
 
-export async function executeTaskWithAgent(
+export async function runAgent(
   agent: Agent,
-  messages: Message[],
-  team: Agent[]
-): Promise<string> {
+  messages: Message[]
+): Promise<[Message[], 'step' | 'complete' | 'tool']> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
         zodFunction({
@@ -21,7 +20,6 @@ export async function executeTaskWithAgent(
     : []
 
   const response = await agent.provider.completions({
-    // tbd: verify the prompt
     messages: [
       {
         role: 'system',
@@ -58,62 +56,23 @@ export async function executeTaskWithAgent(
       'task_result'
     ),
   })
+
   if (response.choices[0].message.tool_calls.length > 0) {
-    const toolResults = await Promise.all(
-      response.choices[0].message.tool_calls.map(async (toolCall) => {
-        if (toolCall.type !== 'function') {
-          throw new Error('Tool call is not a function')
-        }
-
-        const tool = agent.tools ? agent.tools[toolCall.function.name] : null
-        if (!tool) {
-          throw new Error(`Unknown tool: ${toolCall.function.name}`)
-        }
-
-        const content = await tool.execute(toolCall.function.parsed_arguments, {
-          provider: agent.provider,
-          messages,
-        })
-        return {
-          role: 'tool' as const,
-          tool_call_id: toolCall.id,
-          content: JSON.stringify(content),
-        }
-      })
-    )
-
-    return executeTaskWithAgent(
-      agent,
-      [...messages, response.choices[0].message, ...toolResults],
-      team
-    )
+    return [[response.choices[0].message], 'tool']
   }
 
-  // tbd: verify shape of response
   const result = response.choices[0].message.parsed
   if (!result) {
     throw new Error('No parsed response received')
   }
 
-  if (result.response.kind === 'step') {
-    console.log('🚀 Step:', result.response.name)
-    return executeTaskWithAgent(
-      agent,
-      [
-        ...messages,
-        {
-          role: 'assistant',
-          content: result.response.result,
-        },
-      ],
-      team
-    )
-  }
-
-  if (result.response.kind === 'complete') {
-    return result.response.result
-  }
-
-  // tbd: check if this is reachable
-  throw new Error('Illegal state')
+  return [
+    [
+      {
+        role: 'assistant',
+        content: result.response.result,
+      },
+    ],
+    result.response.kind,
+  ]
 }
