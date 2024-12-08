@@ -1,37 +1,57 @@
 /**
- * Example borrowed from CrewAI.
+ * This example demonstrates using framework in server-side environments.
  */
 
 import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
-import { workflowState } from '@dead-simple-ai-agent/framework/workflow'
-import fastify, { FastifyReply, FastifyRequest } from 'fastify'
+import { WorkflowState, workflowState } from '@dead-simple-ai-agent/framework/workflow'
+import fastify, { FastifyRequest } from 'fastify'
 import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 
+import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
+
 const server = fastify({ logger: false })
 
-import { preVisitNoteWorkflow } from './medical_survey/workflow_server.js'
+const dbPath = (id: string) => join(tmpdir(), `${id}_workflow.json`)
 
-const dbPath = (id: string) => join(tmpdir(), id + '_workflow_db.json')
+const visits: Record<string, WorkflowState> = {}
 
-let state = workflowState(preVisitNoteWorkflow)
-
-server.post('/start', async () => {
-  const nextState = await iterate(preVisitNoteWorkflow, state)
-
-  await fs.writeFile(dbPath(nextState.id), JSON.stringify(nextState, null, 2), 'utf-8')
-
-  return {
-    status: 'running',
-    state: nextState,
-  }
+/**
+ * This will create a new workflow and return the initial state
+ */
+server.post('/visits', async () => {
+  const state = workflowState(preVisitNoteWorkflow)
+  visits[state.id] = state
+  return state
 })
 
+/**
+ * Call this endpoint to iterate on the workflow
+ */
+
+// tbd:
+
+type ToolCallMessage = {
+  tool_call_id: string
+  content: string
+}
+
+/**
+ * Once you get response for tools, you can execute this endpoint to continue the workflow.
+ */
 server.post(
-  '/iterate/:id',
-  async (req: FastifyRequest<{ Params: { id: string }; Body: { message: string } }>) => {
-    const { id } = req.params
+  '/visits/:id/messages',
+  async (req: FastifyRequest<{ Params: { id: string }; Body: ToolCallMessage }>) => {
+    const state = visits[req.params.id]
+    if (!state) {
+      throw new Error('Workflow not found')
+    }
+
+    if (!state.status !== 'assigned') {
+      throw new Error('Workflow is not waiting for a message right now')
+    }
+
     const { message } = req.body
 
     const path = dbPath(id)
@@ -61,6 +81,7 @@ const port = parseInt(process.env['PORT'] || '3000', 10)
 server.listen({
   port,
 })
+
 console.log(`🚀 Server running at http://localhost:${port}`)
 console.log(`Run 'curl -X POST http://localhost:${port}/start' to start the workflow`)
 console.log(

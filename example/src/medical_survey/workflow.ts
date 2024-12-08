@@ -25,47 +25,46 @@ const askPatient = tool({
 })
 
 const nurse = agent({
-  role: 'Nurse,doctor assistant',
+  role: 'Nurse',
   description: `
-      You are skille nurse / doctor assistant.
-      You role is to cooperate with reporter to create a pre-visit note for a patient that is about to come for a visit.
-      Ask user questions about the patient's health and symptoms. 
-      Ask one question at time up to 5 questions. 
-    `,
+    You are skille nurse / doctor assistant.
+    You role is to cooperate with reporter to create a pre-visit note for a patient that is about to come for a visit.
+    Ask user questions about the patient's health and symptoms. 
+    Ask one question at time up to 5 questions. 
+  `,
   tools: {
-    ask_question: askPatient,
+    askPatient,
   },
 })
 
 const reporter = agent({
   role: 'Reporter',
   description: `
-      You are skilled at preparing great looking markdown reports.
-      Prepare a report for a patient that is about to come for a visit.
-      Add info about the patient's health and symptoms.
-    `,
-  tools: {},
+    You are skilled at preparing great looking reports.
+    You can prepare a report for a patient that is about to come for a visit.
+    Add info about the patient's health and symptoms.
+  `,
 })
 
 export const preVisitNoteWorkflow = workflow({
   members: [nurse, reporter],
   description: `
-      Create a pre-visit note for a patient that is about to come for a visit.
-      The note should include the patient's health and symptoms.
-      
-      Include:
-      - symptoms,
-      - health issues,
-      - medications,
-      - allergies,
-      - surgeries
-  
-      Never ask fo:
-      - personal data,
-      - sensitive data,
-      - any data that can be used to identify the patient.
-    `,
+    Create a pre-visit note for a patient that is about to come for a visit.
+    The note should include the patient's health and symptoms.
+    
+    Include:
+    - symptoms,
+    - health issues,
+    - medications,
+    - allergies,
+    - surgeries
+
+    Never ask fo:
+    - personal data,
+    - sensitive data,
+    - any data that can be used to identify the patient.
+  `,
   output: `
-      A markdown report for the patient's pre-visit note.
-    `,
+    A markdown report for the patient's pre-visit note.
+  `,
 })
