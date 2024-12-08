@@ -1,12 +1,11 @@
 import * as path from 'node:path'
 
-// @ts-ignore
 import { defineConfig } from 'rspress/config'
 // import { pluginTypeDoc } from '@rspress/plugin-typedoc'
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  title: 'My Site',
+  title: 'Dead Simple AI Agent',
   icon: '/rspress-icon.png',
   logo: {
     light: '/rspress-light-logo.png',
@@ -17,7 +16,7 @@ export default defineConfig({
       {
         icon: 'github',
         mode: 'link',
-        content: 'https://github.com/web-infra-dev/rspress',
+        content: 'https://github.com/callstackincubator/ai-agent-framework',
       },
     ],
   },
