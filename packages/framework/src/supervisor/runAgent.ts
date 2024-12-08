@@ -2,14 +2,13 @@ import s from 'dedent'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
-import { Agent } from './agent.js'
-import { Message } from './types.js'
+import { Agent } from '../agent.js'
+import { Message } from '../types.js'
 
-export async function executeTaskWithAgent(
+export async function runAgent(
   agent: Agent,
-  messages: Message[],
-  team: Agent[]
-): Promise<string> {
+  messages: Message[]
+): Promise<[Message[], 'step' | 'complete']> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
         zodFunction({
@@ -21,7 +20,6 @@ export async function executeTaskWithAgent(
     : []
 
   const response = await agent.provider.completions({
-    // tbd: verify the prompt
     messages: [
       {
         role: 'system',
@@ -82,11 +80,7 @@ export async function executeTaskWithAgent(
       })
     )
 
-    return executeTaskWithAgent(
-      agent,
-      [...messages, response.choices[0].message, ...toolResults],
-      team
-    )
+    return [[response.choices[0].message, ...toolResults], 'step']
   }
 
   // tbd: verify shape of response
@@ -95,25 +89,13 @@ export async function executeTaskWithAgent(
     throw new Error('No parsed response received')
   }
 
-  if (result.response.kind === 'step') {
-    console.log('🚀 Step:', result.response.name)
-    return executeTaskWithAgent(
-      agent,
-      [
-        ...messages,
-        {
-          role: 'assistant',
-          content: result.response.result,
-        },
-      ],
-      team
-    )
-  }
-
-  if (result.response.kind === 'complete') {
-    return result.response.result
-  }
-
-  // tbd: check if this is reachable
-  throw new Error('Illegal state')
+  return [
+    [
+      {
+        role: 'assistant',
+        content: result.response.result,
+      },
+    ],
+    result.response.kind,
+  ]
 }

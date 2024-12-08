@@ -1,113 +1,146 @@
-import { executeTaskWithAgent } from './executor.js'
 import { finalizeWorkflow } from './supervisor/finalizeWorkflow.js'
-import { getNextTask } from './supervisor/nextTask.js'
+import { nextTask } from './supervisor/nextTask.js'
+import { runAgent } from './supervisor/runAgent.js'
 import { selectAgent } from './supervisor/selectAgent.js'
-import { Message, MessageContent } from './types.js'
+import { MessageContent } from './types.js'
 import { Workflow, WorkflowState, workflowState } from './workflow.js'
 
+/**
+ * Performs single iteration over Workflow and produces its next state.
+ */
 export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
-  const { provider, members, telemetry } = workflow
-  const { messages } = state
+  const { status, messages } = state
 
-  telemetry.record({
-    type: 'workflow.iteration.start',
-    data: {
-      workflow,
-      state,
-    },
-  })
-
-  const task = await getNextTask(provider, messages)
-  if (!task) {
+  /**
+   * When number of messages exceedes number of maximum iterations, we must force finish the workflow
+   * and produce best final answer
+   */
+  if (messages.length > workflow.maxIterations) {
+    const content = await finalizeWorkflow(workflow.provider, messages)
     return {
       ...state,
-      messages,
+      status: 'finished',
+      messages: state.messages.concat({
+        role: 'user',
+        content,
+      }),
+    }
+  }
+
+  /**
+   * When workflow is idle, we must get next task to work on, or finish the workflow otherwise.
+   */
+  if (status === 'idle') {
+    const task = await nextTask(workflow.provider, messages)
+    if (task) {
+      return {
+        ...state,
+        status: 'pending',
+        agentRequest: [
+          {
+            role: 'user',
+            content: task,
+          },
+        ],
+      }
+    } else {
+      return {
+        ...state,
+        status: 'finished',
+      }
+    }
+  }
+
+  /**
+   * When workflow is pending, we must find best agent to work on it.
+   */
+  if (status === 'pending') {
+    const selectedAgent = await selectAgent(
+      workflow.provider,
+      state.agentRequest!,
+      workflow.members
+    )
+    return {
+      ...state,
+      status: 'running',
+      agent: selectedAgent.role,
+    }
+  }
+
+  /**
+   * When workflow is running, we must call assigned agent to continue working on it.
+   */
+  if (status === 'running') {
+    const agent = workflow.members.find((member) => member.role === state.agent)
+    if (!agent) {
+      return {
+        ...state,
+        status: 'failed',
+        messages: state.messages.concat({
+          role: 'assistant',
+          content: 'No agent found.',
+        }),
+      }
+    }
+    /**
+     * When agent finishes running, it will return status to indicate whether it finished processing.
+     *
+     * If it finished processing, we will append its final answer to the context. Otherwise, we will
+     * further extend agentRequest to carry context over to the next iteration.
+     */
+    try {
+      const [agentResponse, status] = await runAgent(agent, state.agentRequest!)
+      if (status === 'complete') {
+        const agentFinalAnswer = agentResponse.at(-1)!
+        return {
+          ...state,
+          status: 'idle',
+          messages: state.messages.concat(agentFinalAnswer),
+        }
+      }
+      return {
+        ...state,
+        status: 'running',
+        agentRequest: state.agentRequest?.concat(agentResponse),
+      }
+    } catch (error) {
+      return {
+        ...state,
+        status: 'failed',
+        messages: state.messages.concat({
+          role: 'assistant',
+          content: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      }
+    }
+  }
+
+  /**
+   * When workflow fails due to unexpected error, we must attempt recovering or finish the workflow
+   * otherwise.
+   */
+  if (status === 'failed') {
+    return {
+      ...state,
       status: 'finished',
     }
   }
 
-  telemetry.record({
-    type: 'workflow.iteration.nextTask',
-    data: {
-      workflow,
-      task,
-    },
-  })
-
-  if (messages.length > workflow.maxIterations) {
-    return {
-      ...state,
-      messages,
-      status: 'interrupted',
-    }
-  }
-
-  // tbd: get rid of console.logs, use telemetry instead
-  console.log('🚀 Next task:', task)
-
-  const selectedAgent = await selectAgent(provider, task, members)
-  console.log('🚀 Selected agent:', selectedAgent.role)
-
-  const agentRequest: Message[] = [
-    ...messages,
-    {
-      role: 'user',
-      content: task,
-    },
-  ]
-
-  try {
-    const result = await executeTaskWithAgent(selectedAgent, agentRequest, members)
-    return {
-      ...state,
-      messages: [
-        ...agentRequest,
-        {
-          role: 'assistant',
-          content: result,
-        },
-      ],
-      status: 'running',
-    }
-  } catch (error) {
-    return {
-      ...state,
-      messages: [
-        ...agentRequest,
-        {
-          role: 'assistant',
-          content: error instanceof Error ? error.message : 'Unknown error',
-        },
-      ],
-      status: 'failed',
-    }
-  }
+  return state
 }
 
+/**
+ * Teamwork runs given workflow and continues iterating over the workflow until it finishes.
+ */
 export async function teamwork(
   workflow: Workflow,
   state: WorkflowState = workflowState(workflow)
 ): Promise<MessageContent> {
   const { status, messages } = state
 
-  if (status === 'pending' || status === 'running') {
-    return teamwork(workflow, await iterate(workflow, state))
-  }
-
   if (status === 'finished') {
     return messages.at(-1)!.content
   }
 
-  if (status === 'failed') {
-    return ('🚨' + messages.at(-1)!.content) as string
-  }
-
-  if (status === 'interrupted') {
-    console.log('🚨 Max iterations exceeded ', workflow.maxIterations)
-    return finalizeWorkflow(workflow.provider, messages)
-  }
-
-  // tbd: recover from errors
-  // tbd: request final answer if took too long
-  throw new Error('Workflow failed. This is not implemented yet.')
+  return teamwork(workflow, await iterate(workflow, state))
 }

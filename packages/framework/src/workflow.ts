@@ -33,8 +33,10 @@ export type Workflow = Required<WorkflowOptions>
 
 export type WorkflowState = {
   id: string
-  status: 'running' | 'finished' | 'interrupted' | 'failed' | 'pending'
+  status: 'idle' | 'running' | 'finished' | 'failed' | 'pending'
   messages: Message[]
+  agent?: string
+  agentRequest?: Message[]
 }
 
 /**

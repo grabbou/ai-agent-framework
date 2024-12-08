@@ -11,6 +11,7 @@
     "rspress": "^1.37.3"
   },
   "devDependencies": {
+    "@rspress/plugin-typedoc": "^1.37.4",
     "@types/node": "^18.11.17"
   }
 }
