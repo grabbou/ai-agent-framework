@@ -7,7 +7,7 @@ import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { logger } from '@dead-simple-ai-agent/framework/telemetry/console'
 import { workflow } from '@dead-simple-ai-agent/framework/workflow'
 
-import { lookupWikipedia } from '../tools.js'
+import { lookupWikipedia } from './tools/wikipediaTool.js'
 
 const personalizedActivityPlanner = agent({
   role: 'Activity Planner',
