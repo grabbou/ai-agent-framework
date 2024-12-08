@@ -17,3 +17,9 @@ export async function teamwork(
 
   return teamwork(workflow, await iterate(workflow, state))
 }
+
+/**
+ * Re-export iterate for advanced use cases that need more control over the default `teamwork` behavior.
+ * This is typically useful for distributed environments
+ */
+export { iterate } from './supervisor/iterate.js'
