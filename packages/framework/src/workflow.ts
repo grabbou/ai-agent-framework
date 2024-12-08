@@ -31,25 +31,49 @@ export const workflow = (options: WorkflowOptions): Workflow => {
 
 export type Workflow = Required<WorkflowOptions>
 
-export type AgentStatus = 'idle' | 'step' | 'tool'
-
-export type WorkflowState = {
+/**
+ * Base workflow
+ */
+type BaseWorkflowState = {
   id: string
-  status: 'idle' | 'assigned' | 'finished' | 'failed' | 'pending'
   messages: Message[]
-
-  agent?: string
-  agentRequest?: Message[]
-  agentStatus?: AgentStatus
 }
+
+/**
+ * Different states workflow is in, in between execution from agents
+ */
+type IdleWorkflowState = BaseWorkflowState & {
+  status: 'idle' | 'finished' | 'failed'
+}
+
+/**
+ * Supervisor selected the task, and is now pending assignement of an agent
+ */
+type PendingWorkflowState = BaseWorkflowState & {
+  status: 'pending'
+  agentRequest: Message[]
+}
+
+/**
+ * State in which an agent is assigned and work is pending
+ */
+type AssignedWorkflowState = BaseWorkflowState & {
+  status: 'assigned'
+
+  agent: string
+  agentRequest: Message[]
+  agentStatus: 'idle' | 'step' | 'tool'
+}
+
+export type WorkflowState = IdleWorkflowState | PendingWorkflowState | AssignedWorkflowState
 
 /**
  * Helper utility to create a workflow state with defaults.
  */
-export const workflowState = (workflow: Workflow): WorkflowState => {
+export const workflowState = (workflow: Workflow): IdleWorkflowState => {
   return {
     id: randomUUID(),
-    status: 'pending',
+    status: 'idle',
     messages: [
       {
         role: 'assistant' as const,

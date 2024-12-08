@@ -76,7 +76,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
     const agent = workflow.members.find((member) => member.role === state.agent)
     if (!agent) {
       return {
-        ...state,
+        id: state.id,
         status: 'failed',
         messages: state.messages.concat({
           role: 'assistant',
@@ -116,7 +116,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
     return {
       ...state,
       agentStatus: status,
-      agentRequest: state.agentRequest?.concat(agentResponse),
+      agentRequest: state.agentRequest.concat(agentResponse),
     }
   }
 
