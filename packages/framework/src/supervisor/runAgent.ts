@@ -8,7 +8,7 @@ import { Message } from '../types.js'
 export async function runAgent(
   agent: Agent,
   messages: Message[]
-): Promise<[Message[], 'step' | 'complete']> {
+): Promise<[Message[], 'step' | 'complete' | 'tool']> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
         zodFunction({
@@ -56,34 +56,11 @@ export async function runAgent(
       'task_result'
     ),
   })
+
   if (response.choices[0].message.tool_calls.length > 0) {
-    const toolResults = await Promise.all(
-      response.choices[0].message.tool_calls.map(async (toolCall) => {
-        if (toolCall.type !== 'function') {
-          throw new Error('Tool call is not a function')
-        }
-
-        const tool = agent.tools ? agent.tools[toolCall.function.name] : null
-        if (!tool) {
-          throw new Error(`Unknown tool: ${toolCall.function.name}`)
-        }
-
-        const content = await tool.execute(toolCall.function.parsed_arguments, {
-          provider: agent.provider,
-          messages,
-        })
-        return {
-          role: 'tool' as const,
-          tool_call_id: toolCall.id,
-          content: JSON.stringify(content),
-        }
-      })
-    )
-
-    return [[response.choices[0].message, ...toolResults], 'step']
+    return [[response.choices[0].message], 'tool']
   }
 
-  // tbd: verify shape of response
   const result = response.choices[0].message.parsed
   if (!result) {
     throw new Error('No parsed response received')

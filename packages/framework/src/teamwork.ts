@@ -1,6 +1,7 @@
 import { finalizeWorkflow } from './supervisor/finalizeWorkflow.js'
 import { nextTask } from './supervisor/nextTask.js'
 import { runAgent } from './supervisor/runAgent.js'
+import { runTools } from './supervisor/runTools.js'
 import { selectAgent } from './supervisor/selectAgent.js'
 import { MessageContent } from './types.js'
 import { Workflow, WorkflowState, workflowState } from './workflow.js'
@@ -62,7 +63,8 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
     )
     return {
       ...state,
-      status: 'running',
+      status: 'assigned',
+      agentStatus: 'idle',
       agent: selectedAgent.role,
     }
   }
@@ -70,7 +72,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
   /**
    * When workflow is running, we must call assigned agent to continue working on it.
    */
-  if (status === 'running') {
+  if (status === 'assigned') {
     const agent = workflow.members.find((member) => member.role === state.agent)
     if (!agent) {
       return {
@@ -82,36 +84,39 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
         }),
       }
     }
+
+    /**
+     * When agentStatus is `tool`, an agent is waiting for the tools results.
+     * We must run all the tools in order to proceed to the next step.
+     */
+    if (state.agentStatus === 'tool') {
+      const toolsResponse = await runTools(agent, state.agentRequest!)
+      return {
+        ...state,
+        agentStatus: 'step',
+        agentRequest: state.agentRequest?.concat(toolsResponse),
+      }
+    }
+
     /**
      * When agent finishes running, it will return status to indicate whether it finished processing.
      *
      * If it finished processing, we will append its final answer to the context. Otherwise, we will
      * further extend agentRequest to carry context over to the next iteration.
      */
-    try {
-      const [agentResponse, status] = await runAgent(agent, state.agentRequest!)
-      if (status === 'complete') {
-        const agentFinalAnswer = agentResponse.at(-1)!
-        return {
-          ...state,
-          status: 'idle',
-          messages: state.messages.concat(agentFinalAnswer),
-        }
-      }
+    const [agentResponse, status] = await runAgent(agent, state.agentRequest!)
+    if (status === 'complete') {
+      const agentFinalAnswer = agentResponse.at(-1)!
       return {
         ...state,
-        status: 'running',
-        agentRequest: state.agentRequest?.concat(agentResponse),
+        status: 'idle',
+        messages: state.messages.concat(agentFinalAnswer),
       }
-    } catch (error) {
-      return {
-        ...state,
-        status: 'failed',
-        messages: state.messages.concat({
-          role: 'assistant',
-          content: error instanceof Error ? error.message : 'Unknown error',
-        }),
-      }
+    }
+    return {
+      ...state,
+      agentStatus: status,
+      agentRequest: state.agentRequest?.concat(agentResponse),
     }
   }
 

@@ -31,12 +31,16 @@ export const workflow = (options: WorkflowOptions): Workflow => {
 
 export type Workflow = Required<WorkflowOptions>
 
+export type AgentStatus = 'idle' | 'step' | 'tool'
+
 export type WorkflowState = {
   id: string
-  status: 'idle' | 'running' | 'finished' | 'failed' | 'pending'
+  status: 'idle' | 'assigned' | 'finished' | 'failed' | 'pending'
   messages: Message[]
+
   agent?: string
   agentRequest?: Message[]
+  agentStatus?: AgentStatus
 }
 
 /**
