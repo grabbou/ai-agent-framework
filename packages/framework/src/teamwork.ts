@@ -6,8 +6,16 @@ import { Message, MessageContent } from './types.js'
 import { Workflow, WorkflowState, workflowState } from './workflow.js'
 
 export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
-  const { provider, members } = workflow
+  const { provider, members, telemetry } = workflow
   const { messages } = state
+
+  telemetry.record({
+    type: 'workflow.iteration.start',
+    data: {
+      workflow,
+      state,
+    },
+  })
 
   const task = await getNextTask(provider, messages)
   if (!task) {
@@ -17,6 +25,14 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
       status: 'finished',
     }
   }
+
+  telemetry.record({
+    type: 'workflow.iteration.nextTask',
+    data: {
+      workflow,
+      task,
+    },
+  })
 
   if (messages.length > workflow.maxIterations) {
     return {
