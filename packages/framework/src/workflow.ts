@@ -4,7 +4,7 @@ import s from 'dedent'
 
 import { Agent } from './agent.js'
 import { openai, Provider } from './models/openai.js'
-import { noopTelemetry, Telemetry } from './telemetry/index.js'
+import { noopTelemetry, Telemetry } from './telemetry/base.js'
 import { Message } from './types.js'
 
 type WorkflowOptions = {

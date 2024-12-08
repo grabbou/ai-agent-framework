@@ -10,7 +10,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
   const { messages } = state
 
   telemetry.record({
-    type: 'iterate.start',
+    type: 'workflow.iteration.start',
     data: {
       workflow,
       state,
@@ -18,16 +18,6 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
   })
 
   const task = await getNextTask(provider, messages)
-
-  telemetry.record({
-    type: 'iterate.task',
-    data: {
-      workflow,
-      state,
-      task,
-    },
-  })
-
   if (!task) {
     return {
       ...state,
@@ -35,6 +25,14 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
       status: 'finished',
     }
   }
+
+  telemetry.record({
+    type: 'workflow.iteration.nextTask',
+    data: {
+      workflow,
+      task,
+    },
+  })
 
   if (messages.length > workflow.maxIterations) {
     return {
