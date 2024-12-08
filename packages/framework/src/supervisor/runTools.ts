@@ -7,7 +7,7 @@ import { Message } from '../types.js'
 /**
  * Asserts that given message requests tool calls
  */
-function isToolCallRequest(message?: Message): message is ParsedChatCompletionMessage<any> {
+export function isToolCallRequest(message?: Message): message is ParsedChatCompletionMessage<any> {
   return message ? 'tool_calls' in message : false
 }
 
