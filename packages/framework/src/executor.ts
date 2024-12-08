@@ -5,11 +5,7 @@ import { z } from 'zod'
 import { Agent } from './agent.js'
 import { Message } from './types.js'
 
-export async function executeTaskWithAgent(
-  agent: Agent,
-  messages: Message[],
-  team: Agent[]
-): Promise<string> {
+export async function iterateTaskWithAgent(agent: Agent, messages: Message[]): Promise<Message[]> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
         zodFunction({
@@ -82,11 +78,7 @@ export async function executeTaskWithAgent(
       })
     )
 
-    return executeTaskWithAgent(
-      agent,
-      [...messages, response.choices[0].message, ...toolResults],
-      team
-    )
+    return [...messages, response.choices[0].message, ...toolResults]
   }
 
   // tbd: verify shape of response
@@ -97,21 +89,16 @@ export async function executeTaskWithAgent(
 
   if (result.response.kind === 'step') {
     console.log('🚀 Step:', result.response.name)
-    return executeTaskWithAgent(
-      agent,
-      [
-        ...messages,
-        {
-          role: 'assistant',
-          content: result.response.result,
-        },
-      ],
-      team
-    )
   }
 
-  if (result.response.kind === 'complete') {
-    return result.response.result
+  if (result.response.kind === 'complete' || result.response.kind === 'step') {
+    return [
+      ...messages,
+      {
+        role: 'assistant',
+        content: result.response.result,
+      },
+    ]
   }
 
   // tbd: check if this is reachable

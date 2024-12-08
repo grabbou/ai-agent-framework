@@ -18,6 +18,10 @@ if (await fs.exists(dbPath)) {
   try {
     state = JSON.parse(await fs.readFile(dbPath, 'utf-8'))
     console.log('🛟 Loaded workflow from', dbPath)
+    if (state.status === 'finished') {
+      console.log('🛟 Workflow already finished. Starting new workflow.')
+      state = workflowState(preVisitNoteWorkflow)
+    }
   } catch (error) {
     console.log(`🚨Error while loading workflow from ${dbPath}. Starting new workflow.`)
   }

@@ -14,6 +14,7 @@ export async function getNextTask(provider: Provider, history: Message[]): Promi
         content: s`
           You are a planner that breaks down complex workflows into smaller, actionable steps.
           Your job is to determine the next task that needs to be done based on the original workflow and what has been completed so far.
+          If the previous task is not yet completed, return the same task to continue.
           If all required tasks are completed, return null.
 
           Rules:

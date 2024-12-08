@@ -1,4 +1,4 @@
-import { executeTaskWithAgent } from './executor.js'
+import { iterateTaskWithAgent } from './executor.js'
 import { finalizeWorkflow } from './supervisor/finalizeWorkflow.js'
 import { getNextTask } from './supervisor/nextTask.js'
 import { selectAgent } from './supervisor/selectAgent.js'
@@ -57,16 +57,11 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
   ]
 
   try {
-    const result = await executeTaskWithAgent(selectedAgent, agentRequest, members)
+    const agentState = await iterateTaskWithAgent(selectedAgent, agentRequest)
+
     return {
       ...state,
-      messages: [
-        ...agentRequest,
-        {
-          role: 'assistant',
-          content: result,
-        },
-      ],
+      messages: [...agentState],
       status: 'running',
     }
   } catch (error) {
