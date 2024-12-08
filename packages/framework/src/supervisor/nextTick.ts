@@ -8,13 +8,7 @@ import { selectAgent } from './selectAgent.js'
 /**
  * Performs single iteration over Workflow and produces its next state.
  */
-export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
-  const nextState = await nextTick(workflow, state)
-  workflow.snapshot(nextState)
-  return nextState
-}
-
-async function nextTick(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
+export async function nextTick(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
   const { status, messages } = state
 
   /**

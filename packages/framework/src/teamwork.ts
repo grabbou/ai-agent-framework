@@ -1,4 +1,4 @@
-import { iterate } from './supervisor/iterate.js'
+import { nextTick } from './supervisor/nextTick.js'
 import { MessageContent } from './types.js'
 import { Workflow, WorkflowState, workflowState } from './workflow.js'
 
@@ -19,7 +19,10 @@ export async function teamwork(
 }
 
 /**
- * Re-export iterate for advanced use cases that need more control over the default `teamwork` behavior.
- * This is typically useful for distributed environments
+ * Iterate performs single iteration over workflow and returns its next state
  */
-export { iterate } from './supervisor/iterate.js'
+export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
+  const nextState = await nextTick(workflow, state)
+  workflow.snapshot(nextState)
+  return nextState
+}
