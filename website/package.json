@@ -1,6 +1,7 @@
 {
   "name": "@dead-simple-ai-agent/website",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "rspress dev",
     "build": "rspress build",

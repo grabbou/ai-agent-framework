@@ -1,7 +1,8 @@
 import * as path from 'node:path'
 
-// import { pluginTypeDoc } from '@rspress/plugin-typedoc'
+// @ts-ignore
 import { defineConfig } from 'rspress/config'
+// import { pluginTypeDoc } from '@rspress/plugin-typedoc'
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
