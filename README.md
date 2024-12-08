@@ -4,18 +4,31 @@ A lightweight, functional, and composable framework for building AI agents that 
 
 Built with TypeScript and designed to be serverless-ready.
 
-## Getting started
+## Getting Started
 
-Most existing AI agent frameworks are either too complex, heavily object-oriented, or tightly coupled to specific infrastructure. 
+It is very easy to get started. All you have to do is to create a file with your agents and workflow, then run it.
 
-We wanted something different - a framework that embraces functional programming principles, remains stateless, and stays laser-focused on composability.
+### Installing the framework from `npm`
 
-**Now, English + Typescript is your tech stack.**
+```bash
+$ npm install @dead-simple-ai-agent/framework
+```
 
-Example:
+### Create your first workflow
 
-```typescript
-const personalizedActivityPlanner = agent({
+Here is a simple example of a workflow that researches and plans a trip to Wrocław, Poland:
+
+```ts
+// First, import all the necessary functions
+import { agent } from '@dead-simple-ai-agent/framework/agent'
+import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
+import { logger } from '@dead-simple-ai-agent/framework/telemetry/console'
+import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+
+// Then, define your agents:
+
+// This agent is responsible for researching and finding cool things to do at the destination.
+const activityPlanner = agent({
   role: 'Activity Planner',
   description: `
     You are skilled at creating personalized itineraries that cater to
@@ -25,6 +38,8 @@ const personalizedActivityPlanner = agent({
   `,
 })
 
+// This agent is responsible for researching and finding interesting landmarks at the destination. 
+// It uses Wikipedia as a source of information.
 const landmarkScout = agent({
   role: 'Landmark Scout',
   description: `
@@ -36,6 +51,7 @@ const landmarkScout = agent({
   },
 })
 
+// This agent is responsible for researching and finding highly-rated restaurants at the destination.
 const restaurantScout = agent({
   role: 'Restaurant Scout',
   description: `
@@ -46,6 +62,7 @@ const restaurantScout = agent({
   `,
 })
 
+// This agent is responsible for compiling all the information into a coherent and enjoyable travel plan.
 const itineraryCompiler = agent({
   role: 'Itinerary Compiler',
   description: `
@@ -55,8 +72,10 @@ const itineraryCompiler = agent({
   `,
 })
 
+// Then, define your workflow.
+// Workflows can be simple, or they can be more complex, involving multiple steps and loops.
 const researchTripWorkflow = workflow({
-  members: [personalizedActivityPlanner, restaurantScout, landmarkScout, itineraryCompiler],
+  members: [activityPlanner, restaurantScout],
   description: `
     Research and find cool things to do in Wrocław, Poland.
 
@@ -78,25 +97,44 @@ const researchTripWorkflow = workflow({
     Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
     Ensure the itinerary integrates flights, hotel information, and all planned activities and dining experiences.
   `,
+  // By default, framework does not log anything.
+  // Use `logger` for nice console output of each step on the way.
   telemetry: logger,
 })
 
+// Finally, you can run the workflow.
+// This will block until the workflow is completed.
+const result = await teamwork(researchTripWorkflow)
 
-// This will block until the workflow is complete
-const result = await teamwork(workflow)
-console.log(🎁 ' + result);
+// Don't forget to log the result!
+console.log(result)
 ```
 
-No dependencies required. Run it with simple:
+### Running the example
 
-```typescript
-bun install
-bun example/src/surprise_trip.ts
+Finally, you can run the example by simply executing the file.
+
+#### Using `bun`
+
+```bash
+$ bun your_file.ts
+```
+
+#### Using `node`
+
+```bash
+$ node --import=tsx your_file.ts
 ```
 
 ## Why Another AI Agent Framework?
 
+Most existing AI agent frameworks are either too complex, heavily object-oriented, or tightly coupled to specific infrastructure. 
 
+We wanted something different - a framework that embraces functional programming principles, remains stateless, and stays laser-focused on composability.
+
+**Now, English + Typescript is your tech stack.**
+
+## Core Concepts
 
 The framework is designed around the idea that AI agents should be:
 - Easy to create and compose
@@ -104,8 +142,6 @@ The framework is designed around the idea that AI agents should be:
 - Stateless by default
 - Minimal in dependencies
 - Focused on team collaboration
-
-## Core Concepts
 
 ### Agents
 
@@ -139,7 +175,6 @@ The framework provides two main ways to orchestrate agent collaboration:
 The `teamwork` function handles complete workflow execution from start to finish, managing the entire process automatically. It's perfect for simple use cases where you want to get results in a single call.
 
 ```typescript
-// This will block until the workflow is complete
 const result = await teamwork(workflow)
 ```
 
