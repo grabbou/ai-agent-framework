@@ -4,6 +4,7 @@ import s from 'dedent'
 
 import { Agent } from './agent.js'
 import { openai, Provider } from './models/openai.js'
+import { noopTelemetry, Telemetry } from './telemetry/base.js'
 import { Message } from './types.js'
 
 type WorkflowOptions = {
@@ -13,6 +14,7 @@ type WorkflowOptions = {
 
   provider?: Provider
   maxIterations?: number
+  telemetry?: Telemetry
 }
 
 /**
@@ -22,6 +24,7 @@ export const workflow = (options: WorkflowOptions): Workflow => {
   return {
     maxIterations: 50,
     provider: openai(),
+    telemetry: noopTelemetry,
     ...options,
   }
 }
