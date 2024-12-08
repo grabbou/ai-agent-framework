@@ -1,6 +1,6 @@
 import { openai, Provider } from './models/openai.js'
 import { Tool } from './tool.js'
-import { RequiredOptionals } from './types.js'
+import { Message, RequiredOptionals } from './types.js'
 
 type AgentOptions = {
   role: string
@@ -26,4 +26,8 @@ export const agent = (options: AgentOptions): Agent => {
   }
 }
 
+export type AgentResponse = {
+  kind: 'step' | 'complete'
+  messages: Message[]
+}
 export type Agent = Required<AgentOptions>

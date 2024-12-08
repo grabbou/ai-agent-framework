@@ -2,10 +2,13 @@ import s from 'dedent'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
-import { Agent } from './agent.js'
+import { Agent, AgentResponse } from './agent.js'
 import { Message } from './types.js'
 
-export async function iterateTaskWithAgent(agent: Agent, messages: Message[]): Promise<Message[]> {
+export async function iterateTaskWithAgent(
+  agent: Agent,
+  messages: Message[]
+): Promise<AgentResponse> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
         zodFunction({
@@ -78,7 +81,7 @@ export async function iterateTaskWithAgent(agent: Agent, messages: Message[]): P
       })
     )
 
-    return [...messages, response.choices[0].message, ...toolResults]
+    return { kind: 'step', messages: [...messages, response.choices[0].message, ...toolResults] }
   }
 
   // tbd: verify shape of response
@@ -92,13 +95,16 @@ export async function iterateTaskWithAgent(agent: Agent, messages: Message[]): P
   }
 
   if (result.response.kind === 'complete' || result.response.kind === 'step') {
-    return [
-      ...messages,
-      {
-        role: 'assistant',
-        content: result.response.result,
-      },
-    ]
+    return {
+      kind: result.response.kind,
+      messages: [
+        ...messages,
+        {
+          role: 'assistant',
+          content: result.response.result,
+        },
+      ],
+    }
   }
 
   // tbd: check if this is reachable

@@ -45,6 +45,7 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
   // tbd: get rid of console.logs, use telemetry instead
   console.log('🚀 Next task:', task)
 
+  // tbd we are each time selecting the agent - if we saved the selected agent in the state, we could reuse it
   const selectedAgent = await selectAgent(provider, task, members)
   console.log('🚀 Selected agent:', selectedAgent.role)
 
@@ -57,18 +58,18 @@ export async function iterate(workflow: Workflow, state: WorkflowState): Promise
   ]
 
   try {
-    const agentState = await iterateTaskWithAgent(selectedAgent, agentRequest)
+    const agentResponse = await iterateTaskWithAgent(selectedAgent, agentRequest)
 
     return {
       ...state,
-      messages: [...agentState],
-      status: 'running',
+      messages: [...agentResponse.messages],
+      status: agentResponse.kind !== 'complete' ? 'running' : 'finished',
     }
   } catch (error) {
     return {
       ...state,
       messages: [
-        ...agentRequest,
+        ...agentRequest, // no response, it failed
         {
           role: 'assistant',
           content: error instanceof Error ? error.message : 'Unknown error',
