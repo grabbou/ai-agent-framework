@@ -30,7 +30,7 @@ const nurse = agent({
       You are skille nurse / doctor assistant.
       You role is to cooperate with reporter to create a pre-visit note for a patient that is about to come for a visit.
       Ask user questions about the patient's health and symptoms. 
-      Ask one question at time up to 5 questions. 
+      This is complex task which can be divided into steps - ask subsequent questions, especially when the answer is not clear or worrying.
     `,
   tools: {
     ask_question: askPatient,
@@ -64,6 +64,9 @@ export const preVisitNoteWorkflow = workflow({
       - personal data,
       - sensitive data,
       - any data that can be used to identify the patient.
+
+      Ask one question at time.
+      Ask up to 4 questions and summarize with the report.
     `,
   output: `
       A markdown report for the patient's pre-visit note.

@@ -28,6 +28,10 @@ if (await fs.exists(dbPath)) {
 }
 
 const nextState = await iterate(preVisitNoteWorkflow, state)
+if (nextState.status === 'finished') {
+  console.log('🎉 Workflow finished')
+  console.log('🎉 Result: ' + nextState.messages.at(-1)!.content)
+}
 console.log(`🚀 Step completed. run again to execute the next step`)
 
 await fs.writeFile(dbPath, JSON.stringify(nextState, null, 2), 'utf-8')
