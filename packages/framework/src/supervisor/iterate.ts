@@ -10,7 +10,7 @@ import { selectAgent } from './selectAgent.js'
  */
 export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
   const nextState = await nextTick(workflow, state)
-  workflow.snapshot(nextState)
+  workflow.snapshot({ prevState: state, nextState })
   return nextState
 }
 
