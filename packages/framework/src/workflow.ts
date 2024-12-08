@@ -4,7 +4,7 @@ import s from 'dedent'
 
 import { Agent } from './agent.js'
 import { openai, Provider } from './models/openai.js'
-import { noopTelemetry, Telemetry } from './telemetry/base.js'
+import { noop, Telemetry } from './telemetry.js'
 import { Message } from './types.js'
 
 type WorkflowOptions = {
@@ -14,7 +14,7 @@ type WorkflowOptions = {
 
   provider?: Provider
   maxIterations?: number
-  telemetry?: Telemetry
+  snapshot?: Telemetry
 }
 
 /**
@@ -24,7 +24,7 @@ export const workflow = (options: WorkflowOptions): Workflow => {
   return {
     maxIterations: 50,
     provider: openai(),
-    telemetry: noopTelemetry,
+    snapshot: noop,
     ...options,
   }
 }
@@ -42,14 +42,14 @@ type BaseWorkflowState = {
 /**
  * Different states workflow is in, in between execution from agents
  */
-type IdleWorkflowState = BaseWorkflowState & {
+export type IdleWorkflowState = BaseWorkflowState & {
   status: 'idle' | 'finished' | 'failed'
 }
 
 /**
  * Supervisor selected the task, and is now pending assignement of an agent
  */
-type PendingWorkflowState = BaseWorkflowState & {
+export type PendingWorkflowState = BaseWorkflowState & {
   status: 'pending'
   agentRequest: Message[]
 }
@@ -57,7 +57,7 @@ type PendingWorkflowState = BaseWorkflowState & {
 /**
  * State in which an agent is assigned and work is pending
  */
-type AssignedWorkflowState = BaseWorkflowState & {
+export type AssignedWorkflowState = BaseWorkflowState & {
   status: 'assigned'
 
   agent: string

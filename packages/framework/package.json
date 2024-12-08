@@ -9,9 +9,6 @@
     },
     "./models/*": {
       "bun": "./src/models/*.ts"
-    },
-    "./telemetry/*": {
-      "bun": "./src/telemetry/*.ts"
     }
   },
   "type": "module",
