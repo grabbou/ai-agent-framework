@@ -58,7 +58,11 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
         }
         break
       case 'idle':
-        logMessage('✅', 'Moving to next task', `Iterations: ${nextState.messages.length}`)
+        logMessage(
+          '✅',
+          'Moving to next task',
+          `Iterations: ${Math.floor((nextState.messages.length - 1) / 2)}`
+        )
         break
       case 'finished':
         logMessage(
