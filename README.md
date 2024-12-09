@@ -21,9 +21,9 @@ Here is a simple example of a workflow that researches and plans a trip to Wroc≈
 ```ts
 // First, import all the necessary functions
 import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { teamwork, breakout } from '@dead-simple-ai-agent/framework/teamwork'
+import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { logger } from '@dead-simple-ai-agent/framework/telemetry/console'
-import { workflow, workflowState } from '@dead-simple-ai-agent/framework/workflow'
+import { workflow } from '@dead-simple-ai-agent/framework/workflow'
 
 // Then, define your agents:
 

@@ -1,6 +1,3 @@
-/**
- * Example borrowed from CrewAI.
- */
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
 import { z } from 'zod'

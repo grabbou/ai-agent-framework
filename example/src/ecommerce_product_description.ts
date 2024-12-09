@@ -1,7 +1,3 @@
-/**
- * Example borrowed from CrewAI.
- */
-
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
