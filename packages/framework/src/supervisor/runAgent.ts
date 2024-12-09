@@ -7,8 +7,9 @@ import { Message } from '../types.js'
 
 export async function runAgent(
   agent: Agent,
+  agentContext: Message[],
   agentRequest: Message[]
-): Promise<[Message[], 'step' | 'complete' | 'tool']> {
+): Promise<[Message, 'step' | 'complete' | 'tool']> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
         zodFunction({
@@ -25,14 +26,28 @@ export async function runAgent(
         role: 'system',
         content: s`
           You are ${agent.role}. ${agent.description}
-          
-          Your job is to complete the assigned task.
-          1. You can break down complex task into multiple steps
-          2. You can use available tools when needed
 
-          First try to complete the task on your own.
-          Only ask question to the user if you cannot complete the task without their input.
+          Your job is to complete the assigned task:
+          - You can break down complex tasks into multiple steps if needed.
+          - You can use available tools if needed.
+
+          If tool requires arguments, get them from the input, or use other tools to get them.
+          Do not fabricate or assume information not present in the input.
+
+          Try to complete the task on your own.
         `,
+      },
+      {
+        role: 'assistant',
+        content: 'What have been done so far?',
+      },
+      {
+        role: 'user',
+        content: `Here is all the work done so far by other agents: ${JSON.stringify(agentContext)}`,
+      },
+      {
+        role: 'assistant',
+        content: 'What do you want me to do now?',
       },
       ...agentRequest,
     ],
@@ -48,8 +63,16 @@ export async function runAgent(
           }),
           z.object({
             kind: z.literal('complete'),
-            result: z.string().describe('The final result of the task'),
+            result: z
+              .string()
+              .describe(
+                'The final result of the task. Include all relevant information from previous steps.'
+              ),
             reasoning: z.string().describe('The reasoning for completing the task'),
+          }),
+          z.object({
+            kind: z.literal('error'),
+            reasoning: z.string().describe('The reason why you cannot complete the task'),
           }),
         ]),
       }),
@@ -58,7 +81,7 @@ export async function runAgent(
   })
 
   if (response.choices[0].message.tool_calls.length > 0) {
-    return [[response.choices[0].message], 'tool']
+    return [response.choices[0].message, 'tool']
   }
 
   const result = response.choices[0].message.parsed
@@ -66,13 +89,15 @@ export async function runAgent(
     throw new Error('No parsed response received')
   }
 
+  if (result.response.kind === 'error') {
+    throw new Error(result.response.reasoning)
+  }
+
   return [
-    [
-      {
-        role: 'assistant',
-        content: result.response.result,
-      },
-    ],
+    {
+      role: 'assistant',
+      content: result.response.result,
+    },
     result.response.kind,
   ]
 }

@@ -101,13 +101,12 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
      *
      * If further processing is required, we will carry `agentRequest` over to the next iteration.
      */
-    const [agentResponse, status] = await runAgent(agent, state.agentRequest)
+    const [agentResponse, status] = await runAgent(agent, state.messages, state.agentRequest)
     if (status === 'complete') {
-      const agentFinalAnswer = agentResponse.at(-1)!
       return {
         ...state,
         status: 'idle',
-        messages: state.messages.concat(state.agentRequest[0], agentFinalAnswer),
+        messages: state.messages.concat(state.agentRequest[0], agentResponse),
       }
     }
     return {
