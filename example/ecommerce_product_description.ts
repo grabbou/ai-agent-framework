@@ -7,8 +7,7 @@ const techExpert = agent({
   role: 'Technical expert',
   description: `
     You are skilled at extracting and describing most detailed
-    technical information about the product from the photo.
-  `,
+    technical information about the product from the photo.  `,
   tools: {
     visionTool,
   },

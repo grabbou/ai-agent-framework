@@ -1,7 +1,3 @@
-/**
- * Example borrowed from CrewAI.
- */
-
 import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
 import { workflowState } from '@dead-simple-ai-agent/framework/workflow'
 import { promises as fs } from 'fs'

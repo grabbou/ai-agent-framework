@@ -1,6 +1,3 @@
-/**
- * Example borrowed from CrewAI.
- */
 import { Provider } from '@dead-simple-ai-agent/framework/models/openai'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import * as fs from 'fs'
