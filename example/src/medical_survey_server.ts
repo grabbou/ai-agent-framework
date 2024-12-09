@@ -1,10 +1,10 @@
 /**
  * This example demonstrates using framework in server-side environments.
  */
-
 import { isToolCallRequest } from '@dead-simple-ai-agent/framework/supervisor/runTools'
 import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
-import { WorkflowState, workflowState } from '@dead-simple-ai-agent/framework/workflow'
+import { workflow, WorkflowState, workflowState } from '@dead-simple-ai-agent/framework/workflow'
+import chalk from 'chalk'
 import s from 'dedent'
 import fastify, { FastifyRequest } from 'fastify'
 
@@ -24,7 +24,7 @@ server.post('/visits', async () => {
   visits[state.id] = state
 
   // Start the visit in the background
-  runVisit(state)
+  runVisit(state.id)
 
   return state
 })
@@ -47,7 +47,7 @@ server.get('/visits/:id', async (req: FastifyRequest<{ Params: { id: string } }>
 
   if (state.status === 'assigned') {
     if (state.agentStatus === 'tool') {
-      return state.agentRequest.at(-1)!.content
+      return state.agentRequest.findLast(isToolCallRequest)!.tool_calls
     }
     return {
       status: state.status,
@@ -87,24 +87,34 @@ server.post(
       throw new Error('Tool call not found')
     }
 
-    visits[req.params.id] = {
-      ...state,
-      agentRequest: state.agentRequest.concat({
-        role: 'tool',
-        tool_call_id: toolCall.id,
-        content: req.body.content,
-      }),
-    }
+    const agentRequest = state.agentRequest.concat({
+      role: 'tool',
+      tool_call_id: toolCall.id,
+      content: req.body.content,
+    })
 
     const allToolRequests = toolRequestMessage.tool_calls.map((toolCall) => toolCall.id)
     const hasAllToolCalls = allToolRequests.every((toolCallId) =>
-      state.agentRequest.some(
+      agentRequest.some(
         (request) => 'tool_call_id' in request && request.tool_call_id === toolCallId
       )
     )
 
+    // Add tool response to the workflow
+    // Change agent status to `step` if all tool calls have been added, so
+    // runVisit will continue
     if (hasAllToolCalls) {
-      runVisit(visits[req.params.id])
+      visits[req.params.id] = {
+        ...state,
+        agentStatus: 'step',
+        agentRequest,
+      }
+      runVisit(req.params.id)
+    } else {
+      visits[req.params.id] = {
+        ...state,
+        agentRequest,
+      }
     }
 
     return {
@@ -122,8 +132,22 @@ server.listen({ port })
 console.log(s`
   🚀 Server running at http://localhost:${port}
 
-  Run 'curl -X POST http://localhost:${port}/visits' to create a new visit
-  Run 'curl -X POST http://localhost:${port}/visits/:id/messages -d '{"tool_call_id":"...","content":"..."}' to add a message to the visit
+  Things to do:
+
+  ${chalk.bold('🩺 Create a new visit:')}
+  ${chalk.gray(`curl -X POST http://localhost:${port}/visits`)}
+
+  ${chalk.bold('💻 Check the status of the visit:')}
+  ${chalk.gray(`curl -X GET http://localhost:${port}/visits/:id`)}
+
+  ${chalk.bold('🔧 If the workflow is waiting for a tool call, you will get a response like this:')}
+  ${chalk.gray(`[{"id":"<tool_call_id>","type":"function"}]`)}
+
+  ${chalk.bold('📝 Add a message to the visit:')}
+  ${chalk.gray(`curl -X POST http://localhost:${port}/visits/:id/messages H "Content-Type: application/json" -d '{"tool_call_id":"...","content":"..."}'`)}
+
+  Note:
+  - You can only add messages when the workflow is waiting for a tool call
 `)
 
 type ToolCallMessage = {
@@ -135,13 +159,20 @@ type ToolCallMessage = {
  * Helper function, inspired by `teamwork`.
  * It will continue running the visit in the background and will stop when the workflow is finished.
  */
-async function runVisit(state: WorkflowState): Promise<WorkflowState> {
+async function runVisit(id: string) {
+  const state = visits[id]
+  if (!state) {
+    throw new Error('Workflow not found')
+  }
+
   if (
     state.status === 'finished' ||
     (state.status === 'assigned' && state.agentStatus === 'tool')
   ) {
-    return state
+    return
   }
 
-  return runVisit(await iterate(preVisitNoteWorkflow, state))
+  visits[id] = await iterate(preVisitNoteWorkflow, state)
+
+  return runVisit(id)
 }
