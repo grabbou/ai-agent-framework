@@ -5,6 +5,13 @@ import { workflow } from '@dead-simple-ai-agent/framework/workflow'
 
 import { getCurrentDate } from './tools/currentDateTool.js'
 import { serplyWebSearch } from './tools/serplyWebSearchTool.js'
+import { getApiKey } from './utils.js'
+
+const apiKey = await getApiKey('Sereply.io API', 'SERPLY_API_KEY')
+if (!apiKey) {
+  console.error('API Key for Serply is required')
+  process.exit(1)
+}
 
 const newsResearcher = agent({
   role: 'News Researcher',
@@ -13,7 +20,9 @@ const newsResearcher = agent({
     Your job is to get the news from the last week.
   `,
   tools: {
-    serplyWebSearch,
+    webSearch: serplyWebSearch({
+      apiKey,
+    }),
     getCurrentDate,
   },
 })
@@ -44,13 +53,11 @@ const wrapUpTheNewsWorkflow = workflow({
 
     Here are some ground rules to follow: 
       - Include one sentence summary for each article.
-      - Include top takeaways bulletpoints from each article.
-      - Create one sentence of "State of the Affairs" summary.
-      - Create a comprehensive markdown report.
-      - Do not get deeper into the links on the news website; first page is enough
+      - Include top takeaways - bulletpoints from each article.
   `,
   output: `
     Comprehensive markdown report with the top news and trends for the last week.
+    Add one sentence of "State of the Affairs" summary.
   `,
   telemetry: logger,
 })
