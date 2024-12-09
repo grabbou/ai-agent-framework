@@ -3,7 +3,7 @@ import { zodResponseFormat } from 'openai/helpers/zod.mjs'
 import { z } from 'zod'
 
 import { Agent } from '../agent.js'
-import { Provider } from '../models/openai.js'
+import { Provider } from '../models.js'
 import { Message } from '../types.js'
 
 export async function selectAgent(

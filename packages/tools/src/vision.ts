@@ -1,7 +1,4 @@
-/**
- * Example borrowed from CrewAI.
- */
-import { Provider } from '@dead-simple-ai-agent/framework/models/openai'
+import { Provider } from '@dead-simple-ai-agent/framework/models'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import * as fs from 'fs'
 import { z } from 'zod'
@@ -48,15 +45,11 @@ const runWebHostedImages = async (provider: Provider, imagePathUrl: string): Pro
 }
 
 export const visionTool = tool({
-  description: 'Tool for analyzing and OCR the pitures',
+  description: 'Tool for analyzing and OCR the pictures',
   parameters: z.object({
     imagePathUrl: z.string().describe('The image path or URL'),
   }),
   execute: ({ imagePathUrl }, { provider }) => {
-    if (!imagePathUrl) {
-      throw new Error('Image Path or URL is required.')
-    }
-
     if (imagePathUrl.startsWith('http')) {
       return runWebHostedImages(provider, imagePathUrl)
     } else {

@@ -1,4 +1,4 @@
-import { openai, Provider } from './models/openai.js'
+import { openai, Provider } from './models.js'
 import { Tool } from './tool.js'
 import { RequiredOptionals } from './types.js'
 
