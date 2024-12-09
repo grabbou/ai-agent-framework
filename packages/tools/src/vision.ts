@@ -64,7 +64,6 @@ export const visionTool = tool({
     prompt: z.string().describe(s`
       This is a prompt for LLM Multimodal model - a detailed instruction of what to analyze and extract
       from the image, such as: text content, layout, font styles, and any specific data fields.
-      '
     `),
     detail: z
       .enum(['low', 'high'])
