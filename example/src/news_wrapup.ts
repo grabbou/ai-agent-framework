@@ -1,17 +1,21 @@
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { logger } from '@dead-simple-ai-agent/framework/telemetry/console'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { logger } from '@dead-simple-ai-agent/framework/telemetry'
+import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
 
-import { getCurrentDate } from './tools/currentDateTool.js'
-import { serplyWebSearch } from './tools/serplyWebSearchTool.js'
-import { getApiKey } from './utils.js'
+import { getCurrentDate } from './tools/date.js'
+import { getApiKey } from './tools/utils.js'
+import { createWebSearchTools } from './tools/webSearch.js'
 
 const apiKey = await getApiKey('Sereply.io API', 'SERPLY_API_KEY')
 if (!apiKey) {
   console.error('API Key for Serply is required')
   process.exit(1)
 }
+
+const { googleSearch } = createWebSearchTools({
+  apiKey,
+})
 
 const newsResearcher = agent({
   role: 'News Researcher',
@@ -20,9 +24,7 @@ const newsResearcher = agent({
     Your job is to get the news from the last week.
   `,
   tools: {
-    webSearch: serplyWebSearch({
-      apiKey,
-    }),
+    googleSearch,
     getCurrentDate,
   },
 })
@@ -59,9 +61,9 @@ const wrapUpTheNewsWorkflow = workflow({
     Comprehensive markdown report with the top news and trends for the last week.
     Add one sentence of "State of the Affairs" summary.
   `,
-  telemetry: logger,
+  snapshot: logger,
 })
 
 const result = await teamwork(wrapUpTheNewsWorkflow)
 
-console.log(result)
+console.log(solution(result))
