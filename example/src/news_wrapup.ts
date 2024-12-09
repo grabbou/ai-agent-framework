@@ -40,15 +40,14 @@ const wrapUpTheNewsWorkflow = workflow({
   members: [newsResearcher, newsReader, wrapupRedactor],
   description: `
     Research the top news and trends for the last week - get title and headline description.
-    Then summarize it all into a comprehensive report markdown report.
+    Then summarize it all into a comprehensive report markdown output.
 
-    Focus:
-      - Search the web for the latest news and trends for the last week.
+    Here are some ground rules to follow: 
       - Include one sentence summary for each article.
       - Include top takeaways bulletpoints from each article.
-      - Create one sentence "State of the Affairs" summary.
-      - Create a comprehensive report markdown report.
-      - Don not get deeper into the links on the news website; first page is enough
+      - Create one sentence of "State of the Affairs" summary.
+      - Create a comprehensive markdown report.
+      - Do not get deeper into the links on the news website; first page is enough
   `,
   output: `
     Comprehensive markdown report with the top news and trends for the last week.
