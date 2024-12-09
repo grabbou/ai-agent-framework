@@ -4,7 +4,7 @@
 
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
 import { visionTool } from '@dead-simple-ai-agent/tools/vision'
 
 const techExpert = agent({
@@ -49,4 +49,4 @@ const productDescriptionWorkflow = workflow({
 
 const result = await teamwork(productDescriptionWorkflow)
 
-console.log(result)
+console.log(solution(result))

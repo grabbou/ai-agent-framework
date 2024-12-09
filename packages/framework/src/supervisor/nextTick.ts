@@ -130,3 +130,12 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
 
   return state
 }
+
+/**
+ * Iterates over the workflow and takes a snapshot of the state after each iteration.
+ */
+export async function iterate(workflow: Workflow, state: WorkflowState) {
+  const nextState = await nextTick(workflow, state)
+  workflow.snapshot({ prevState: state, nextState })
+  return nextState
+}
