@@ -7,11 +7,7 @@ import { getCurrentDate } from './tools/date.js'
 import { getApiKey } from './tools/utils.js'
 import { createWebSearchTools } from './tools/webSearch.js'
 
-const apiKey = await getApiKey('Sereply.io API', 'SERPLY_API_KEY')
-if (!apiKey) {
-  console.error('API Key for Serply is required')
-  process.exit(1)
-}
+const apiKey = await getApiKey('Serply.io API', 'SERPLY_API_KEY')
 
 const { googleSearch } = createWebSearchTools({
   apiKey,

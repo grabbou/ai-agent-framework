@@ -5,9 +5,9 @@ import dedent from 'dedent'
 /**
  * Get API key from environment variables or prompt user for it.
  */
-export async function getApiKey(name: string, key: string) {
+export async function getApiKey(name: string, key: string): Promise<string> {
   if (key in process.env) {
-    return process.env[key]
+    return process.env[key]!
   }
   return (async () => {
     let apiKey: string | symbol
