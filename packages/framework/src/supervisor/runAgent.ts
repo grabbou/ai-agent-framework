@@ -7,7 +7,7 @@ import { Message } from '../types.js'
 
 export async function runAgent(
   agent: Agent,
-  messages: Message[]
+  agentRequest: Message[]
 ): Promise<[Message[], 'step' | 'complete' | 'tool']> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
@@ -34,7 +34,7 @@ export async function runAgent(
           Only ask question to the user if you cannot complete the task without their input.
         `,
       },
-      ...messages,
+      ...agentRequest,
     ],
     tools: tools.length > 0 ? tools : undefined,
     response_format: zodResponseFormat(
