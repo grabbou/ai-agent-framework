@@ -1,7 +1,3 @@
-/**
- * Example borrowed from CrewAI.
- */
-
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
@@ -30,7 +26,7 @@ const marketingManager = agent({
 const productDescriptionWorkflow = workflow({
   members: [techExpert, marketingManager],
   description: `
-    Based on the picture './example/example-sneakers.jpg' make the eCommerce product to 
+    Based on the picture './example/assets/example-sneakers.jpg' make the eCommerce product to 
     list this product on the website.
 
     Focus:

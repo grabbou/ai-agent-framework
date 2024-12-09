@@ -1,59 +1,81 @@
+import fs from 'node:fs/promises'
+
 import { Provider } from '@dead-simple-ai-agent/framework/models'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
-import * as fs from 'fs'
+import s from 'dedent'
+import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
-const encodeImage = (imagePath: string): string => {
-  const imageBuffer = fs.readFileSync(imagePath)
-  return imageBuffer.toString('base64')
+const encodeImage = async (imagePath: string): Promise<string> => {
+  const imageBuffer = await fs.readFile(imagePath)
+  return `data:image/jpeg;base64,${imageBuffer.toString('base64')}`
 }
 
-const runLocalImages = async (provider: Provider, imagePathUrl: string): Promise<string> => {
-  const base64Image = encodeImage(imagePathUrl)
+async function callOpenAI(
+  provider: Provider,
+  prompt: string,
+  image_url: string,
+  detail: 'low' | 'high'
+) {
   const response = await provider.completions({
-    model: 'gpt-4o-mini',
     messages: [
       {
         role: 'user',
         content: [
-          { type: 'text', text: "What's in this image?" },
-          { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64Image}` } },
+          { type: 'image_url', image_url: { url: image_url, detail } },
+          {
+            type: 'text',
+            text: `${prompt}. Use your built-in OCR capabilities.`,
+          },
         ],
       },
     ],
-    max_tokens: 300,
+    response_format: zodResponseFormat(
+      z.object({
+        response: z.discriminatedUnion('type', [
+          z.object({
+            type: z.literal('success'),
+            text: z.string(),
+          }),
+          z.object({
+            type: z.literal('failure'),
+            error: z.string(),
+          }),
+        ]),
+      }),
+      'vision_request'
+    ),
   })
-  return response.choices[0].message.content as string
-}
-
-const runWebHostedImages = async (provider: Provider, imagePathUrl: string): Promise<string> => {
-  const response = await provider.completions({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'user',
-        content: [
-          { type: 'text', text: "What's in this image?" },
-          { type: 'image_url', image_url: { url: imagePathUrl } },
-        ],
-      },
-    ],
-    max_tokens: 300,
-  })
-
-  return response.choices[0].message.content as string
+  const message = response.choices[0].message.parsed
+  if (!message) {
+    throw new Error('No message returned from OpenAI')
+  }
+  if (message.response.type !== 'success') {
+    throw new Error(message.response.error)
+  }
+  return message.response.text
 }
 
 export const visionTool = tool({
-  description: 'Tool for analyzing and OCR the pictures',
+  description:
+    'Analyzes the pictures using LLM Multimodal model with image to text (OCR) capabilities.',
   parameters: z.object({
-    imagePathUrl: z.string().describe('The image path or URL'),
+    imagePathUrl: z.string().describe('Absolute path to image on disk or URL'),
+    prompt: z.string().describe(s`
+      This is a prompt for LLM Multimodal model - a detailed instruction of what to analyze and extract
+      from the image, such as: text content, layout, font styles, and any specific data fields.
+    `),
+    detail: z
+      .enum(['low', 'high'])
+      .describe(
+        'Fidelity of the analysis. For detailed analysis, use "high". For general questions, use "low".'
+      )
+      .default('high'),
   }),
-  execute: ({ imagePathUrl }, { provider }) => {
-    if (imagePathUrl.startsWith('http')) {
-      return runWebHostedImages(provider, imagePathUrl)
-    } else {
-      return runLocalImages(provider, imagePathUrl)
-    }
+  execute: async ({ imagePathUrl, detail, prompt }, { provider }) => {
+    const imageUrl = imagePathUrl.startsWith('http')
+      ? imagePathUrl
+      : await encodeImage(imagePathUrl)
+    return callOpenAI(provider, prompt, imageUrl, detail)
   },
 })
