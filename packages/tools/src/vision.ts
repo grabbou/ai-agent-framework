@@ -57,7 +57,8 @@ async function callOpenAI(
 }
 
 export const visionTool = tool({
-  description: 'LLM AI Tool for analyzing and OCR the pictures',
+  description:
+    'Analyzes the pictures using LLM Multimodal model with image to text (OCR) capabilities.',
   parameters: z.object({
     imagePathUrl: z.string().describe('Absolute path to image on disk or URL'),
     prompt: z.string().describe(s`
