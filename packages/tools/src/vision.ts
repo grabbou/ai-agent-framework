@@ -13,7 +13,7 @@ const encodeImage = async (imagePath: string): Promise<string> => {
 
 async function callOpenAI(
   provider: Provider,
-  analysis: string,
+  prompt: string,
   image_url: string,
   detail: 'low' | 'high'
 ) {
@@ -24,7 +24,7 @@ async function callOpenAI(
         content: [
           {
             type: 'text',
-            text: `${analysis}. Use your built-in OCR capabilities.`,
+            text: `${prompt}. Use your built-in OCR capabilities.`,
           },
           { type: 'image_url', image_url: { url: image_url, detail } },
         ],
@@ -57,12 +57,21 @@ async function callOpenAI(
 }
 
 export const visionTool = tool({
-  description: 'Tool for analyzing and OCR the pictures',
+  description: 'LLM AI Tool for analyzing and OCR the pictures',
   parameters: z.object({
     imagePathUrl: z.string().describe('Absolute path to image on disk or URL'),
-    analysis: z.string().describe(s`
+    outputFormat: z
+      .enum(['text', 'json'])
+      .default('text')
+      .describe(
+        'Output format of the data extracted from image - for example attributes you like to extract from the objects on image, JSON format for the document to OCR to etc'
+      ),
+    prompt: z.string().describe(s`
       Description of what to analyze and extract from the image, such as
-      text content, layout, font styles, and any specific data fields.'
+      text content, layout, font styles, and any specific data fields.
+      To use the vision tool properly provide it with the 'prompt' for a LLM multimodal model 
+      which describes in details - which features to extract and analyze from the image image.      
+      '
     `),
     detail: z
       .enum(['low', 'high'])
@@ -71,11 +80,11 @@ export const visionTool = tool({
       )
       .default('high'),
   }),
-  execute: async ({ imagePathUrl, detail, analysis }, { provider }) => {
-    console.log(imagePathUrl, analysis, detail)
+  execute: async ({ imagePathUrl, detail, prompt }, { provider }) => {
+    console.log(imagePathUrl, prompt, detail)
     const imageUrl = imagePathUrl.startsWith('http')
       ? imagePathUrl
       : await encodeImage(imagePathUrl)
-    return callOpenAI(provider, analysis, imageUrl, detail)
+    return callOpenAI(provider, prompt, imageUrl, detail)
   },
 })

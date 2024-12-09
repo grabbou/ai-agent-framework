@@ -44,11 +44,11 @@ const outputPath = path.join(workingDir, 'library.html')
 const bookLibraryWorkflow = workflow({
   members: [librarian, webmaster],
   description: `
+    Analyze the photo of the library and list all the books in the library.
     Generate a website that lists all the books in the library.
     The photo of books in the library is in the "${imagePath}" file.
 
     Important information:
-    - To use the vision tool properly provide it with the 'analysis' which is LLM prompt to analyze the image - for example 'analyze the image and list all the books you see there using OCR feature - get title and author'.
     - All available templates are in "${workingDir}" directory. Find the best template to use.
     - You only have access to files in "${workingDir}" directory.
     - Use absolute paths for tool calls.
