@@ -11,8 +11,7 @@ export async function teamwork(
   if (state.status === 'finished') {
     return state
   }
-  const nextState = await iterate(workflow, state)
-  return teamwork(workflow, nextState)
+  return teamwork(workflow, await iterate(workflow, state))
 }
 
 /**
