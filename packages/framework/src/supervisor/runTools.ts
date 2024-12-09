@@ -1,5 +1,5 @@
-import type { ParsedChatCompletionMessage } from 'openai/resources/beta/chat/completions.mjs'
-import { ChatCompletionToolMessageParam } from 'openai/resources/index.mjs'
+import type { ParsedChatCompletionMessage } from 'openai/resources/beta/chat/completions'
+import { ChatCompletionToolMessageParam } from 'openai/resources/chat/completions'
 
 import { Agent } from '../agent.js'
 import { Message } from '../types.js'

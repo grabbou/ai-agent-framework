@@ -1,5 +1,5 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod.mjs'
+import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { Agent } from '../agent.js'
