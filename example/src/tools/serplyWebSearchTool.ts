@@ -1,6 +1,7 @@
 import { tool } from '@dead-simple-ai-agent/framework/tool'
 import { RequiredOptionals } from '@dead-simple-ai-agent/framework/types'
 import axios from 'axios'
+import dedent from 'dedent'
 import { z } from 'zod'
 
 interface SerplyOptions {
@@ -15,7 +16,7 @@ interface SerplyOptions {
 }
 
 const defaults: RequiredOptionals<SerplyOptions> = {
-  searchUrl: 'https://api.serply.io/v1/search/q',
+  searchUrl: 'https://api.serply.io/v1/search/q=',
   limit: 5,
   hl: 'en',
   proxyLocation: 'us',
@@ -63,10 +64,10 @@ export const serplyWebSearch = (options: SerplyOptions) =>
             .map((result: any) => {
               try {
                 return [
-                  `Title: ${result.title}`,
-                  `Link: ${result.link}`,
-                  `Description: ${result.description.trim()}`,
-                  '---',
+                  dedent`Title: ${result.title}
+                         Link: ${result.link}
+                         Description: ${result.description.trim()}
+                         ---`,
                 ].join('\n')
               } catch {
                 return null
