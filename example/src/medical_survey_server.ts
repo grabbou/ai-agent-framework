@@ -26,7 +26,10 @@ server.post('/visits', async () => {
   // Start the visit in the background
   runVisit(state.id)
 
-  return state
+  return {
+    id: state.id,
+    status: state.status,
+  }
 })
 
 /**
