@@ -67,9 +67,8 @@ export const visionTool = tool({
         'Output format of the data extracted from image - for example attributes you like to extract from the objects on image, JSON format for the document to OCR to etc'
       ),
     prompt: z.string().describe(s`
-      This is a prompt for LLM Multimodal model used to analyze and extract features from the picture.
-      Prompt should include detailed instruction on what to extract, for example:
-      kind of items, text content, number of items, layout, font styles, and any specific data fields.
+      This is a prompt for LLM Multimodal model - a detailed instruction of what to analyze and extract
+      from the image, such as: text content, layout, font styles, and any specific data fields.
       '
     `),
     detail: z
@@ -80,6 +79,7 @@ export const visionTool = tool({
       .default('high'),
   }),
   execute: async ({ imagePathUrl, detail, prompt }, { provider }) => {
+    console.log({ imagePathUrl, detail, prompt })
     const imageUrl = imagePathUrl.startsWith('http')
       ? imagePathUrl
       : await encodeImage(imagePathUrl)
