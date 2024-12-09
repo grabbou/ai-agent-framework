@@ -1,6 +1,5 @@
 import * as path from 'node:path'
 
-import { pluginTypeDoc } from '@rspress/plugin-typedoc'
 import { defineConfig } from 'rspress/config'
 // import { pluginTypeDoc } from '@rspress/plugin-typedoc'
 
@@ -12,7 +11,6 @@ export default defineConfig({
     light: '/rspress-light-logo.png',
     dark: '/rspress-dark-logo.png',
   },
-  globalStyles: path.join(__dirname, 'global.css'),
   themeConfig: {
     socialLinks: [
       {
@@ -23,18 +21,6 @@ export default defineConfig({
     ],
   },
   plugins: [
-<<<<<<< HEAD
-    pluginTypeDoc({
-      entryPoints: [
-        path.join(__dirname, '../packages/framework/src/agent.ts'),
-        path.join(__dirname, '../packages/framework/src/teamwork.ts'),
-        path.join(__dirname, '../packages/framework/src/tool.ts'),
-        path.join(__dirname, '../packages/framework/src/workflow.ts'),
-        path.join(__dirname, '../packages/framework/src/models/openai.ts'),
-        path.join(__dirname, '../packages/framework/src/telemetry.ts'),
-      ],
-    }),
-=======
     // pluginTypeDoc({
     //   entryPoints: [
     //     path.join(__dirname, '../packages/framework/src/agent.ts'),
@@ -45,6 +31,5 @@ export default defineConfig({
     //     path.join(__dirname, '../packages/framework/src/telemetry.ts'),
     //   ],
     // }),
->>>>>>> main
   ],
 })
