@@ -1,5 +1,6 @@
 import * as path from 'node:path'
 
+import { pluginTypeDoc } from '@rspress/plugin-typedoc'
 import { defineConfig } from 'rspress/config'
 
 export default defineConfig({
@@ -19,4 +20,16 @@ export default defineConfig({
       },
     ],
   },
+  plugins: [
+    pluginTypeDoc({
+      entryPoints: [
+        path.join(__dirname, '../packages/framework/src/agent.ts'),
+        path.join(__dirname, '../packages/framework/src/teamwork.ts'),
+        path.join(__dirname, '../packages/framework/src/tool.ts'),
+        path.join(__dirname, '../packages/framework/src/workflow.ts'),
+        path.join(__dirname, '../packages/framework/src/models/openai.ts'),
+        path.join(__dirname, '../packages/framework/src/telemetry.ts'),
+      ],
+    }),
+  ],
 })
