@@ -67,10 +67,9 @@ export const visionTool = tool({
         'Output format of the data extracted from image - for example attributes you like to extract from the objects on image, JSON format for the document to OCR to etc'
       ),
     prompt: z.string().describe(s`
-      Description of what to analyze and extract from the image, such as
-      text content, layout, font styles, and any specific data fields.
-      To use the vision tool properly provide it with the 'prompt' for a LLM multimodal model 
-      which describes in details - which features to extract and analyze from the image.      
+      This is a prompt for LLM Multimodal model used to analyze and extract features from the picture.
+      Prompt should include detailed instruction on what to extract, for example:
+      kind of items, text content, number of items, layout, font styles, and any specific data fields.
       '
     `),
     detail: z
