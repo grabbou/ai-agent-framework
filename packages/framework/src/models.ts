@@ -1,7 +1,7 @@
 import OpenAI, { ClientOptions } from 'openai'
 import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/index.mjs'
 
-import { RequiredOptionals } from '../types.js'
+import { RequiredOptionals } from './types.js'
 
 type OpenAIOptions = {
   model?: string

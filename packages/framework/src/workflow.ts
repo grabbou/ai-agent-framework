@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import s from 'dedent'
 
 import { Agent } from './agent.js'
-import { openai, Provider } from './models/openai.js'
+import { openai, Provider } from './models.js'
 import { noop, Telemetry } from './telemetry.js'
 import { Message } from './types.js'
 
