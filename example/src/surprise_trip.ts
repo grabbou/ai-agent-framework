@@ -1,7 +1,7 @@
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { logger } from '@dead-simple-ai-agent/framework/telemetry/console'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { logger } from '@dead-simple-ai-agent/framework/telemetry'
+import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
 
 import { lookupWikipedia } from './tools/wikipediaTool.js'
 
@@ -68,9 +68,9 @@ const researchTripWorkflow = workflow({
     Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
     Ensure the itinerary integrates flights, hotel information, and all planned activities and dining experiences.
   `,
-  telemetry: logger,
+  snapshot: logger,
 })
 
 const result = await teamwork(researchTripWorkflow)
 
-console.log(result)
+console.log(solution(result))

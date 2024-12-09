@@ -1,6 +1,6 @@
 import z, { ZodTypeAny } from 'zod'
 
-import { Provider } from './models/openai.js'
+import { Provider } from './models.js'
 import { Message } from './types.js'
 
 export type Tool<P extends ZodTypeAny = any> = {

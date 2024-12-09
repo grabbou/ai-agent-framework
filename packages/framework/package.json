@@ -1,23 +1,48 @@
 {
   "name": "@dead-simple-ai-agent/framework",
-  "version": "0.0.1",
   "description": "A dead simple AI agent framework",
   "author": "Mike Grabowski <mike@callstack.com>",
+  "contributors": [
+    "Piotr Karwatka <piotr@catchthetornado.com>"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "bun run clean && bun run build:lib && bun run build:types",
+    "build:lib": "rslib build",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outdir dist/types"
+  },
   "exports": {
     "./*": {
-      "bun": "./src/*.ts"
-    },
-    "./models/*": {
-      "bun": "./src/models/*.ts"
-    },
-    "./telemetry/*": {
-      "bun": "./src/telemetry/*.ts"
+      "bun": "./src/*.ts",
+      "types": "./dist/types/*.d.ts",
+      "require": "./dist/*.cjs",
+      "import": "./dist/*.js"
     }
   },
   "type": "module",
   "dependencies": {
+    "chalk": "^5.3.0",
     "dedent": "^1.5.3",
     "openai": "^4.76.0",
     "zod": "^3.23.8"
-  }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callstackincubator/ai-agent-framework.git"
+  },
+  "keywords": [
+    "ai",
+    "ai agents",
+    "ai tools"
+  ],
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "version": "0.0.1"
 }

@@ -1,7 +1,7 @@
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
-import { visionTool } from '@dead-simple-ai-agent/tools'
+import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { visionTool } from '@dead-simple-ai-agent/tools/vision'
 
 const techExpert = agent({
   role: 'Technical expert',
@@ -26,7 +26,7 @@ const marketingManager = agent({
 const productDescriptionWorkflow = workflow({
   members: [techExpert, marketingManager],
   description: `
-    Based on the picture './example/example-sneakers.jpg' make the eCommerce product to 
+    Based on the picture './example/assets/example-sneakers.jpg' make the eCommerce product to 
     list this product on the website.
 
     Focus:
@@ -45,4 +45,4 @@ const productDescriptionWorkflow = workflow({
 
 const result = await teamwork(productDescriptionWorkflow)
 
-console.log(result)
+console.log(solution(result))

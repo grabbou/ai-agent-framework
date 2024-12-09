@@ -3,8 +3,8 @@ import { randomUUID } from 'node:crypto'
 import s from 'dedent'
 
 import { Agent } from './agent.js'
-import { openai, Provider } from './models/openai.js'
-import { noopTelemetry, Telemetry } from './telemetry/base.js'
+import { openai, Provider } from './models.js'
+import { noop, Telemetry } from './telemetry.js'
 import { Message } from './types.js'
 
 type WorkflowOptions = {
@@ -14,7 +14,7 @@ type WorkflowOptions = {
 
   provider?: Provider
   maxIterations?: number
-  telemetry?: Telemetry
+  snapshot?: Telemetry
 }
 
 /**
@@ -24,26 +24,56 @@ export const workflow = (options: WorkflowOptions): Workflow => {
   return {
     maxIterations: 50,
     provider: openai(),
-    telemetry: noopTelemetry,
+    snapshot: noop,
     ...options,
   }
 }
 
 export type Workflow = Required<WorkflowOptions>
 
-export type WorkflowState = {
+/**
+ * Base workflow
+ */
+type BaseWorkflowState = {
   id: string
-  status: 'running' | 'finished' | 'interrupted' | 'failed' | 'pending'
   messages: Message[]
 }
 
 /**
+ * Different states workflow is in, in between execution from agents
+ */
+export type IdleWorkflowState = BaseWorkflowState & {
+  status: 'idle' | 'finished' | 'failed'
+}
+
+/**
+ * Supervisor selected the task, and is now pending assignement of an agent
+ */
+export type PendingWorkflowState = BaseWorkflowState & {
+  status: 'pending'
+  agentRequest: Message[]
+}
+
+/**
+ * State in which an agent is assigned and work is pending
+ */
+export type AssignedWorkflowState = BaseWorkflowState & {
+  status: 'assigned'
+
+  agent: string
+  agentRequest: Message[]
+  agentStatus: 'idle' | 'step' | 'tool'
+}
+
+export type WorkflowState = IdleWorkflowState | PendingWorkflowState | AssignedWorkflowState
+
+/**
  * Helper utility to create a workflow state with defaults.
  */
-export const workflowState = (workflow: Workflow): WorkflowState => {
+export const workflowState = (workflow: Workflow): IdleWorkflowState => {
   return {
     id: randomUUID(),
-    status: 'pending',
+    status: 'idle',
     messages: [
       {
         role: 'assistant' as const,
@@ -55,4 +85,12 @@ export const workflowState = (workflow: Workflow): WorkflowState => {
       },
     ],
   }
+}
+
+/**
+ * Prints the last message from the workflow state in user-friendly format.
+ */
+export const solution = (state: WorkflowState) => {
+  // tbd: handle different message shapes
+  return state.messages.at(-1)?.content
 }

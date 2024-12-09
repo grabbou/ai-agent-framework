@@ -1,7 +1,7 @@
 {
   "name": "@dead-simple-ai-agent/website",
-  "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "rspress dev",
     "build": "rspress build",
@@ -11,6 +11,7 @@
     "rspress": "^1.37.3"
   },
   "devDependencies": {
+    "@rspress/plugin-typedoc": "^1.37.4",
     "@types/node": "^18.11.17"
   }
 }

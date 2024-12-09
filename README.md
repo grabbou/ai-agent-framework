@@ -104,10 +104,10 @@ const researchTripWorkflow = workflow({
 
 // Finally, you can run the workflow.
 // This will block until the workflow is completed.
-const result = await teamwork(researchTripWorkflow)
+const state = await teamwork(researchTripWorkflow)
 
 // Don't forget to log the result!
-console.log(result)
+console.log(solution(state))
 ```
 
 ### Running the example
@@ -175,8 +175,31 @@ The framework provides two main ways to orchestrate agent collaboration:
 The `teamwork` function handles complete workflow execution from start to finish, managing the entire process automatically. It's perfect for simple use cases where you want to get results in a single call.
 
 ```typescript
-const result = await teamwork(workflow)
+import { teamwork } from '@dead-simple-ai-agent/framework'
+
+const state = await teamwork(workflow)
 ```
+
+#### Server-side Teamwork
+
+The server-side version of teamwork is perfectly suited for long-running workflows that require external tool execution or manual intervention. It will not wait for the tool to be executed, but will return the state of the workflow.
+
+You can then handle tool calls on your own, and call `teamwork` again when ready.
+
+```typescript
+import { teamwork } from '@dead-simple-ai-agent/framework/server'
+
+// If status is `assigned`, you need to handle tool calls on your own.
+// Otherwise, status is `finished` and you can read the result.
+const nextState = await teamwork(workflow)
+```
+
+This pattern is especially useful for:
+- Running workflows in serverless environments
+- Handling long-running tool executions
+- Implementing manual review steps
+- Building interactive workflows
+- Managing rate limits and quotas
 
 #### Iterate
 
@@ -203,8 +226,27 @@ This approach offers several benefits:
 
 This functional approach makes the framework particularly well-suited for building long-running workflows that are distributed across multiple servers in the cloud.
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/grabbou"><img src="https://avatars.githubusercontent.com/u/2464966?v=4?s=100" width="100px;" alt="Mike"/><br /><sub><b>Mike</b></sub></a><br /><a href="#code-grabbou" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://catchthetornado.com"><img src="https://avatars.githubusercontent.com/u/211899?v=4?s=100" width="100px;" alt="Piotr Karwatka"/><br /><sub><b>Piotr Karwatka</b></sub></a><br /><a href="#code-pkarw" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
 ## Made with ❤️ at Callstack
 
-Cali is an open source project and will always remain free to use. If you think it's cool, please star it 🌟. [Callstack](https://callstack.com) is a group of React and React Native geeks, contact us at [hello@callstack.com](mailto:hello@callstack.com) if you need any help with these or just want to say hi!
+Dead Simple AI Agent is an open source project and will always remain free to use. If you think it's cool, please star it 🌟. [Callstack](https://callstack.com) is a group of React and React Native geeks, contact us at [hello@callstack.com](mailto:hello@callstack.com) if you need any help with these or just want to say hi!
 
 Like the project? ⚛️ [Join the team](https://callstack.com/careers/?utm_campaign=Senior_RN&utm_source=github&utm_medium=readme) who does amazing stuff for clients and drives React Native Open Source! 🔥 

@@ -1,13 +1,14 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod.mjs'
+import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { Agent } from '../agent.js'
-import { Provider } from '../models/openai.js'
+import { Provider } from '../models.js'
+import { Message } from '../types.js'
 
 export async function selectAgent(
   provider: Provider,
-  task: string,
+  agentRequest: Message[],
   agents: Agent[]
 ): Promise<Agent> {
   const response = await provider.completions({
@@ -29,7 +30,7 @@ export async function selectAgent(
         role: 'user',
         content: s`
           Here is the task:
-          <task>${task}</task>
+          <task>${agentRequest.map((request) => request.content).join(',')}</task>
 
           Here are the available agents:
           <agents>
