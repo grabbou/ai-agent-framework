@@ -11,7 +11,12 @@ const encodeImage = async (imagePath: string): Promise<string> => {
   return `data:image/jpeg;base64,${imageBuffer.toString('base64')}`
 }
 
-async function callOpenAI(provider: Provider, analysis: string, image_url: string) {
+async function callOpenAI(
+  provider: Provider,
+  analysis: string,
+  image_url: string,
+  detail: 'low' | 'high'
+) {
   const response = await provider.completions({
     messages: [
       {
@@ -21,7 +26,7 @@ async function callOpenAI(provider: Provider, analysis: string, image_url: strin
             type: 'text',
             text: `${analysis}. Use your built-in OCR capabilities.`,
           },
-          { type: 'image_url', image_url: { url: image_url } },
+          { type: 'image_url', image_url: { url: image_url, detail } },
         ],
       },
     ],
@@ -56,14 +61,20 @@ export const visionTool = tool({
   parameters: z.object({
     imagePathUrl: z.string().describe('Absolute path to image on disk or URL'),
     analysis: z.string().describe(s`
-      Detailed description of what to analyze and extract from the image, such as
+      Description of what to analyze and extract from the image, such as
       text content, layout, font styles, and any specific data fields.'
     `),
+    detail: z
+      .enum(['low', 'high'])
+      .describe(
+        'Fidelity of the analysis. For detailed analysis, use "high". For general questions, use "low".'
+      )
+      .default('high'),
   }),
-  execute: async ({ imagePathUrl, analysis }, { provider }) => {
+  execute: async ({ imagePathUrl, detail, analysis }, { provider }) => {
     const imageUrl = imagePathUrl.startsWith('http')
       ? imagePathUrl
       : await encodeImage(imagePathUrl)
-    return callOpenAI(provider, analysis, imageUrl)
+    return callOpenAI(provider, analysis, imageUrl, detail)
   },
 })
