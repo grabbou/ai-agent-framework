@@ -22,11 +22,11 @@ async function callOpenAI(
       {
         role: 'user',
         content: [
+          { type: 'image_url', image_url: { url: image_url, detail } },
           {
             type: 'text',
             text: `${prompt}. Use your built-in OCR capabilities.`,
           },
-          { type: 'image_url', image_url: { url: image_url, detail } },
         ],
       },
     ],
@@ -79,7 +79,6 @@ export const visionTool = tool({
       .default('high'),
   }),
   execute: async ({ imagePathUrl, detail, prompt }, { provider }) => {
-    console.log({ imagePathUrl, detail, prompt })
     const imageUrl = imagePathUrl.startsWith('http')
       ? imagePathUrl
       : await encodeImage(imagePathUrl)
