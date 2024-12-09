@@ -3,7 +3,7 @@
  */
 import { isToolCallRequest } from '@dead-simple-ai-agent/framework/supervisor/runTools'
 import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
-import { workflow, WorkflowState, workflowState } from '@dead-simple-ai-agent/framework/workflow'
+import { WorkflowState, workflowState } from '@dead-simple-ai-agent/framework/workflow'
 import chalk from 'chalk'
 import s from 'dedent'
 import fastify, { FastifyRequest } from 'fastify'

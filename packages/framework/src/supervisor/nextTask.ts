@@ -1,8 +1,8 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod.mjs'
+import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
-import { Provider } from '../models/openai.js'
+import { Provider } from '../models.js'
 import { Message } from '../types.js'
 
 export async function nextTask(provider: Provider, history: Message[]): Promise<string | null> {
