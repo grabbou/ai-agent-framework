@@ -60,12 +60,6 @@ export const visionTool = tool({
   description: 'LLM AI Tool for analyzing and OCR the pictures',
   parameters: z.object({
     imagePathUrl: z.string().describe('Absolute path to image on disk or URL'),
-    outputFormat: z
-      .enum(['text', 'json'])
-      .default('text')
-      .describe(
-        'Output format of the data extracted from image - for example attributes you like to extract from the objects on image, JSON format for the document to OCR to etc'
-      ),
     prompt: z.string().describe(s`
       This is a prompt for LLM Multimodal model - a detailed instruction of what to analyze and extract
       from the image, such as: text content, layout, font styles, and any specific data fields.
