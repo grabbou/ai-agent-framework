@@ -13,7 +13,7 @@ const encodeImage = async (imagePath: string): Promise<string> => {
 
 async function callOpenAI(
   provider: Provider,
-  analysis: string,
+  prompt: string,
   image_url: string,
   detail: 'low' | 'high'
 ) {
@@ -22,11 +22,11 @@ async function callOpenAI(
       {
         role: 'user',
         content: [
+          { type: 'image_url', image_url: { url: image_url, detail } },
           {
             type: 'text',
-            text: `${analysis}. Use your built-in OCR capabilities.`,
+            text: `${prompt}. Use your built-in OCR capabilities.`,
           },
-          { type: 'image_url', image_url: { url: image_url, detail } },
         ],
       },
     ],
@@ -57,12 +57,13 @@ async function callOpenAI(
 }
 
 export const visionTool = tool({
-  description: 'Tool for analyzing and OCR the pictures',
+  description:
+    'Analyzes the pictures using LLM Multimodal model with image to text (OCR) capabilities.',
   parameters: z.object({
     imagePathUrl: z.string().describe('Absolute path to image on disk or URL'),
-    analysis: z.string().describe(s`
-      Description of what to analyze and extract from the image, such as
-      text content, layout, font styles, and any specific data fields.'
+    prompt: z.string().describe(s`
+      This is a prompt for LLM Multimodal model - a detailed instruction of what to analyze and extract
+      from the image, such as: text content, layout, font styles, and any specific data fields.
     `),
     detail: z
       .enum(['low', 'high'])
@@ -71,10 +72,10 @@ export const visionTool = tool({
       )
       .default('high'),
   }),
-  execute: async ({ imagePathUrl, detail, analysis }, { provider }) => {
+  execute: async ({ imagePathUrl, detail, prompt }, { provider }) => {
     const imageUrl = imagePathUrl.startsWith('http')
       ? imagePathUrl
       : await encodeImage(imagePathUrl)
-    return callOpenAI(provider, analysis, imageUrl, detail)
+    return callOpenAI(provider, prompt, imageUrl, detail)
   },
 })

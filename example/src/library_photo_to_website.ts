@@ -44,6 +44,7 @@ const outputPath = path.join(workingDir, 'library.html')
 const bookLibraryWorkflow = workflow({
   members: [librarian, webmaster],
   description: `
+    Analyze the photo of the library and list all the books in the library.
     Generate a website that lists all the books in the library.
     The photo of books in the library is in the "${imagePath}" file.
 
