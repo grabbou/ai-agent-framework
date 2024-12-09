@@ -1,8 +1,8 @@
 /**
  * This example demonstrates using framework in server-side environments.
  */
+import { teamwork } from '@dead-simple-ai-agent/framework/server'
 import { isToolCallRequest } from '@dead-simple-ai-agent/framework/supervisor/runTools'
-import { iterate } from '@dead-simple-ai-agent/framework/teamwork'
 import { WorkflowState, workflowState } from '@dead-simple-ai-agent/framework/workflow'
 import chalk from 'chalk'
 import s from 'dedent'
@@ -158,24 +158,6 @@ type ToolCallMessage = {
   content: string
 }
 
-/**
- * Helper function, inspired by `teamwork`.
- * It will continue running the visit in the background and will stop when the workflow is finished.
- */
 async function runVisit(id: string) {
-  const state = visits[id]
-  if (!state) {
-    throw new Error('Workflow not found')
-  }
-
-  if (
-    state.status === 'finished' ||
-    (state.status === 'assigned' && state.agentStatus === 'tool')
-  ) {
-    return
-  }
-
-  visits[id] = await iterate(preVisitNoteWorkflow, state)
-
-  return runVisit(id)
+  visits[id] = await teamwork(preVisitNoteWorkflow, visits[id])
 }

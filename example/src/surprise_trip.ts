@@ -5,7 +5,7 @@
 import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { logger } from '@dead-simple-ai-agent/framework/telemetry'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
 
 import { lookupWikipedia } from '../tools.js'
 
@@ -77,4 +77,4 @@ const researchTripWorkflow = workflow({
 
 const result = await teamwork(researchTripWorkflow)
 
-console.log(result)
+console.log(solution(result))

@@ -21,9 +21,9 @@ Here is a simple example of a workflow that researches and plans a trip to Wroc≈
 ```ts
 // First, import all the necessary functions
 import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
+import { teamwork, breakout } from '@dead-simple-ai-agent/framework/teamwork'
 import { logger } from '@dead-simple-ai-agent/framework/telemetry/console'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { workflow, workflowState } from '@dead-simple-ai-agent/framework/workflow'
 
 // Then, define your agents:
 
@@ -104,10 +104,10 @@ const researchTripWorkflow = workflow({
 
 // Finally, you can run the workflow.
 // This will block until the workflow is completed.
-const result = await teamwork(researchTripWorkflow)
+const state = await teamwork(researchTripWorkflow)
 
 // Don't forget to log the result!
-console.log(result)
+console.log(solution(state))
 ```
 
 ### Running the example
@@ -175,8 +175,31 @@ The framework provides two main ways to orchestrate agent collaboration:
 The `teamwork` function handles complete workflow execution from start to finish, managing the entire process automatically. It's perfect for simple use cases where you want to get results in a single call.
 
 ```typescript
-const result = await teamwork(workflow)
+import { teamwork } from '@dead-simple-ai-agent/framework'
+
+const state = await teamwork(workflow)
 ```
+
+#### Server-side Teamwork
+
+The server-side version of teamwork is perfectly suited for long-running workflows that require external tool execution or manual intervention. It will not wait for the tool to be executed, but will return the state of the workflow.
+
+You can then handle tool calls on your own, and call `teamwork` again when ready.
+
+```typescript
+import { teamwork } from '@dead-simple-ai-agent/framework/server'
+
+// If status is `assigned`, you need to handle tool calls on your own.
+// Otherwise, status is `finished` and you can read the result.
+const nextState = await teamwork(workflow)
+```
+
+This pattern is especially useful for:
+- Running workflows in serverless environments
+- Handling long-running tool executions
+- Implementing manual review steps
+- Building interactive workflows
+- Managing rate limits and quotas
 
 #### Iterate
 

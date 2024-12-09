@@ -1,5 +1,4 @@
-import { nextTick } from './supervisor/nextTick.js'
-import { MessageContent } from './types.js'
+import { iterate, nextTick } from './supervisor/nextTick.js'
 import { Workflow, WorkflowState, workflowState } from './workflow.js'
 
 /**
@@ -8,21 +7,15 @@ import { Workflow, WorkflowState, workflowState } from './workflow.js'
 export async function teamwork(
   workflow: Workflow,
   state: WorkflowState = workflowState(workflow)
-): Promise<MessageContent> {
-  const { status, messages } = state
-
-  if (status === 'finished') {
-    return messages.at(-1)!.content
+): Promise<WorkflowState> {
+  if (state.status === 'finished') {
+    return state
   }
-
-  return teamwork(workflow, await iterate(workflow, state))
+  const nextState = await iterate(workflow, state)
+  return teamwork(workflow, nextState)
 }
 
 /**
  * Iterate performs single iteration over workflow and returns its next state
  */
-export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
-  const nextState = await nextTick(workflow, state)
-  workflow.snapshot({ prevState: state, nextState })
-  return nextState
-}
+export { nextTick as iterate }
