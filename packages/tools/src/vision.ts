@@ -72,6 +72,7 @@ export const visionTool = tool({
       .default('high'),
   }),
   execute: async ({ imagePathUrl, detail, analysis }, { provider }) => {
+    console.log(imagePathUrl, analysis, detail)
     const imageUrl = imagePathUrl.startsWith('http')
       ? imagePathUrl
       : await encodeImage(imagePathUrl)
