@@ -70,7 +70,7 @@ export const visionTool = tool({
       Description of what to analyze and extract from the image, such as
       text content, layout, font styles, and any specific data fields.
       To use the vision tool properly provide it with the 'prompt' for a LLM multimodal model 
-      which describes in details - which features to extract and analyze from the image image.      
+      which describes in details - which features to extract and analyze from the image.      
       '
     `),
     detail: z
