@@ -1,16 +1,17 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod.mjs'
+import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
-import { Provider } from '../models/openai.js'
+import { Provider } from '../models.js'
 import { Message } from '../types.js'
 
-export async function getNextTask(provider: Provider, history: Message[]): Promise<string | null> {
+export async function nextTask(provider: Provider, history: Message[]): Promise<string | null> {
   const response = await provider.completions({
     messages: [
       {
         role: 'system',
         // tbd: handle subsequent failures
+        // tbd: include max iterations in system prompt
         content: s`
           You are a planner that breaks down complex workflows into smaller, actionable steps.
           Your job is to determine the next task that needs to be done based on the original workflow and what has been completed so far.

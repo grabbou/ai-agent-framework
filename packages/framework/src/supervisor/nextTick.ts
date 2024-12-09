@@ -8,13 +8,7 @@ import { selectAgent } from './selectAgent.js'
 /**
  * Performs single iteration over Workflow and produces its next state.
  */
-export async function iterate(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
-  const nextState = await nextTick(workflow, state)
-  workflow.snapshot(nextState)
-  return nextState
-}
-
-async function nextTick(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
+export async function nextTick(workflow: Workflow, state: WorkflowState): Promise<WorkflowState> {
   const { status, messages } = state
 
   /**
@@ -61,11 +55,7 @@ async function nextTick(workflow: Workflow, state: WorkflowState): Promise<Workf
    * When workflow is pending, we must find best agent to work on it.
    */
   if (status === 'pending') {
-    const selectedAgent = await selectAgent(
-      workflow.provider,
-      state.agentRequest!,
-      workflow.members
-    )
+    const selectedAgent = await selectAgent(workflow.provider, state.agentRequest, workflow.members)
     return {
       ...state,
       status: 'assigned',
@@ -99,23 +89,25 @@ async function nextTick(workflow: Workflow, state: WorkflowState): Promise<Workf
       return {
         ...state,
         agentStatus: 'step',
-        agentRequest: state.agentRequest?.concat(toolsResponse),
+        agentRequest: state.agentRequest.concat(toolsResponse),
       }
     }
 
     /**
      * When agent finishes running, it will return status to indicate whether it finished processing.
      *
-     * If it finished processing, we will append its final answer to the context. Otherwise, we will
-     * further extend agentRequest to carry context over to the next iteration.
+     * If it finished processing, we will append its final answer to the context, as well as
+     * first message from `agentRequest`, which holds the actual task, excluding middle-steps.
+     *
+     * If further processing is required, we will carry `agentRequest` over to the next iteration.
      */
-    const [agentResponse, status] = await runAgent(agent, state.agentRequest!)
+    const [agentResponse, status] = await runAgent(agent, state.agentRequest)
     if (status === 'complete') {
       const agentFinalAnswer = agentResponse.at(-1)!
       return {
         ...state,
         status: 'idle',
-        messages: state.messages.concat(agentFinalAnswer),
+        messages: state.messages.concat(state.agentRequest[0], agentFinalAnswer),
       }
     }
     return {

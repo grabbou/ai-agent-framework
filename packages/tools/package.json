@@ -1,20 +1,43 @@
 {
   "name": "@dead-simple-ai-agent/tools",
-  "version": "0.0.1",
   "description": "A dead simple AI agent tools",
   "author": "Piotr Karwatka <piotr@catchthetornado.com>",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "bun run clean && bun run build:lib && bun run build:types",
+    "build:lib": "rslib build",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outdir dist/types"
+  },
   "exports": {
-    ".": {
-      "bun": "./src/index.ts"
-    },
-    "./tools": {
-      "bun": "./src/index.ts"
+    "./*": {
+      "bun": "./src/*.ts",
+      "types": "./dist/types/*.d.ts",
+      "require": "./dist/*.cjs",
+      "import": "./dist/*.js"
     }
   },
   "type": "module",
   "dependencies": {
-    "dedent": "^1.5.3",
-    "openai": "^4.76.0",
+    "@dead-simple-ai-agent/framework": "0.0.1",
     "zod": "^3.23.8"
-  }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callstackincubator/ai-agent-framework.git"
+  },
+  "keywords": [
+    "ai",
+    "ai agents",
+    "ai tools"
+  ],
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "version": "0.0.1"
 }
