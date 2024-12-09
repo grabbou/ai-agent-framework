@@ -110,6 +110,8 @@ const state = await teamwork(researchTripWorkflow)
 console.log(solution(state))
 ```
 
+You can see this example in action and other ones [here](./example/README.md).
+
 ### Running the example
 
 Finally, you can run the example by simply executing the file.
