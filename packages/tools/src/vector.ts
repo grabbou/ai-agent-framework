@@ -15,7 +15,7 @@ export interface VectorStore {
 /**
  * Represents a document with its embedding vector and associated metadata
  */
-type EmbeddingResult = {
+export type EmbeddingResult = {
   content: string
   embedding: number[]
   metadata: any

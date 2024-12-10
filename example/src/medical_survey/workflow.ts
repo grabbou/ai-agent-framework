@@ -5,7 +5,7 @@ import { z } from 'zod'
 
 async function requestUserInput(prompt: string): Promise<string> {
   return new Promise((resolve) => {
-    console.log(prompt)
+    console.log('❔' + prompt)
     process.stdin.resume()
     process.stdin.once('data', (data) => {
       process.stdin.pause()
