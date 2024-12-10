@@ -12,37 +12,6 @@ import { askUser } from './tools/askUser.js'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
 
-async function requestUserInput(prompt: string): Promise<string> {
-  return new Promise((resolve) => {
-    console.log('❔' + prompt)
-    process.stdin.resume()
-    process.stdin.once('data', (data) => {
-      process.stdin.pause()
-      resolve(data.toString().trim())
-    })
-  })
-}
-
-const createInMemoryVectorStore = () => {
-  /**
-   * In-memory implementation of the VectorStore interface using functions.
-   */
-  const store = new Map<string, EmbeddingResult>()
-
-  const set = async (id: string, value: EmbeddingResult): Promise<void> => {
-    store.set(id, value)
-  }
-
-  const entries = async (): Promise<[string, EmbeddingResult][]> => {
-    return Array.from(store.entries())
-  }
-
-  return {
-    set,
-    entries,
-  }
-}
-
 const printTool = tool({
   description: 'Display information to the user',
   parameters: z.object({
@@ -54,9 +23,7 @@ const printTool = tool({
   },
 })
 
-const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools(
-  createInMemoryVectorStore()
-)
+const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools()
 
 const { firecrawlScrape } = createFireCrawlTool({
   apiKey,
