@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rise-tools/rise-tools.git",
+    "url": "https://github.com/callstackincubator/fabrice-ai.git",
     "directory": "packages/create-ai-agent"
   },
   "author": "Mike Grabowski <mike@callstack.com> (https://github.com/grabbou)",
   "bugs": {
-    "url": "https://github.com/rise-tools/rise-tools/issues"
+    "url": "https://github.com/callstackincubator/fabrice-ai/issues"
   },
-  "homepage": "https://github.com/rise-tools/rise-tools#readme",
+  "homepage": "https://github.com/callstackincubator/fabrice-ai#readme",
   "publishConfig": {
     "access": "public"
   },
