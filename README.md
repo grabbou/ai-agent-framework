@@ -16,6 +16,8 @@ Use our creator tool to quickly create a new AI agent project.
 $ npx create ai-agent
 ```
 
+You can choose from a few templates. You can see a full list of them [here](./example/README.md).
+
 ### Manually
 
 ```bash
@@ -117,8 +119,6 @@ const state = await teamwork(researchTripWorkflow)
 // Don't forget to log the result!
 console.log(solution(state))
 ```
-
-You can see this example in action and other ones [here](./example/README.md).
 
 #### Running the example
 
