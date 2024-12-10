@@ -1,0 +1,36 @@
+{
+  "name": "create-ai-agent",
+  "version": "0.1.2",
+  "license": "MIT",
+  "description": "Create new AI agent application with Fabrice",
+  "type": "module",
+  "bin": {
+    "create-ai-agent": "dist/index.js"
+  },
+  "scripts": {
+    "prepare": "bun run build",
+    "clean": "rm -rf dist",
+    "build": "bun run clean && bun run build:lib",
+    "build:lib": "rslib build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rise-tools/rise-tools.git",
+    "directory": "packages/create-ai-agent"
+  },
+  "author": "Mike Grabowski <mike@callstack.com> (https://github.com/grabbou)",
+  "bugs": {
+    "url": "https://github.com/rise-tools/rise-tools/issues"
+  },
+  "homepage": "https://github.com/rise-tools/rise-tools#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.8.2",
+    "chalk": "^5.3.0",
+    "dedent": "^1.5.3",
+    "gradient-string": "^3.0.0",
+    "tar": "^6.2.1"
+  }
+}

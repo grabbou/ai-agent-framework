@@ -1,6 +1,7 @@
 import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
+import { logger } from 'fabrice-ai/telemetry'
 import { solution, workflow } from 'fabrice-ai/workflow'
 
 const techExpert = agent({
@@ -41,6 +42,7 @@ const productDescriptionWorkflow = workflow({
     Catchy, yet detailed product description that will make customers to instantly fall in love with the product.
     Should contain all the product features + marketing description.
   `,
+  snapshot: logger,
 })
 
 const result = await teamwork(productDescriptionWorkflow)
