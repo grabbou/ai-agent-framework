@@ -66,13 +66,13 @@ const exampleAgent = agent({
 
 ## 🌐 Web Scraper
 
-> `packages/tools/src/firecrawlScrape.ts`
+> `packages/tools/src/firecrawl.ts`
 
 Scrapes a website using Firecrawl.dev to extract metadata and content.
 
 ### Example
 ```typescript
-import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawlScrape'
+import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawl'
 
 const exampleAgent = agent({
   role: '...',

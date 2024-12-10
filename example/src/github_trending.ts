@@ -1,5 +1,4 @@
-
-import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawlScrape'
+import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawl'
 import { getApiKey } from '@fabrice-ai/tools/utils'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
@@ -8,7 +7,7 @@ import { solution, workflow } from 'fabrice-ai/workflow'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
 
-const { firecrawlScrape } = createFireCrawlTool({
+const { firecrawl } = createFireCrawlTool({
   apiKey,
 })
 
@@ -18,7 +17,7 @@ const githubResearcher = agent({
     You are skilled at browsing what's hot on Github trending page.
   `,
   tools: {
-    firecrawlScrape,
+    firecrawl,
   },
 })
 

@@ -64,7 +64,6 @@ Scrapes and analyzes trending Typescript projects from GitHub. Then: asks user a
 
 **Actors:** Github Researcher, Redactor
 
-
 ## Running
 
 Each example is a self-contained TypeScript file that can be run with Bun, or with `tsx`

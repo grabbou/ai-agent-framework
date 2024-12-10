@@ -1,4 +1,4 @@
-import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawlScrape'
+import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawl'
 import { getApiKey } from '@fabrice-ai/tools/utils'
 import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
@@ -25,7 +25,7 @@ const printTool = tool({
 
 const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools()
 
-const { firecrawlScrape } = createFireCrawlTool({
+const { firecrawl } = createFireCrawlTool({
   apiKey,
 })
 
@@ -36,7 +36,7 @@ const githubResearcher = agent({
     You are saving the documents to vector store for later usage
   `,
   tools: {
-    firecrawlScrape,
+    firecrawl,
     saveDocumentInVectorStore,
   },
 })

@@ -68,7 +68,7 @@ export const createFireCrawlTool = (options: FireCrawlOptions) => {
   }
 
   return {
-    firecrawlScrape: tool({
+    firecrawl: tool({
       description:
         'Scrape a website and return its content in specified formats using the FireCrawl API',
       parameters: z.object({
