@@ -65,7 +65,7 @@ const template = await select({
   options: [
     {
       value: {
-        files: ['src/surprise_trip.ts'],
+        files: ['src/surprise_trip.ts', 'src/tools/wikipedia.ts'],
       },
       label: 'Surprise Trip Planner - travel agent creating personalized city adventures',
     },
