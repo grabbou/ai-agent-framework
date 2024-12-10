@@ -68,7 +68,7 @@ export const createFireCrawlTool = (options: FireCrawlOptions) => {
   }
 
   return {
-    firecrawlScrape: tool({
+    firecrawl: tool({
       description:
         'Scrape a website and return its content in specified formats using the FireCrawl API',
       parameters: z.object({
@@ -85,10 +85,7 @@ export const createFireCrawlTool = (options: FireCrawlOptions) => {
         }
 
         try {
-          console.log(request, body)
           const response = await axios.post(config.url, body, request)
-          console.log(response)
-
           const parsedResponse = FireCrawlResponseSchema.parse(response.data)
 
           if (!parsedResponse.success) {
@@ -104,7 +101,7 @@ export const createFireCrawlTool = (options: FireCrawlOptions) => {
             \nMetadata:\n${JSON.stringify(metadata, null, 2)}
           `
         } catch (error) {
-          return `Error scraping website: ${error.message}`
+          return `Error scraping website: ${error}`
         }
       },
     }),
