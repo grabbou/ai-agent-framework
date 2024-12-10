@@ -1,11 +1,11 @@
 {
-  "name": "create-ai-agent",
+  "name": "create-fabrice-ai",
   "version": "0.1.2",
   "license": "MIT",
   "description": "Create new AI agent application with Fabrice",
   "type": "module",
   "bin": {
-    "create-ai-agent": "dist/index.js"
+    "create-fabrice-ai": "dist/index.js"
   },
   "scripts": {
     "prepare": "bun run build",
@@ -15,7 +15,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/callstackincubator/fabrice-ai.git",
-    "directory": "packages/create-ai-agent"
+    "directory": "packages/create-fabrice-ai"
   },
   "author": "Mike Grabowski <mike@callstack.com> (https://github.com/grabbou)",
   "bugs": {

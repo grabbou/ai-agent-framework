@@ -8,7 +8,7 @@ Built with TypeScript and designed to be serverless-ready.
 
 It is very easy to get started. All you have to do is to create a file with your agents and workflow, then run it.
 
-### Using `create-ai-agent`
+### Using `npx create`
 
 Use our creator tool to quickly create a new AI agent project.
 
