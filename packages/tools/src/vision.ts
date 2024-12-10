@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import path from 'node:path'
 
 import { Provider } from '@dead-simple-ai-agent/framework/models'
 import { tool } from '@dead-simple-ai-agent/framework/tool'
@@ -8,7 +9,7 @@ import { z } from 'zod'
 
 const encodeImage = async (imagePath: string): Promise<string> => {
   const imageBuffer = await fs.readFile(imagePath)
-  return `data:image/jpeg;base64,${imageBuffer.toString('base64')}`
+  return `data:image/${path.extname(imagePath).toLowerCase().replace('.', '')};base64,${imageBuffer.toString('base64')}`
 }
 
 async function callOpenAI(
