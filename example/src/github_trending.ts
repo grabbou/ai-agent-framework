@@ -26,7 +26,7 @@ const wrapupRedactor = agent({
   role: 'Redactor',
   description: `
     Your role is to wrap up reports.
-    You're famouse of beautifull Markdown formatting.
+    You're famous of beautiful Markdown formatting.
   `,
 })
 
