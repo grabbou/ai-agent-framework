@@ -1,4 +1,4 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["./src", "../../example/src/tools/wikipedia.ts"]
+  "include": ["./src"]
 }
