@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_fabrice_ai_website=self.webpackChunk_fabrice_ai_website||[]).push([["212"],{8663:function(){},7512:function(){},159:function(){},7157:function(){}}]);
