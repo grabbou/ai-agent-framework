@@ -1,4 +1,6 @@
-# Fabrice
+<p>
+  <img src="https://github.com/user-attachments/assets/bd03d003-9c22-4154-8953-519a5faabaa6" height="250" />
+</p>
 
 A lightweight, functional, and composable framework for building AI agents that work together to solve complex tasks. 
 
