@@ -10,8 +10,7 @@
   "scripts": {
     "prepare": "bun run build",
     "clean": "rm -rf dist",
-    "build": "bun run clean && bun run build:lib",
-    "build:lib": "rslib build"
+    "build": "bun build ./src/index.ts --outdir dist --packages external"
   },
   "repository": {
     "type": "git",
@@ -32,5 +31,8 @@
     "dedent": "^1.5.3",
     "gradient-string": "^3.0.0",
     "tar": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/tar": "^6.1.13"
   }
 }
