@@ -1,5 +1,5 @@
-import { tool } from '@dead-simple-ai-agent/framework/tool'
-import { RequiredOptionals } from '@dead-simple-ai-agent/framework/types'
+import { tool } from 'fabrice/tool'
+import { RequiredOptionals } from 'fabrice/types'
 import axios from 'axios'
 import s from 'dedent'
 import { z } from 'zod'

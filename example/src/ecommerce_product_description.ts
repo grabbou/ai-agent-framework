@@ -1,7 +1,7 @@
-import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
-import { visionTool } from '@dead-simple-ai-agent/tools/vision'
+import { agent } from 'fabrice/agent'
+import { teamwork } from 'fabrice/teamwork'
+import { solution, workflow } from 'fabrice/workflow'
+import { visionTool } from '@fabrice-ai/tools/vision'
 
 const techExpert = agent({
   role: 'Technical expert',

@@ -1,6 +1,6 @@
 {
-  "name": "@dead-simple-ai-agent/tools",
-  "description": "A dead simple AI agent tools",
+  "name": "@fabrice-ai/tools",
+  "description": "Tools that help you build AI agents",
   "author": "Piotr Karwatka <piotr@catchthetornado.com>",
   "scripts": {
     "clean": "rm -rf dist",
@@ -18,7 +18,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@dead-simple-ai-agent/framework": "0.0.1",
+    "fabrice": "0.0.1",
     "zod": "^3.23.8"
   },
   "license": "MIT",

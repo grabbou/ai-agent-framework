@@ -2,15 +2,12 @@
 pageType: home
 
 hero:
-  name: Dead Simple AI Agent
-  tagline: AI agents made simple - from prototype to production in minutes!w
+  name: Fabrice
+  tagline: AI agents made simple - from prototype to production in minutes!
   actions:
-    - theme: brand
-      text: Quick Start
-      link: /guide/
     - theme: alt
-      text: GitHub
-      link: https://github.com/callstack/dead-simple-ai-agent
+      text: Check out the docs!
+      link: https://github.com/callstackincubator/fabrice-ai
 features:
   - title: Purely Functional Design
     details: Embrace functional programming with pure functions, immutable state, and composable workflows. No hidden state, no side effects.

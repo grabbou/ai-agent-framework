@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import { Provider } from '@dead-simple-ai-agent/framework/models'
-import { tool } from '@dead-simple-ai-agent/framework/tool'
+import { Provider } from 'fabrice/models'
+import { tool } from 'fabrice/tool'
 import s from 'dedent'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'

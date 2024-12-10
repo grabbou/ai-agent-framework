@@ -1,4 +1,4 @@
-import { tool } from '@dead-simple-ai-agent/framework/tool'
+import { tool } from 'fabrice/tool'
 import { z } from 'zod'
 
 export const getCurrentDate = tool({
