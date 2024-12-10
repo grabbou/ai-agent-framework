@@ -1,6 +1,6 @@
-import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { tool } from '@dead-simple-ai-agent/framework/tool'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { agent } from 'fabrice/agent'
+import { tool } from 'fabrice/tool'
+import { workflow } from 'fabrice/workflow'
 import { z } from 'zod'
 
 async function requestUserInput(prompt: string): Promise<string> {

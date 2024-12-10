@@ -1,3 +1,3 @@
-@dead-simple-ai-agent/tools
+@fabrice-ai/tools
 ====
 

@@ -1,5 +1,5 @@
 {
-  "name": "dead-simple-ai-agent",
+  "name": "@fabrice-ai/monorepo",
   "private": true,
   "workspaces": [
     "packages/*",

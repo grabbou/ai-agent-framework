@@ -1,6 +1,6 @@
-import { openai } from '@dead-simple-ai-agent/framework/models'
-import { tool } from '@dead-simple-ai-agent/framework/tool'
 import dedent from 'dedent'
+import { openai } from 'fabrice/models'
+import { tool } from 'fabrice/tool'
 import { z } from 'zod'
 
 // Type Definitions

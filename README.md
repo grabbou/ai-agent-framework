@@ -1,4 +1,4 @@
-# Dead Simple AI Agent
+# Fabrice
 
 A lightweight, functional, and composable framework for building AI agents that work together to solve complex tasks. 
 
@@ -11,7 +11,7 @@ It is very easy to get started. All you have to do is to create a file with your
 ### Installing the framework from `npm`
 
 ```bash
-$ npm install @dead-simple-ai-agent/framework
+$ npm install fabrice
 ```
 
 ### Create your first workflow
@@ -20,10 +20,10 @@ Here is a simple example of a workflow that researches and plans a trip to Wroc�
 
 ```ts
 // First, import all the necessary functions
-import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { logger } from '@dead-simple-ai-agent/framework/telemetry/console'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { agent } from 'fabrice/agent'
+import { teamwork } from 'fabrice/teamwork'
+import { logger } from 'fabrice/telemetry/console'
+import { workflow } from 'fabrice/workflow'
 
 // Then, define your agents:
 
@@ -177,7 +177,7 @@ The framework provides two main ways to orchestrate agent collaboration:
 The `teamwork` function handles complete workflow execution from start to finish, managing the entire process automatically. It's perfect for simple use cases where you want to get results in a single call.
 
 ```typescript
-import { teamwork } from '@dead-simple-ai-agent/framework'
+import { teamwork } from 'fabrice'
 
 const state = await teamwork(workflow)
 ```
@@ -189,7 +189,7 @@ The server-side version of teamwork is perfectly suited for long-running workflo
 You can then handle tool calls on your own, and call `teamwork` again when ready.
 
 ```typescript
-import { teamwork } from '@dead-simple-ai-agent/framework/server'
+import { teamwork } from 'fabrice/server'
 
 // If status is `assigned`, you need to handle tool calls on your own.
 // Otherwise, status is `finished` and you can read the result.
@@ -249,6 +249,6 @@ This functional approach makes the framework particularly well-suited for buildi
 
 ## Made with ❤️ at Callstack
 
-Dead Simple AI Agent is an open source project and will always remain free to use. If you think it's cool, please star it 🌟. [Callstack](https://callstack.com) is a group of React and React Native geeks, contact us at [hello@callstack.com](mailto:hello@callstack.com) if you need any help with these or just want to say hi!
+Fabrice is an open source project and will always remain free to use. If you think it's cool, please star it 🌟. [Callstack](https://callstack.com) is a group of React and React Native geeks, contact us at [hello@callstack.com](mailto:hello@callstack.com) if you need any help with these or just want to say hi!
 
 Like the project? ⚛️ [Join the team](https://callstack.com/careers/?utm_campaign=Senior_RN&utm_source=github&utm_medium=readme) who does amazing stuff for clients and drives React Native Open Source! 🔥 

@@ -1,5 +1,5 @@
-import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { solution } from '@dead-simple-ai-agent/framework/workflow'
+import { teamwork } from 'fabrice/teamwork'
+import { solution } from 'fabrice/workflow'
 
 import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
 

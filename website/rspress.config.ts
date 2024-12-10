@@ -5,7 +5,7 @@ import { defineConfig } from 'rspress/config'
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  title: 'Dead Simple AI Agent',
+  title: 'Fabrice',
   icon: '/rspress-icon.png',
   logo: {
     light: '/rspress-light-logo.png',

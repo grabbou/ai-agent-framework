@@ -1,11 +1,11 @@
 /**
  * This example demonstrates using framework in server-side environments.
  */
-import { teamwork } from '@dead-simple-ai-agent/framework/server'
-import { isToolCallRequest } from '@dead-simple-ai-agent/framework/supervisor/runTools'
-import { WorkflowState, workflowState } from '@dead-simple-ai-agent/framework/workflow'
 import chalk from 'chalk'
 import s from 'dedent'
+import { teamwork } from 'fabrice/server'
+import { isToolCallRequest } from 'fabrice/supervisor/runTools'
+import { WorkflowState, workflowState } from 'fabrice/workflow'
 import fastify, { FastifyRequest } from 'fastify'
 
 import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
