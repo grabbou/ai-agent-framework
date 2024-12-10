@@ -1,5 +1,5 @@
-import { tool } from 'fabrice-ai/tool'
 import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
+import { tool } from 'fabrice-ai/tool'
 import { z } from 'zod'
 
 const wikipedia = new WikipediaQueryRun({

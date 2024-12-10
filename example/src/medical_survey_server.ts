@@ -147,7 +147,7 @@ console.log(s`
   ${chalk.gray(`[{"id":"<tool_call_id>","type":"function"}]`)}
 
   ${chalk.bold('📝 Add a message to the visit:')}
-  ${chalk.gray(`curl -X POST http://localhost:${port}/visits/:id/messages H "Content-Type: application/json" -d '{"tool_call_id":"...","content":"..."}'`)}
+  ${chalk.gray(`curl -X POST http://localhost:${port}/visits/:id/messages -H "Content-Type: application/json" -d '{"tool_call_id":"...","content":"..."}'`)}
 
   Note:
   - You can only add messages when the workflow is waiting for a tool call
