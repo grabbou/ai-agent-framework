@@ -12,6 +12,13 @@
     "clean": "rm -rf dist",
     "build": "bun build ./src/index.ts --outdir dist --packages external"
   },
+  "files": [
+    "dist",
+    "src",
+    "_gitignore",
+    "README.md",
+    "_tsconfig.json"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/callstackincubator/fabrice-ai.git",
