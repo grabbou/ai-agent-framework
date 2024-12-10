@@ -1,4 +1,4 @@
-import { createVectorStoreTools, EmbeddingResult } from '@fabrice-ai/tools/vector'
+import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
@@ -6,28 +6,7 @@ import { solution, workflow } from 'fabrice-ai/workflow'
 
 import { lookupWikipedia } from './tools/wikipedia.js'
 
-const createInMemoryVectorStore = () => {
-  /**
-   * In-memory implementation of the VectorStore interface using functions.
-   */
-  const store = new Map<string, EmbeddingResult>()
-
-  const set = async (id: string, value: EmbeddingResult): Promise<void> => {
-    store.set(id, value)
-  }
-
-  const entries = async (): Promise<[string, EmbeddingResult][]> => {
-    return Array.from(store.entries())
-  }
-
-  return {
-    set,
-    entries,
-  }
-}
-const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools(
-  createInMemoryVectorStore()
-)
+const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools()
 
 const wikipediaIndexer = agent({
   role: 'Wikipedia Indexer',

@@ -24,7 +24,7 @@ export type EmbeddingResult = {
 /**
  * Creates a set of tools for interacting with a vector store.
  */
-export const createVectorStoreTools = (vectorStore: VectorStore) => {
+export const createVectorStoreTools = (vectorStore: VectorStore = createInMemoryVectorStore()) => {
   return {
     /**
      * Tool for saving a document and its metadata to the vector store.
@@ -101,4 +101,24 @@ const computeEmbedding = async (provider: Provider, text: string): Promise<numbe
   })
 
   return response.data[0].embedding
+}
+
+/**
+ * In-memory implementation of the VectorStore interface using functions.
+ */
+const createInMemoryVectorStore = () => {
+  const store = new Map<string, EmbeddingResult>()
+
+  const set = async (id: string, value: EmbeddingResult): Promise<void> => {
+    store.set(id, value)
+  }
+
+  const entries = async (): Promise<[string, EmbeddingResult][]> => {
+    return Array.from(store.entries())
+  }
+
+  return {
+    set,
+    entries,
+  }
 }
