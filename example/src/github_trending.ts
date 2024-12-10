@@ -2,9 +2,9 @@ import { agent } from '@dead-simple-ai-agent/framework/agent'
 import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
 import { logger } from '@dead-simple-ai-agent/framework/telemetry'
 import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
+import { getApiKey } from '@fabrice-ai/tools/utils'
 
 import { createFireCrawlTool } from './tools/firecrawlScrape.js'
-import { getApiKey } from './tools/utils.js'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
 

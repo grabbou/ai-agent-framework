@@ -48,6 +48,14 @@ Researches and summarizes the top news from the past week into a comprehensive r
 
 **Actors:** News Researcher, News Reader, Wrapup Redactor
 
+## 📈 GitHub Trending
+
+> `src/github_trending.ts`
+
+Scrapes and analyzes trending Python projects from GitHub, creating a markdown summary report.
+
+**Actors:** Github Researcher, Redactor
+
 ## Running
 
 Each example is a self-contained TypeScript file that can be run with Bun, or with `tsx`
