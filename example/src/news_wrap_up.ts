@@ -1,11 +1,10 @@
+import { getCurrentDate } from '@fabrice-ai/tools/date'
+import { getApiKey } from '@fabrice-ai/tools/utils'
+import { createWebSearchTools } from '@fabrice-ai/tools/webSearch'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { solution, workflow } from 'fabrice-ai/workflow'
-
-import { getCurrentDate } from './tools/date.js'
-import { getApiKey } from './tools/utils.js'
-import { createWebSearchTools } from './tools/webSearch.js'
 
 const apiKey = await getApiKey('Serply.io API', 'SERPLY_API_KEY')
 

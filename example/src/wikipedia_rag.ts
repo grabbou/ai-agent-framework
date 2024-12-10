@@ -1,10 +1,10 @@
+import { ragSave, ragSearch } from '@fabrice-ai/tools/vector/index'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { solution, workflow } from 'fabrice-ai/workflow'
 
-import { lookupWikipedia } from '../tools.js'
-import { ragSave, ragSearch } from './tools/vector/index.js'
+import { lookupWikipedia } from './tools/wikipedia.js'
 
 const wikipediaIndexer = agent({
   role: 'Wikipedia Indexer',
