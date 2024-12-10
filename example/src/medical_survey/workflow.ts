@@ -1,28 +1,7 @@
 import { agent } from 'fabrice-ai/agent'
-import { tool } from 'fabrice-ai/tool'
 import { workflow } from 'fabrice-ai/workflow'
-import { z } from 'zod'
 
-async function requestUserInput(prompt: string): Promise<string> {
-  return new Promise((resolve) => {
-    console.log('❔' + prompt)
-    process.stdin.resume()
-    process.stdin.once('data', (data) => {
-      process.stdin.pause()
-      resolve(data.toString().trim())
-    })
-  })
-}
-
-const askPatient = tool({
-  description: 'Tool for asking patient a question',
-  parameters: z.object({
-    query: z.string().describe('The question to ask the patient'),
-  }),
-  execute: ({ query }): Promise<string> => {
-    return requestUserInput(query)
-  },
-})
+import { askUser } from '../tools/askUser.js'
 
 const nurse = agent({
   role: 'Nurse',
@@ -33,7 +12,7 @@ const nurse = agent({
     Ask one question at time up to 5 questions. 
   `,
   tools: {
-    askPatient,
+    askPatient: askUser,
   },
 })
 

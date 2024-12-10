@@ -1,0 +1,116 @@
+import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawlScrape'
+import { getApiKey } from '@fabrice-ai/tools/utils'
+import { createVectorStoreTools, EmbeddingResult } from '@fabrice-ai/tools/vector'
+import { agent } from 'fabrice-ai/agent'
+import { teamwork } from 'fabrice-ai/teamwork'
+import { logger } from 'fabrice-ai/telemetry'
+import { tool } from 'fabrice-ai/tool'
+import { solution, workflow } from 'fabrice-ai/workflow'
+import { z } from 'zod'
+
+import { askUser } from './tools/askUser.js'
+
+const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
+
+async function requestUserInput(prompt: string): Promise<string> {
+  return new Promise((resolve) => {
+    console.log('❔' + prompt)
+    process.stdin.resume()
+    process.stdin.once('data', (data) => {
+      process.stdin.pause()
+      resolve(data.toString().trim())
+    })
+  })
+}
+
+const createInMemoryVectorStore = () => {
+  /**
+   * In-memory implementation of the VectorStore interface using functions.
+   */
+  const store = new Map<string, EmbeddingResult>()
+
+  const set = async (id: string, value: EmbeddingResult): Promise<void> => {
+    store.set(id, value)
+  }
+
+  const entries = async (): Promise<[string, EmbeddingResult][]> => {
+    return Array.from(store.entries())
+  }
+
+  return {
+    set,
+    entries,
+  }
+}
+
+const printTool = tool({
+  description: 'Display information to the user',
+  parameters: z.object({
+    message: z.string().describe('The information to be displayed'),
+  }),
+  execute: async ({ message }) => {
+    console.log(message)
+    return ''
+  },
+})
+
+const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools(
+  createInMemoryVectorStore()
+)
+
+const { firecrawlScrape } = createFireCrawlTool({
+  apiKey,
+})
+
+const githubResearcher = agent({
+  role: 'Github Researcher',
+  description: `
+    You are skilled at browsing what's hot on Github trending page.
+    You are saving the documents to vector store for later usage
+  `,
+  tools: {
+    firecrawlScrape,
+    saveDocumentInVectorStore,
+  },
+})
+
+const wrapupRedactor = agent({
+  role: 'Redactor',
+  description: `
+    Your role is to wrap up reports.
+    You ask users for which topic to focus on if it's defined in the task.
+    You're famous of beautiful Markdown formatting.
+  `,
+  tools: {
+    printTool,
+    askUser,
+    searchInVectorStore,
+  },
+})
+
+const wrapUpTrending = workflow({
+  members: [githubResearcher, wrapupRedactor],
+  description: `
+    Research the URL "https://github.com/trending/typescript" page using scraper tool
+    Get 3 top projects. You can get the title and description from the project page.
+    Then summarize it all into a comprehensive report markdown output.
+
+    Ask user about which project he wants to learn more.
+    Search for the project in the vector store and provide more details in the report.
+
+    Here are some ground rules to follow: 
+      - Include one sentence summary for each project.
+      - Print the list of projects to the user.
+      - Ask user about which project he wants to learn more.
+      - Display more information about this specific project from the vector store.
+  `,
+  output: `
+    Comprehensive markdown report with the top trending Typescript projects.
+    Detailed report about the project selected by the user.
+  `,
+  snapshot: logger,
+})
+
+const result = await teamwork(wrapUpTrending)
+
+console.log(solution(result))

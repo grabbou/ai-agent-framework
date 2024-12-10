@@ -1,10 +1,9 @@
-import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { logger } from '@dead-simple-ai-agent/framework/telemetry'
-import { solution, workflow } from '@dead-simple-ai-agent/framework/workflow'
-
-import { createFireCrawlTool } from './tools/firecrawlScrape.js'
-import { getApiKey } from './tools/utils.js'
+import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawlScrape'
+import { getApiKey } from '@fabrice-ai/tools/utils'
+import { agent } from 'fabrice-ai/agent'
+import { teamwork } from 'fabrice-ai/teamwork'
+import { logger } from 'fabrice-ai/telemetry'
+import { solution, workflow } from 'fabrice-ai/workflow'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
 
