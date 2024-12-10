@@ -6,6 +6,7 @@
     "Piotr Karwatka <piotr@catchthetornado.com>"
   ],
   "scripts": {
+    "prepare": "bun run build",
     "clean": "rm -rf dist",
     "build": "bun run clean && bun run build:lib && bun run build:types",
     "build:lib": "rslib build",
