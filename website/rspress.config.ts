@@ -2,6 +2,7 @@ import * as path from 'node:path'
 
 import { defineConfig } from 'rspress/config'
 // import { pluginTypeDoc } from '@rspress/plugin-typedoc'
+import ghPages from 'rspress-plugin-gh-pages'
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -21,6 +22,10 @@ export default defineConfig({
     ],
   },
   plugins: [
+    ghPages({
+      repo: 'https://github.com/callstackincubator/fabrice-ai.git',
+      branch: 'website',
+    }),
     // pluginTypeDoc({
     //   entryPoints: [
     //     path.join(__dirname, '../packages/framework/src/agent.ts'),
