@@ -38,7 +38,6 @@ const FireCrawlResponseSchema = z.object({
   data: z.object({
     markdown: z.string().optional(),
     html: z.string().optional(),
-    extract: z.object({}).optional(),
     metadata: z.object({
       title: z.string().optional(),
       description: z.string().optional(),
@@ -77,7 +76,7 @@ export const createFireCrawlTool = (options: FireCrawlOptions) => {
         formats: z
           .array(z.string())
           .optional()
-          .describe('Output formats to include (options: markdown, html, extract)'),
+          .describe('Output formats to include (options: markdown, html)'),
       }),
       execute: async ({ url, formats }) => {
         const body = {
@@ -96,13 +95,12 @@ export const createFireCrawlTool = (options: FireCrawlOptions) => {
             throw new Error('Failed to scrape the website.')
           }
 
-          const { markdown, html, metadata, extract } = parsedResponse.data
+          const { markdown, html, metadata } = parsedResponse.data
 
           return s`
             Scraped content for URL "${url}":
             ${markdown ? `\nMarkdown:\n${markdown}` : ''}
             ${html ? `\nHTML:\n${html}` : ''}
-            ${extract ? `\bJSON:\n${extract}` : ''}
             \nMetadata:\n${JSON.stringify(metadata, null, 2)}
           `
         } catch (error) {

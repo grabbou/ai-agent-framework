@@ -33,7 +33,7 @@ const wrapupRedactor = agent({
 const wrapUpTrending = workflow({
   members: [githubResearcher, wrapupRedactor],
   description: `
-    Research the URL https://github.com/trending/python page using scraper tool
+    Research the URL "https://github.com/trending/python" page using scraper tool
     Get 3 top projects. You can get the title and description from the project page.
     Then summarize it all into a comprehensive report markdown output.
 
