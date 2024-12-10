@@ -13,9 +13,9 @@ async function requestUserInput(prompt: string): Promise<string> {
 }
 
 export const askUser = tool({
-  description: 'Tool for asking patient a question',
+  description: 'Tool for asking user a question',
   parameters: z.object({
-    query: z.string().describe('The question to ask the patient'),
+    query: z.string().describe('The question to ask the user'),
   }),
   execute: ({ query }): Promise<string> => {
     return requestUserInput(query)
