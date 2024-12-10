@@ -111,10 +111,9 @@ const exampleAgent = agent({
 ```typescript
 import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 
-// createVectorStore accepts a `vectorStore` adapter way to switch the default - in-memory store to Pinecone or others
-
 /**
- * In-memory implementation of the VectorStore interface using functions.
+ * createVectorStore accepts a `vectorStore` adapter. 
+ * This is a way to switch the default - in-memory store to Pinecone or others of your choice.
  */
 const createPineconeVectorStore = () => {
   const store = new Map<string, EmbeddingResult>()
