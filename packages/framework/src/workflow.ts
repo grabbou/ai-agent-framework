@@ -76,7 +76,7 @@ export const workflowState = (workflow: Workflow): IdleWorkflowState => {
     status: 'idle',
     messages: [
       {
-        role: 'assistant' as const,
+        role: 'user' as const,
         content: s`
           Here is description of the workflow and expected output by the user:
           <workflow>${workflow.description}</workflow>
