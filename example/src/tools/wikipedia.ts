@@ -1,4 +1,4 @@
-import { tool } from 'fabrice/tool'
+import { tool } from 'fabrice-ai/tool'
 import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
 import { z } from 'zod'
 

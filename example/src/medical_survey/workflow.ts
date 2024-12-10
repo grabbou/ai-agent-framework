@@ -1,6 +1,6 @@
-import { agent } from 'fabrice/agent'
-import { tool } from 'fabrice/tool'
-import { workflow } from 'fabrice/workflow'
+import { agent } from 'fabrice-ai/agent'
+import { tool } from 'fabrice-ai/tool'
+import { workflow } from 'fabrice-ai/workflow'
 import { z } from 'zod'
 
 async function requestUserInput(prompt: string): Promise<string> {

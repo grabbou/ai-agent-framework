@@ -4,7 +4,7 @@
   "author": "Mike Grabowski <mike@callstack.com>",
   "type": "module",
   "dependencies": {
-    "fabrice": "0.1.0",
+    "fabrice-ai": "0.1.0",
     "@fabrice-ai/tools": "0.1.0",
     "@langchain/community": "^0.3.17",
     "axios": "^1.7.9",

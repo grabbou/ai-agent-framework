@@ -1,7 +1,7 @@
-import { tool } from 'fabrice/tool'
-import { RequiredOptionals } from 'fabrice/types'
 import axios from 'axios'
 import s from 'dedent'
+import { tool } from 'fabrice-ai/tool'
+import { RequiredOptionals } from 'fabrice-ai/types'
 import { z } from 'zod'
 
 /**

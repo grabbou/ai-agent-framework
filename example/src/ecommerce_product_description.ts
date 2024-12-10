@@ -1,7 +1,7 @@
-import { agent } from 'fabrice/agent'
-import { teamwork } from 'fabrice/teamwork'
-import { solution, workflow } from 'fabrice/workflow'
 import { visionTool } from '@fabrice-ai/tools/vision'
+import { agent } from 'fabrice-ai/agent'
+import { teamwork } from 'fabrice-ai/teamwork'
+import { solution, workflow } from 'fabrice-ai/workflow'
 
 const techExpert = agent({
   role: 'Technical expert',

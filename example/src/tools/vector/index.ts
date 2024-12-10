@@ -1,6 +1,6 @@
 import dedent from 'dedent'
-import { openai } from 'fabrice/models'
-import { tool } from 'fabrice/tool'
+import { openai } from 'fabrice-ai/models'
+import { tool } from 'fabrice-ai/tool'
 import { z } from 'zod'
 
 // Type Definitions

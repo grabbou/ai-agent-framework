@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import { Provider } from 'fabrice/models'
-import { tool } from 'fabrice/tool'
 import s from 'dedent'
+import { Provider } from 'fabrice-ai/models'
+import { tool } from 'fabrice-ai/tool'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 

@@ -3,9 +3,9 @@
  */
 import chalk from 'chalk'
 import s from 'dedent'
-import { teamwork } from 'fabrice/server'
-import { isToolCallRequest } from 'fabrice/supervisor/runTools'
-import { WorkflowState, workflowState } from 'fabrice/workflow'
+import { teamwork } from 'fabrice-ai/server'
+import { isToolCallRequest } from 'fabrice-ai/supervisor/runTools'
+import { WorkflowState, workflowState } from 'fabrice-ai/workflow'
 import fastify, { FastifyRequest } from 'fastify'
 
 import { preVisitNoteWorkflow } from './medical_survey/workflow.js'

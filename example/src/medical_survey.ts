@@ -1,5 +1,5 @@
-import { teamwork } from 'fabrice/teamwork'
-import { solution } from 'fabrice/workflow'
+import { teamwork } from 'fabrice-ai/teamwork'
+import { solution } from 'fabrice-ai/workflow'
 
 import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
 

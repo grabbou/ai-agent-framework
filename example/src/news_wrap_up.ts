@@ -1,7 +1,7 @@
-import { agent } from 'fabrice/agent'
-import { teamwork } from 'fabrice/teamwork'
-import { logger } from 'fabrice/telemetry'
-import { solution, workflow } from 'fabrice/workflow'
+import { agent } from 'fabrice-ai/agent'
+import { teamwork } from 'fabrice-ai/teamwork'
+import { logger } from 'fabrice-ai/telemetry'
+import { solution, workflow } from 'fabrice-ai/workflow'
 
 import { getCurrentDate } from './tools/date.js'
 import { getApiKey } from './tools/utils.js'

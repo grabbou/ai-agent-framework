@@ -1,7 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { tool } from 'fabrice/tool'
+import { tool } from 'fabrice-ai/tool'
 import { z } from 'zod'
 
 interface FileSystemOptions {

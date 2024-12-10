@@ -11,7 +11,7 @@ It is very easy to get started. All you have to do is to create a file with your
 ### Installing the framework from `npm`
 
 ```bash
-$ npm install fabrice
+$ npm install fabrice-ai
 ```
 
 ### Create your first workflow
@@ -20,10 +20,10 @@ Here is a simple example of a workflow that researches and plans a trip to Wroc≈
 
 ```ts
 // First, import all the necessary functions
-import { agent } from 'fabrice/agent'
-import { teamwork } from 'fabrice/teamwork'
-import { logger } from 'fabrice/telemetry/console'
-import { workflow } from 'fabrice/workflow'
+import { agent } from 'fabrice-ai/agent'
+import { teamwork } from 'fabrice-ai/teamwork'
+import { logger } from 'fabrice-ai/telemetry/console'
+import { workflow } from 'fabrice-ai/workflow'
 
 // Then, define your agents:
 
@@ -189,7 +189,7 @@ The server-side version of teamwork is perfectly suited for long-running workflo
 You can then handle tool calls on your own, and call `teamwork` again when ready.
 
 ```typescript
-import { teamwork } from 'fabrice/server'
+import { teamwork } from 'fabrice-ai/server'
 
 // If status is `assigned`, you need to handle tool calls on your own.
 // Otherwise, status is `finished` and you can read the result.

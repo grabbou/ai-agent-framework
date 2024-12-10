@@ -1,4 +1,4 @@
-import { tool } from 'fabrice/tool'
+import { tool } from 'fabrice-ai/tool'
 import { z } from 'zod'
 
 export const getCurrentDate = tool({
