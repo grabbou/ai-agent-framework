@@ -1,6 +1,6 @@
 import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawlScrape'
 import { getApiKey } from '@fabrice-ai/tools/utils'
-import { createVectorStoreTools, EmbeddingResult } from '@fabrice-ai/tools/vector'
+import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
