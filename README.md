@@ -8,12 +8,12 @@ Built with TypeScript and designed to be serverless-ready.
 
 It is very easy to get started. All you have to do is to create a file with your agents and workflow, then run it.
 
-### Using `npx create`
+### Using `npx create-fabrice-ai`
 
 Use our creator tool to quickly create a new AI agent project.
 
 ```bash
-$ npx create ai-agent
+$ npx create-fabrice-ai
 ```
 
 You can choose from a few templates. You can see a full list of them [here](./example/README.md).
