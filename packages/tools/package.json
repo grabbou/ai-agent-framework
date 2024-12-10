@@ -19,7 +19,8 @@
   },
   "type": "module",
   "dependencies": {
-    "fabrice-ai": "0.1.2",
+    "axios": "^1.7.9",
+    "fabrice-ai": "0.2.0",
     "zod": "^3.23.8"
   },
   "license": "MIT",
@@ -44,5 +45,5 @@
   "engines": {
     "node": ">=22"
   },
-  "version": "0.1.2"
+  "version": "0.2.0"
 }
