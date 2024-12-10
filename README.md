@@ -31,95 +31,30 @@ $ npm install fabrice-ai
 Here is a simple example of a workflow that researches and plans a trip to Wrocław, Poland:
 
 ```ts
-// First, import all the necessary functions
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
-import { logger } from 'fabrice-ai/telemetry/console'
-import { workflow } from 'fabrice-ai/workflow'
+import { solution, workflow } from 'fabrice-ai/workflow'
 
-// Then, define your agents:
+import { lookupWikipedia } from './tools/wikipedia.js'
 
-// This agent is responsible for researching and finding cool things to do at the destination.
 const activityPlanner = agent({
   role: 'Activity Planner',
-  description: `
-    You are skilled at creating personalized itineraries that cater to
-    the specific preferences and demographics of travelers.
-    Your goal is to research and find cool things to do at the destination,
-    including activities and events that match the traveler's interests and age group.
-  `,
+  description: `You are skilled at creating personalized itineraries...`,
 })
 
-// This agent is responsible for researching and finding interesting landmarks at the destination. 
-// It uses Wikipedia as a source of information.
 const landmarkScout = agent({
   role: 'Landmark Scout',
-  description: `
-    You are skilled at researching and finding interesting landmarks at the destination.
-    Your goal is to find historical landmarks, museums, and other interesting places.
-  `,
-  tools: {
-    lookupWikipedia,
-  },
+  description: `You research interesting landmarks...`,
+  tools: { lookupWikipedia },
 })
 
-// This agent is responsible for researching and finding highly-rated restaurants at the destination.
-const restaurantScout = agent({
-  role: 'Restaurant Scout',
-  description: `
-    As a food lover, you know the best spots in town for a delightful culinary experience.
-    You also have a knack for finding picturesque and entertaining locations.
-    Your goal is to find highly-rated restaurants and dining experiences at the destination,
-    and recommend scenic locations and fun activities.
-  `,
+const workflow = workflow({
+  members: [activityPlanner, landmarkScout],
+  description: `Plan a trip to Wrocław, Poland...`,
 })
 
-// This agent is responsible for compiling all the information into a coherent and enjoyable travel plan.
-const itineraryCompiler = agent({
-  role: 'Itinerary Compiler',
-  description: `
-    With an eye for detail, you organize all the information into a coherent and enjoyable travel plan.
-    Your goal is to compile all researched information into a comprehensive day-by-day itinerary,
-    ensuring the integration of flights and hotel information.
-  `,
-})
-
-// Then, define your workflow.
-// Workflows can be simple, or they can be more complex, involving multiple steps and loops.
-const researchTripWorkflow = workflow({
-  members: [activityPlanner, restaurantScout],
-  description: `
-    Research and find cool things to do in Wrocław, Poland.
-
-    Focus:
-      - activities and events that match the traveler's interests and age group.
-      - highly-rated restaurants and dining experiences.
-      - landmarks with historic context.
-      - picturesque and entertaining locations.
-
-    Traveler's information:
-      - Origin: New York, USA
-      - Destination: Wrocław, Poland
-      - Age of the traveler: 30
-      - Hotel location: Main Square, Wrocław
-      - Flight information: Flight AA123, arriving on 2023-12-15
-      - How long is the trip: 7 days
-  `,
-  output: `
-    Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
-    Ensure the itinerary integrates flights, hotel information, and all planned activities and dining experiences.
-  `,
-  // By default, framework does not log anything.
-  // Use `logger` for nice console output of each step on the way.
-  telemetry: logger,
-})
-
-// Finally, you can run the workflow.
-// This will block until the workflow is completed.
-const state = await teamwork(researchTripWorkflow)
-
-// Don't forget to log the result!
-console.log(solution(state))
+const result = await teamwork(workflow)
+console.log(solution(result))
 ```
 
 #### Running the example
