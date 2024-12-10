@@ -27,5 +27,27 @@
   "trustedDependencies": [
     "core-js"
   ],
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release ${version}",
+      "tagName": "v${version}"
+    },
+    "npm": false,
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "angular"
+      },
+      "@release-it-plugins/workspaces": {
+        "workspaces": [
+          "packages/*"
+        ],
+        "additionalManifests": {
+          "dependencyUpdates": [
+            "example/package.json"
+          ]
+        }
+      }
+    }
+  },
   "version": "0.0.1"
 }
