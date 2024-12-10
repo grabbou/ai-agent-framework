@@ -46,7 +46,13 @@ export function isNodeError(error: unknown): error is NodeJS.ErrnoException {
  * Copy additional files to the root directory
  */
 export async function copyAdditionalTemplateFiles(root: string) {
-  execSync(`cp ${path.join(__dirname, '../_gitignore')} ${path.join(root, '.gitignore')}`)
-  execSync(`cp ${path.join(__dirname, '../README.md')} ${path.join(root, 'README.md')}`)
-  execSync(`cp ${path.join(__dirname, '../_tsconfig.json')} ${path.join(root, 'tsconfig.json')}`)
+  const files = [
+    { src: '../_gitignore', dest: '.gitignore' },
+    { src: '../README.md', dest: 'README.md' },
+    { src: '../_tsconfig.json', dest: 'tsconfig.json' },
+  ]
+
+  for (const file of files) {
+    execSync(`cp ${path.join(__dirname, file.src)} ${path.join(root, file.dest)}`)
+  }
 }
