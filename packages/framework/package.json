@@ -30,7 +30,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/callstackincubator/ai-agent-framework.git"
+    "url": "git+https://github.com/callstackincubator/ai-agent-framework.git",
+    "directory": "packages/framework"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "ai",
@@ -45,5 +49,5 @@
   "engines": {
     "node": ">=22"
   },
-  "version": "0.1.2"
+  "version": "0.3.0"
 }
