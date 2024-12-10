@@ -8,13 +8,23 @@ Built with TypeScript and designed to be serverless-ready.
 
 It is very easy to get started. All you have to do is to create a file with your agents and workflow, then run it.
 
-### Installing the framework from `npm`
+### Using `npx create`
+
+Use our creator tool to quickly create a new AI agent project.
+
+```bash
+$ npx create ai-agent
+```
+
+You can choose from a few templates. You can see a full list of them [here](./example/README.md).
+
+### Manually
 
 ```bash
 $ npm install fabrice-ai
 ```
 
-### Create your first workflow
+#### Create your first workflow
 
 Here is a simple example of a workflow that researches and plans a trip to Wrocław, Poland:
 
@@ -110,19 +120,17 @@ const state = await teamwork(researchTripWorkflow)
 console.log(solution(state))
 ```
 
-You can see this example in action and other ones [here](./example/README.md).
-
-### Running the example
+#### Running the example
 
 Finally, you can run the example by simply executing the file.
 
-#### Using `bun`
+**Using `bun`**
 
 ```bash
 $ bun your_file.ts
 ```
 
-#### Using `node`
+**Using `node`**
 
 ```bash
 $ node --import=tsx your_file.ts
