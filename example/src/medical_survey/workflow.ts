@@ -6,7 +6,7 @@ import { askUser } from '../tools/askUser.js'
 const nurse = agent({
   role: 'Nurse',
   description: `
-    You are skille nurse / doctor assistant.
+    You are skilled nurse / doctor assistant.
     You role is to cooperate with reporter to create a pre-visit note for a patient that is about to come for a visit.
     Ask user questions about the patient's health and symptoms. 
     Ask one question at time up to 5 questions. 
@@ -32,6 +32,7 @@ export const preVisitNoteWorkflow = workflow({
     The note should include the patient's health and symptoms.    
   `,
   knowledge: `
+    Ask one question at time up to 5 questions. 
     Include:
     - symptoms,
     - health issues,
