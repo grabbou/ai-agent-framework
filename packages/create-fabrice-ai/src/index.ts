@@ -100,9 +100,16 @@ const template = await select({
     },
     {
       value: {
-        files: ['src/github_trending.ts', 'src/tools/firecrawl.ts'],
+        files: ['src/github_trending.ts'],
       },
       label: 'GitHub Trending - Track and summarize hot Python projects on GitHub',
+    },
+    {
+      value: {
+        files: ['src/github_trending_vector.ts', 'src/tools/askUser.ts'],
+      },
+      label:
+        'GitHub Trending + Vector Store - Track and summarize hot Typescript projects on GitHub + get project details from vector store',
     },
     {
       value: {
