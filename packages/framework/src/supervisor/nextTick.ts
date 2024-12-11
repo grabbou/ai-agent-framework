@@ -1,4 +1,5 @@
-import { Workflow, WorkflowState } from '../workflow.js'
+import type { Usage } from '../types.js'
+import type { Workflow, WorkflowState } from '../workflow.js'
 import { finalizeWorkflow } from './finalizeWorkflow.js'
 import { nextTask } from './nextTask.js'
 import { runAgent } from './runAgent.js'
@@ -12,11 +13,11 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
   const { status, messages } = state
 
   /**
-   * When number of messages exceedes number of maximum iterations, we must force finish the workflow
+   * When number of messages exceeds number of maximum iterations, we must force finish the workflow
    * and produce best final answer
    */
   if (messages.length > workflow.maxIterations) {
-    const content = await finalizeWorkflow(workflow.provider, messages)
+    const { response, usage } = await finalizeWorkflow(workflow.provider, messages)
     return {
       ...state,
       status: 'finished',
@@ -24,7 +25,8 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
         role: 'user',
         content,
       }),
-    }
+      usage: addUsage(state.usage, usage),
+    };
   }
 
   /**
@@ -77,7 +79,8 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
           role: 'assistant',
           content: 'No agent found.',
         }),
-      }
+        usage: state.usage,
+      };
     }
 
     /**
@@ -137,4 +140,12 @@ export async function iterate(workflow: Workflow, state: WorkflowState) {
   const nextState = await nextTick(workflow, state)
   workflow.snapshot({ prevState: state, nextState })
   return nextState
+}
+
+function addUsage(prevUsage: Usage, usage: Usage | undefined) {
+  return {
+    prompt_tokens: prevUsage.prompt_tokens + (usage?.prompt_tokens ?? 0),
+    completion_tokens: prevUsage.completion_tokens + (usage?.completion_tokens ?? 0),
+    total_tokens: prevUsage.total_tokens + (usage?.total_tokens ?? 0),
+  }
 }

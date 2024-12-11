@@ -66,9 +66,12 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
         break
       case 'finished':
         logMessage(
-          '🎉',
-          'Workflow finished successfully!',
-          `Total messages: ${nextState.messages.length}`
+          "🎉",
+          "Workflow finished successfully!",
+          [ 
+            `Total messages: ${nextState.messages.length}`,
+            `Total tokens: ${nextState.usage.total_tokens} (input: ${nextState.usage.prompt_tokens}, output: ${nextState.usage.completion_tokens})`,
+          ].join('\n')
         )
         break
       case 'failed':
