@@ -12,7 +12,7 @@ type WorkflowOptions = {
   output: string
   members: Agent[]
 
-  knowledge?: string
+  background?: string
   provider?: Provider
   maxIterations?: number
   snapshot?: Telemetry
@@ -26,7 +26,7 @@ export const workflow = (options: WorkflowOptions): Workflow => {
     maxIterations: 50,
     provider: openai(),
     snapshot: noop,
-    knowledge: '',
+    background: '',
     ...options,
   }
 }
