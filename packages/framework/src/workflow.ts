@@ -5,7 +5,7 @@ import s from 'dedent'
 import { Agent } from './agent.js'
 import { openai, Provider } from './models.js'
 import { noop, Telemetry } from './telemetry.js'
-import { Message } from './types.js'
+import { Message, Usage } from './types.js'
 
 type WorkflowOptions = {
   description: string
@@ -35,9 +35,10 @@ export type Workflow = Required<WorkflowOptions>
  * Base workflow
  */
 type BaseWorkflowState = {
-  id: string
-  messages: Message[]
-}
+  id: string;
+  messages: Message[];
+  usage: Usage;
+};
 
 /**
  * Different states workflow is in, in between execution from agents
@@ -47,7 +48,7 @@ export type IdleWorkflowState = BaseWorkflowState & {
 }
 
 /**
- * Supervisor selected the task, and is now pending assignement of an agent
+ * Supervisor selected the task, and is now pending assignment of an agent
  */
 export type PendingWorkflowState = BaseWorkflowState & {
   status: 'pending'
@@ -84,6 +85,11 @@ export const workflowState = (workflow: Workflow): IdleWorkflowState => {
         `,
       },
     ],
+    usage: {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+    },
   }
 }
 

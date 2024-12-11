@@ -1,4 +1,5 @@
-import { Workflow, WorkflowState } from '../workflow.js'
+import type { Usage } from '../types.js'
+import type { Workflow, WorkflowState } from '../workflow.js'
 import { finalizeWorkflow } from './finalizeWorkflow.js'
 import { nextTask } from './nextTask.js'
 import { runAgent } from './runAgent.js'
@@ -12,18 +13,19 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
   const { status, messages } = state
 
   /**
-   * When number of messages exceedes number of maximum iterations, we must force finish the workflow
+   * When number of messages exceeds number of maximum iterations, we must force finish the workflow
    * and produce best final answer
    */
   if (messages.length > workflow.maxIterations) {
-    const content = await finalizeWorkflow(workflow.provider, messages)
+    const { response, usage } = await finalizeWorkflow(workflow.provider, messages)
     return {
       ...state,
       status: 'finished',
       messages: state.messages.concat({
         role: 'user',
-        content,
+        content: response,
       }),
+      usage: combineUsage(state.usage, usage),
     }
   }
 
@@ -31,7 +33,7 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
    * When workflow is idle, we must get next task to work on, or finish the workflow otherwise.
    */
   if (status === 'idle') {
-    const task = await nextTask(workflow.provider, messages)
+    const { task, usage } = await nextTask(workflow.provider, messages)
     if (task) {
       return {
         ...state,
@@ -42,11 +44,13 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
             content: task,
           },
         ],
+        usage: combineUsage(state.usage, usage),
       }
     } else {
       return {
         ...state,
         status: 'finished',
+        usage: combineUsage(state.usage, usage),
       }
     }
   }
@@ -55,12 +59,17 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
    * When workflow is pending, we must find best agent to work on it.
    */
   if (status === 'pending') {
-    const selectedAgent = await selectAgent(workflow.provider, state.agentRequest, workflow.members)
+    const { agent, usage } = await selectAgent(
+      workflow.provider,
+      state.agentRequest,
+      workflow.members
+    )
     return {
       ...state,
       status: 'assigned',
       agentStatus: 'idle',
-      agent: selectedAgent.role,
+      agent: agent.role,
+      usage: combineUsage(state.usage, usage),
     }
   }
 
@@ -77,6 +86,7 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
           role: 'assistant',
           content: 'No agent found.',
         }),
+        usage: state.usage,
       }
     }
 
@@ -101,18 +111,20 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
      *
      * If further processing is required, we will carry `agentRequest` over to the next iteration.
      */
-    const [agentResponse, status] = await runAgent(agent, state.messages, state.agentRequest)
-    if (status === 'complete') {
+    const { kind, message, usage } = await runAgent(agent, state.messages, state.agentRequest)
+    if (kind === 'complete') {
       return {
         ...state,
         status: 'idle',
-        messages: state.messages.concat(state.agentRequest[0], agentResponse),
+        messages: state.messages.concat(state.agentRequest[0], message),
+        usage: combineUsage(state.usage, usage),
       }
     }
     return {
       ...state,
-      agentStatus: status,
-      agentRequest: state.agentRequest.concat(agentResponse),
+      agentStatus: kind,
+      agentRequest: state.agentRequest.concat(message),
+      usage: combineUsage(state.usage, usage),
     }
   }
 
@@ -137,4 +149,12 @@ export async function iterate(workflow: Workflow, state: WorkflowState) {
   const nextState = await nextTick(workflow, state)
   workflow.snapshot({ prevState: state, nextState })
   return nextState
+}
+
+function combineUsage(prevUsage: Usage, usage: Usage | undefined) {
+  return {
+    prompt_tokens: prevUsage.prompt_tokens + (usage?.prompt_tokens ?? 0),
+    completion_tokens: prevUsage.completion_tokens + (usage?.completion_tokens ?? 0),
+    total_tokens: prevUsage.total_tokens + (usage?.total_tokens ?? 0),
+  }
 }

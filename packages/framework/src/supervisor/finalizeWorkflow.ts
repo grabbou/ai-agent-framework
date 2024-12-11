@@ -3,9 +3,14 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { Provider } from '../models.js'
-import { Message } from '../types.js'
+import { Message, Usage } from '../types.js'
 
-export async function finalizeWorkflow(provider: Provider, messages: Message[]): Promise<string> {
+export type FinalizeWorkflowResult = {
+  response: string
+  usage?: Usage
+}
+
+export async function finalizeWorkflow(provider: Provider, messages: Message[]): Promise<FinalizeWorkflowResult> {
   const response = await provider.completions({
     messages: [
       {
@@ -29,5 +34,9 @@ export async function finalizeWorkflow(provider: Provider, messages: Message[]):
   if (!result) {
     throw new Error('No parsed response received')
   }
-  return result.finalAnswer
+
+  return {
+    response: result.finalAnswer,
+    usage: response.usage,
+  };
 }

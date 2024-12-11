@@ -3,13 +3,19 @@ import { zodFunction, zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { Agent } from '../agent.js'
-import { Message } from '../types.js'
+import { Message, Usage } from '../types.js'
+
+export type RunAgentResult = {
+  message: Message
+  kind: 'step' | 'complete' | 'tool'
+  usage?: Usage
+}
 
 export async function runAgent(
   agent: Agent,
   agentContext: Message[],
   agentRequest: Message[]
-): Promise<[Message, 'step' | 'complete' | 'tool']> {
+): Promise<RunAgentResult> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
         zodFunction({
@@ -81,7 +87,7 @@ export async function runAgent(
   })
 
   if (response.choices[0].message.tool_calls.length > 0) {
-    return [response.choices[0].message, 'tool']
+    return { message: response.choices[0].message, kind: 'tool', usage: response.usage }
   }
 
   const result = response.choices[0].message.parsed
@@ -93,11 +99,12 @@ export async function runAgent(
     throw new Error(result.response.reasoning)
   }
 
-  return [
-    {
+  return {
+    message: {
       role: 'assistant',
       content: result.response.result,
     },
-    result.response.kind,
-  ]
+    kind: result.response.kind,
+    usage: response.usage,
+  }
 }

@@ -1,4 +1,5 @@
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
+import type { CompletionUsage } from 'openai/resources/completions.mjs'
 
 /**
  * Utility type to get optional keys from T.
@@ -22,3 +23,8 @@ export type RequiredOptionals<T> = Required<OptionalProperties<T>>
  */
 export type Message = ChatCompletionMessageParam
 export type MessageContent = Message['content']
+
+/**
+ * Usage type for completion
+ */
+export type Usage = CompletionUsage;
