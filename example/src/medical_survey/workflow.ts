@@ -10,6 +10,7 @@ const nurse = agent({
     You role is to cooperate with reporter to create a pre-visit note for a patient that is about to come for a visit.
     Ask user questions about the patient's health and symptoms. 
     Ask one question at time up to 5 questions. 
+    Analyze the answer and ask another question based on the answer and context.
   `,
   tools: {
     askPatient: askUser,
@@ -32,7 +33,12 @@ export const preVisitNoteWorkflow = workflow({
     The note should include the patient's health and symptoms.    
   `,
   knowledge: `
-    Ask one question at time up to 5 questions. 
+    Behaviour:
+    - be professional and kind,
+    - ask questions one at a time,
+    - listen and analyze the answer before asking another question,
+    - be inquisitive and ask for details.
+
     Include:
     - symptoms,
     - health issues,
