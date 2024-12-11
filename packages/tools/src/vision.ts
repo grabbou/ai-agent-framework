@@ -4,12 +4,18 @@ import path from 'node:path'
 import s from 'dedent'
 import { Provider } from 'fabrice-ai/models'
 import { tool } from 'fabrice-ai/tool'
+import { CompletionUsage } from 'openai/resources/completions.mjs'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 const encodeImage = async (imagePath: string): Promise<string> => {
   const imageBuffer = await fs.readFile(imagePath)
   return `data:image/${path.extname(imagePath).toLowerCase().replace('.', '')};base64,${imageBuffer.toString('base64')}`
+}
+
+export type CallOpenAIResult = {
+  text: string
+  usage?: CompletionUsage
 }
 
 async function callOpenAI(

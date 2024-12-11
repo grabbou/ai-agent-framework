@@ -3,9 +3,14 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { Provider } from '../models.js'
-import { Message } from '../types.js'
+import { Message, Usage } from '../types.js'
 
-export async function nextTask(provider: Provider, history: Message[]): Promise<string | null> {
+export type NextTaskResult = {
+  task: string | null
+  usage?: Usage
+}
+
+export async function nextTask(provider: Provider, history: Message[]): Promise<NextTaskResult> {
   const response = await provider.completions({
     messages: [
       {
@@ -53,10 +58,10 @@ export async function nextTask(provider: Provider, history: Message[]): Promise<
     }
 
     if (!content.task) {
-      return null
+      return { task: null, usage: response.usage }
     }
 
-    return content.task
+    return { task: content.task, usage: response.usage }
   } catch (error) {
     throw new Error('Failed to determine next task')
   }

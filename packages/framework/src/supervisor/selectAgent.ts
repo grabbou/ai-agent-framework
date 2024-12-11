@@ -4,13 +4,18 @@ import { z } from 'zod'
 
 import { Agent } from '../agent.js'
 import { Provider } from '../models.js'
-import { Message } from '../types.js'
+import { Message, Usage } from '../types.js'
+
+export type SelectAgentResult = {
+  agent: Agent
+  usage?: Usage
+}
 
 export async function selectAgent(
   provider: Provider,
   agentRequest: Message[],
   agents: Agent[]
-): Promise<Agent> {
+): Promise<SelectAgentResult> {
   const response = await provider.completions({
     messages: [
       {
@@ -64,5 +69,5 @@ export async function selectAgent(
     throw new Error('Invalid agent')
   }
 
-  return agent
+  return { agent, usage: response.usage }
 }
