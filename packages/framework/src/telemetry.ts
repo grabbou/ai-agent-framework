@@ -14,15 +14,14 @@ export type Telemetry = ({
 export const noop: Telemetry = () => {}
 
 export const logger: Telemetry = ({ prevState, nextState }) => {
-  const { status: prevStatus } = prevState
-  const { status: nextStatus } = nextState
+  const { status } = nextState
 
   const logMessage = (emoji: string, message: string, details: string = '') => {
     console.log(`${emoji} ${chalk.bold(message)}${details ? `\n${chalk.gray(details)}` : ''}`)
   }
 
-  if (prevStatus !== nextStatus) {
-    switch (nextStatus) {
+  if (prevState !== nextState) {
+    switch (status) {
       case 'pending':
         logMessage(
           '🕒',
@@ -33,13 +32,17 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
       case 'assigned':
         switch (nextState.agentStatus) {
           case 'idle':
-            logMessage('🛠️', `Agent "${nextState.agent}" is beginning to work on the task`)
+            logMessage(
+              '🛠️',
+              `Agent "${nextState.agent}" is beginning to work on the task`,
+              `Step details: ${nextState.agentRequest.at(-1)!.content}`
+            )
             break
           case 'step':
             logMessage(
               '🔄',
-              `Agent "${nextState.agent}" is proceeding to the next step`,
-              `Step details: ${nextState.agentRequest[0].content}`
+              `Agent "${nextState.agent}" is moving to the next step`,
+              `Step details: ${nextState.agentRequest.at(-1)!.content}`
             )
             break
           case 'tool': {
@@ -75,7 +78,7 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
         logMessage('❌', 'Workflow failed', `Check logs for more details`)
         break
       default:
-        logMessage('ℹ️', 'State changed', `New status: ${nextStatus}`)
+        logMessage('ℹ️', 'State changed', `New status: ${status}`)
     }
   }
 }
