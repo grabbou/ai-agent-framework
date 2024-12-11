@@ -107,7 +107,7 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
             content: `Please take into account the following background: 
                       <background>${workflow.background}</background>`,
           },
-          ...state.messages.slice(1),
+          ...state.messages.slice(1), // [0] element of the overall messages context is workflow description
         ]
       : state.messages
 
