@@ -30,6 +30,12 @@ intro(chalk.gray(`(c) 2024 Callstack Research Team`))
 
 const projectName = await text({
   message: 'How would you like to name your project?',
+  validate: (value) => {
+    const isValid = /^[a-zA-Z0-9-_]+$/.test(value)
+    return isValid
+      ? undefined
+      : 'Please provide a valid project name (no spaces or special characters).'
+  },
 })
 
 if (typeof projectName !== 'string') {
