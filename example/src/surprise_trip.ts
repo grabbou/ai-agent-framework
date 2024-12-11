@@ -55,15 +55,16 @@ const researchTripWorkflow = workflow({
       - highly-rated restaurants and dining experiences.
       - landmarks with historic context.
       - picturesque and entertaining locations.
-
-    Traveler's information:
+  `,
+  knowledge: `
+      Traveler's information:
       - Origin: New York, USA
       - Destination: Wrocław, Poland
       - Age of the traveler: 30
       - Hotel location: Main Square, Wrocław
       - Flight information: Flight AA123, arriving on 2023-12-15
       - How long is the trip: 7 days
-  `,
+    `,
   output: `
     Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
     Ensure the itinerary integrates flights, hotel information, and all planned activities and dining experiences.

@@ -19,7 +19,6 @@ export async function runAgent(
         })
       )
     : []
-
   const response = await agent.provider.completions({
     messages: [
       {
