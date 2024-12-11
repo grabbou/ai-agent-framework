@@ -33,24 +33,24 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
    * When workflow is idle, we must get next task to work on, or finish the workflow otherwise.
    */
   if (status === 'idle') {
-    const task = await nextTask(workflow.provider, messages)
-    if (task.task) {
+    const { task, usage } = await nextTask(workflow.provider, messages)
+    if (task) {
       return {
         ...state,
         status: 'pending',
         agentRequest: [
           {
             role: 'user',
-            content: task.task,
+            content: task,
           },
         ],
-        usage: combineUsage(state.usage, task.usage),
+        usage: combineUsage(state.usage, usage),
       }
     } else {
       return {
         ...state,
         status: 'finished',
-        usage: combineUsage(state.usage, task.usage),
+        usage: combineUsage(state.usage, usage),
       }
     }
   }
@@ -59,13 +59,17 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
    * When workflow is pending, we must find best agent to work on it.
    */
   if (status === 'pending') {
-    const selectedAgent = await selectAgent(workflow.provider, state.agentRequest, workflow.members)
+    const { agent, usage } = await selectAgent(
+      workflow.provider,
+      state.agentRequest,
+      workflow.members
+    )
     return {
       ...state,
       status: 'assigned',
       agentStatus: 'idle',
-      agent: selectedAgent.agent.role,
-      usage: combineUsage(state.usage, selectedAgent.usage),
+      agent: agent.role,
+      usage: combineUsage(state.usage, usage),
     }
   }
 
@@ -107,20 +111,20 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
      *
      * If further processing is required, we will carry `agentRequest` over to the next iteration.
      */
-    const agentResponse = await runAgent(agent, state.messages, state.agentRequest)
-    if (agentResponse.kind === 'complete') {
+    const { kind, message, usage } = await runAgent(agent, state.messages, state.agentRequest)
+    if (kind === 'complete') {
       return {
         ...state,
         status: 'idle',
-        messages: state.messages.concat(state.agentRequest[0], agentResponse.message),
-        usage: combineUsage(state.usage, agentResponse.usage),
+        messages: state.messages.concat(state.agentRequest[0], message),
+        usage: combineUsage(state.usage, usage),
       }
     }
     return {
       ...state,
-      agentStatus: agentResponse.kind,
-      agentRequest: state.agentRequest.concat(agentResponse.message),
-      usage: combineUsage(state.usage, agentResponse.usage),
+      agentStatus: kind,
+      agentRequest: state.agentRequest.concat(message),
+      usage: combineUsage(state.usage, usage),
     }
   }
 
