@@ -1,6 +1,6 @@
 {
   "name": "create-fabrice-ai",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "license": "MIT",
   "description": "Create new AI agent application with Fabrice",
   "type": "module",
