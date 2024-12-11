@@ -71,6 +71,9 @@ const wrapUpTrending = workflow({
       - Ask user about which project he wants to learn more.
       - Display more information about this specific project from the vector store.
   `,
+  knowledge: `
+    We are preparing a report for the Typescript community.
+  `,
   output: `
     Comprehensive markdown report with the top trending Typescript projects.
     Detailed report about the project selected by the user.

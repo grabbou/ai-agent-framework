@@ -3,7 +3,6 @@ import { workflow } from 'fabrice-ai/workflow'
 
 import { askUser } from '../tools/askUser.js'
 
-
 const nurse = agent({
   role: 'Nurse',
   description: `
@@ -30,8 +29,9 @@ export const preVisitNoteWorkflow = workflow({
   members: [nurse, reporter],
   description: `
     Create a pre-visit note for a patient that is about to come for a visit.
-    The note should include the patient's health and symptoms.
-    
+    The note should include the patient's health and symptoms.    
+  `,
+  knowledge: `
     Include:
     - symptoms,
     - health issues,

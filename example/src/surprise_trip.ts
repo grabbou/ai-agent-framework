@@ -56,7 +56,7 @@ const researchTripWorkflow = workflow({
       - landmarks with historic context.
       - picturesque and entertaining locations.
   `,
-  background: `
+  knowledge: `
       Traveler's information:
       - Origin: New York, USA
       - Destination: Wrocław, Poland

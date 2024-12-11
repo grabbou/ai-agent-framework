@@ -45,14 +45,14 @@ const bookLibraryWorkflow = workflow({
   description: `
     Analyze the photo of the library and list all the books in the library.
     Generate a website that lists all the books in the library.
-    The photo of books in the library is in the "${imagePath}" file.
-
+  `,
+  knowledge: `
     Important information:
+    - The photo of books in the library is in the "${imagePath}" file.
     - All available templates are in "${workingDir}" directory. Find the best template to use.
     - You only have access to files in "${workingDir}" directory.
     - Use absolute paths for tool calls.
-
-  `,
+    `,
   output: `
     Create a new HTML page in "${outputPath}" directory, based on the best template you found.
   `,

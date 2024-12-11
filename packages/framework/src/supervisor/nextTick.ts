@@ -95,17 +95,17 @@ export async function nextTick(workflow: Workflow, state: WorkflowState): Promis
     }
 
     /**
-     * Limit the agent context to the background provided by the workflow designer.
+     * Limit the agent context to the knowledge provided by the workflow designer.
      * Implements: https://github.com/callstackincubator/fabrice-ai/issues/99
-     * Right now it's the backward compatibility mode - so when no `background` is provided
+     * Right now it's the backward compatibility mode - so when no `knowledge` is provided
      * it passes the whole workflow description to the agent.
      */
-    const agentContext: Message[] = workflow.background
+    const agentContext: Message[] = workflow.knowledge
       ? [
           {
             role: 'user',
-            content: `Please take into account the following background: 
-                      <background>${workflow.background}</background>`,
+            content: `Please take into account the following knowledge: 
+                      <knowledge>${workflow.knowledge}</knowledge>`,
           },
           ...state.messages.slice(1), // [0] element of the overall messages context is workflow description
         ]

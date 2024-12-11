@@ -39,6 +39,9 @@ const wrapUpTrending = workflow({
     Here are some ground rules to follow: 
       - Include one sentence summary for each project.
   `,
+  knowledge: `
+    We are preparing a report for the Python community.
+  `,
   output: `
     Comprehensive markdown report with the top trending python projects.
   `,
