@@ -9,7 +9,7 @@ export async function runAgent(
   agent: Agent,
   agentContext: Message[],
   agentRequest: Message[]
-): Promise<[Message, 'step' | 'complete' | 'tool']> {
+): Promise<[Message[], 'step' | 'complete' | 'tool']> {
   const tools = agent.tools
     ? Object.entries(agent.tools).map(([name, tool]) =>
         zodFunction({
@@ -60,15 +60,10 @@ export async function runAgent(
             name: z.string().describe('The name of the step'),
             result: z.string().describe('The result of the step'),
             reasoning: z.string().describe('The reasoning for this step'),
-          }),
-          z.object({
-            kind: z.literal('complete'),
-            result: z
+            nextStep: z
               .string()
-              .describe(
-                'The final result of the task. Include all relevant information from previous steps.'
-              ),
-            reasoning: z.string().describe('The reasoning for completing the task'),
+              .nullable()
+              .describe('The next step to complete the task, or null if task is complete'),
           }),
           z.object({
             kind: z.literal('error'),
@@ -81,7 +76,7 @@ export async function runAgent(
   })
 
   if (response.choices[0].message.tool_calls.length > 0) {
-    return [response.choices[0].message, 'tool']
+    return [[response.choices[0].message], 'tool']
   }
 
   const result = response.choices[0].message.parsed
@@ -93,11 +88,25 @@ export async function runAgent(
     throw new Error(result.response.reasoning)
   }
 
-  return [
+  const agentResponse = [
     {
-      role: 'assistant',
+      role: 'assistant' as const,
       content: result.response.result,
     },
-    result.response.kind,
   ]
+
+  if (result.response.nextStep) {
+    return [
+      [
+        ...agentResponse,
+        {
+          role: 'user',
+          content: result.response.nextStep,
+        },
+      ],
+      'step',
+    ]
+  }
+
+  return [agentResponse, 'complete']
 }
