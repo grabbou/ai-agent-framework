@@ -4,9 +4,9 @@ import type {
 } from 'openai/resources/beta/chat/completions'
 import { ChatCompletionToolMessageParam } from 'openai/resources/chat/completions'
 
-import { Agent } from './agent.js'
 import { WorkflowState } from './state.js'
 import { Message } from './types.js'
+import { Workflow } from './workflow.js'
 
 /**
  * Asserts that given message requests tool calls
@@ -16,32 +16,34 @@ export function isToolCallRequest(message?: Message): message is ParsedChatCompl
 }
 
 export async function runTools(
-  agent: Agent,
-  agentRequest: Message[]
+  state: WorkflowState,
+  context: Message[],
+  workflow: Workflow
 ): Promise<ChatCompletionToolMessageParam[]> {
-  // tbd: find cleaner way to do this
-  const messages = Array.from(agentRequest)
-  const toolCallRequest = messages.pop()
+  const toolRequests = getAllMissingToolCalls(state)
 
-  if (!isToolCallRequest(toolCallRequest)) {
+  if (toolRequests.length === 0) {
     throw new Error('Invalid tool request')
   }
 
+  const { tools, provider } = workflow.team[state.agent]
+
   const toolResults = await Promise.all(
-    toolCallRequest.tool_calls.map(async (toolCall) => {
+    toolRequests.map(async (toolCall) => {
       if (toolCall.type !== 'function') {
         throw new Error('Tool call is not a function')
       }
 
-      const tool = agent.tools ? agent.tools[toolCall.function.name] : null
+      const tool = tools[toolCall.function.name]
       if (!tool) {
         throw new Error(`Unknown tool: ${toolCall.function.name}`)
       }
 
       const content = await tool.execute(toolCall.function.parsed_arguments, {
-        provider: agent.provider,
-        messages,
+        provider,
+        messages: context.concat(state.messages),
       })
+
       return {
         role: 'tool' as const,
         tool_call_id: toolCall.id,

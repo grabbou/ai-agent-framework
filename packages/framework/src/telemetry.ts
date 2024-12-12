@@ -23,8 +23,13 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
     }
     switch (state.status) {
       case 'idle':
-      case 'running':
-        return `Working on: ${state.messages[0].content}`
+      case 'running': {
+        const lastMessage = state.messages.at(-1)!
+        if (lastMessage.role === 'tool') {
+          return `Processing tool response...`
+        }
+        return `Working on: ${lastMessage.content}`
+      }
       case 'paused': {
         const lastMessage = state.messages.at(-1)!
         if (isToolCallRequest(lastMessage)) {

@@ -16,8 +16,3 @@ export type Tool<P extends ZodTypeAny = any> = {
  * Helper function to infer the type of the parameters.
  */
 export const tool = <P extends ZodTypeAny>(tool: Tool<P>): Tool<P> => tool
-
-/**
- * Asserts that given message requests tool calls
- */
-export { isToolCallRequest } from './tool_calls.js'

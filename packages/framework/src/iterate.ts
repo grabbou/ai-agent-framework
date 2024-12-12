@@ -34,7 +34,7 @@ export async function run(
   const agent = workflow.team[state.agent]
 
   if (state.status === 'paused') {
-    const toolsResponse = await runTools(agent, state.messages)
+    const toolsResponse = await runTools(state, context, workflow)
     return {
       ...state,
       status: 'running',
