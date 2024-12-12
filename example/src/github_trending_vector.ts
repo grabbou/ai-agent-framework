@@ -28,9 +28,9 @@ const webCrawler = agent({
   },
 })
 
-const topicSelector = agent({
+const human = agent({
   description: `
-    You ask users for the topic specified in the task.
+    You can ask user and get their answer to questions that are needed by other agents.
   `,
   tools: {
     askUser,
@@ -39,8 +39,8 @@ const topicSelector = agent({
 
 const reportCompiler = agent({
   description: `
-    You ask users for which topic to focus on if it's defined in the task.
-    Then - you search relevant information in Vector Store and compile reports based on it.
+    You can search Vector Store to find relevant informations and create reports based on it
+    Based on the information from Vector Store you can compile a comprehensive report.
     You're famous of beautiful Markdown formatting.
   `,
   tools: {
@@ -49,7 +49,7 @@ const reportCompiler = agent({
 })
 
 const wrapUpTrending = workflow({
-  team: { webCrawler, topicSelector, reportCompiler },
+  team: { webCrawler, human, reportCompiler },
   description: `
     Research the URL "https://github.com/trending/typescript" page.
     Select 3 top projects. Browse details about these projects on their subpages.
