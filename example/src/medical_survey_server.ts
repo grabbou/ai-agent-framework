@@ -5,13 +5,13 @@ import { randomUUID } from 'node:crypto'
 
 import chalk from 'chalk'
 import s from 'dedent'
+import { rootState, WorkflowState } from 'fabrice-ai/state'
+import { hasPausedStatus, teamwork } from 'fabrice-ai/teamwork'
 import {
   addToolResponse,
   getAllMissingToolCalls,
   resumeCompletedToolCalls,
-} from 'fabrice-ai/server'
-import { rootState, WorkflowState } from 'fabrice-ai/state'
-import { hasPausedStatus, teamwork } from 'fabrice-ai/teamwork'
+} from 'fabrice-ai/tool_calls'
 import fastify, { FastifyRequest } from 'fastify'
 
 import { preVisitNoteWorkflow } from './medical_survey/workflow.js'

@@ -20,4 +20,4 @@ export const tool = <P extends ZodTypeAny>(tool: Tool<P>): Tool<P> => tool
 /**
  * Asserts that given message requests tool calls
  */
-export { isToolCallRequest } from './utils/runTools.js'
+export { isToolCallRequest } from './tool_calls.js'

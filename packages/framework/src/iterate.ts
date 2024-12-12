@@ -1,6 +1,6 @@
 import { childState, WorkflowState } from './state.js'
+import { runTools } from './tool_calls.js'
 import { Message } from './types.js'
-import { runTools } from './utils/runTools.js'
 import { Workflow } from './workflow.js'
 
 // tbd: finalize workflow

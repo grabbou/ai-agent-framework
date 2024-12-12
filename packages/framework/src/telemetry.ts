@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
 import { WorkflowState } from './state.js'
-import { isToolCallRequest } from './utils/runTools.js'
+import { isToolCallRequest } from './tool_calls.js'
 
 export type Telemetry = ({
   prevState,
