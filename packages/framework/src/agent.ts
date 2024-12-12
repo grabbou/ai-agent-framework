@@ -44,17 +44,17 @@ export const agent = (options: AgentOptions = {}): Agent => {
             {
               role: 'system',
               content: s`
-              ${description}
+                ${description}
 
-              Your job is to complete the assigned task:
-              - You can break down complex tasks into multiple steps if needed.
-              - You can use available tools if needed.
+                Your job is to complete the assigned task:
+                - You can break down complex tasks into multiple steps if needed.
+                - You can use available tools if needed.
 
-              If tool requires arguments, get them from the input, or use other tools to get them.
-              Do not fabricate or assume information not present in the input.
+                If tool requires arguments, get them from the input, or use other tools to get them.
+                Do not fabricate or assume information not present in the input.
 
-              Try to complete the task on your own.
-            `,
+                Try to complete the task on your own.
+              `,
             },
             {
               role: 'assistant',
