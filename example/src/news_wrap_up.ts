@@ -4,7 +4,7 @@ import { createWebSearchTools } from '@fabrice-ai/tools/webSearch'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 
 const apiKey = await getApiKey('Serply.io API', 'SERPLY_API_KEY')
 
@@ -43,7 +43,7 @@ const wrapupRedactor = agent({
 })
 
 const wrapUpTheNewsWorkflow = workflow({
-  members: [newsResearcher, newsReader, wrapupRedactor],
+  team: { newsResearcher, newsReader, wrapupRedactor },
   description: `
     Research the top news and trends for the last week - get title and headline description.
     Then summarize it all into a comprehensive report markdown output.
@@ -61,4 +61,4 @@ const wrapUpTheNewsWorkflow = workflow({
 
 const result = await teamwork(wrapUpTheNewsWorkflow)
 
-console.log(solution(result))
+console.log(result)

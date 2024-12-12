@@ -5,7 +5,7 @@ import { noop, Telemetry } from './telemetry.js'
 type WorkflowOptions = {
   description: string
   output: string
-  members: Agent[]
+  team: Record<string, Agent>
 
   provider?: Provider
   maxIterations?: number

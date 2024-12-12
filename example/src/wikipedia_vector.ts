@@ -2,7 +2,7 @@ import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 
 import { lookupWikipedia } from './tools/wikipedia.js'
 
@@ -33,7 +33,7 @@ const reportCompiler = agent({
 })
 
 const wikipediaResearch = workflow({
-  members: [wikipediaIndexer, reportCompiler],
+  team: { wikipediaIndexer, reportCompiler },
   description: `
     Find information about John III Sobieski.
     Index the data into vector database. One sentence is one document saved in Vector store.
@@ -51,4 +51,4 @@ const wikipediaResearch = workflow({
 
 const result = await teamwork(wikipediaResearch)
 
-console.log(solution(result))
+console.log(result)

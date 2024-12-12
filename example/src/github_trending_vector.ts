@@ -5,7 +5,7 @@ import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { tool } from 'fabrice-ai/tool'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 import { z } from 'zod'
 
 import { askUser } from './tools/askUser.js'
@@ -56,7 +56,7 @@ const wrapupRedactor = agent({
 })
 
 const wrapUpTrending = workflow({
-  members: [githubResearcher, wrapupRedactor],
+  team: { githubResearcher, wrapupRedactor },
   description: `
     Research the URL "https://github.com/trending/typescript" page using scraper tool
     Get 3 top projects. You can get the title and description from the project page.
@@ -80,4 +80,4 @@ const wrapUpTrending = workflow({
 
 const result = await teamwork(wrapUpTrending)
 
-console.log(solution(result))
+console.log(result)

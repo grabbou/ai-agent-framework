@@ -1,6 +1,6 @@
+import { iterate } from './iterate.js'
 import { workflowState } from './state.js'
 import { WorkflowState } from './state.js'
-import { iterate } from './supervisor/nextTick.js'
 import { Workflow } from './workflow.js'
 
 /**
@@ -9,7 +9,7 @@ import { Workflow } from './workflow.js'
 export async function teamwork(
   workflow: Workflow,
   state: WorkflowState = workflowState({
-    request: [
+    messages: [
       {
         role: 'user',
         content: `<workflow>${workflow.description}</workflow><output>${workflow.output}`,

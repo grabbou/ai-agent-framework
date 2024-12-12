@@ -3,7 +3,7 @@ import { getApiKey } from '@fabrice-ai/tools/utils'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
 
@@ -30,7 +30,7 @@ const wrapupRedactor = agent({
 })
 
 const wrapUpTrending = workflow({
-  members: [githubResearcher, wrapupRedactor],
+  team: { githubResearcher, wrapupRedactor },
   description: `
     Research the URL "https://github.com/trending/python" page using scraper tool
     Get 3 top projects. You can get the title and description from the project page.
@@ -47,4 +47,4 @@ const wrapUpTrending = workflow({
 
 const result = await teamwork(wrapUpTrending)
 
-console.log(solution(result))
+console.log(result)

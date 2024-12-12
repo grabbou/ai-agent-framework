@@ -47,7 +47,12 @@ const itineraryCompiler = agent({
 })
 
 const researchTripWorkflow = workflow({
-  members: [personalizedActivityPlanner, restaurantScout, landmarkScout, itineraryCompiler],
+  team: {
+    personalizedActivityPlanner,
+    restaurantScout,
+    landmarkScout,
+    itineraryCompiler,
+  },
   description: `
     Research and find cool things to do in Wrocław, Poland.
 

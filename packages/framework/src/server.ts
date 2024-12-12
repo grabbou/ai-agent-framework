@@ -1,4 +1,4 @@
-import { iterate } from './supervisor/nextTick.js'
+import { iterate } from './iterate.js'
 import { teamwork as originalTeamwork } from './teamwork.js'
 import { workflowState } from './workflow.js'
 

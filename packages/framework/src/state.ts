@@ -1,11 +1,10 @@
 import { Agent } from './agent.js'
-import { supervisor } from './supervisor.js'
+import { supervisor } from './agents/supervisor.js'
 import { Message, RequiredOptionals } from './types.js'
 
 type WorkflowStateOptions = {
-  request: Message[]
+  status?: 'idle' | 'running' | 'paused' | 'finished' | 'failed'
 
-  status?: 'idle' | 'assigned' | 'running' | 'paused' | 'finished' | 'failed'
   messages?: Message[]
   agent?: Agent
   child?: WorkflowState | null

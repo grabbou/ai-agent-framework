@@ -3,15 +3,10 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { Agent } from '../agent.js'
-import { Provider } from '../models.js'
-import { Message } from '../types.js'
+import { workflowState } from '../state.js'
 
-export async function selectAgent(
-  provider: Provider,
-  agentRequest: Message[],
-  agents: Agent[]
-): Promise<Agent> {
-  const response = await provider.completions({
+export const resourcePlanner: Agent = async (state, context, workflow) => {
+  const response = await workflow.provider.completions({
     messages: [
       {
         role: 'system',
@@ -23,31 +18,28 @@ export async function selectAgent(
           1. Required tools and skills
           2. Agent's specialization
           3. Model capabilities
-          4. Previous task context if available
+          4. Previous task context if available  
         `,
       },
       {
         role: 'user',
         content: s`
-          Here is the task:
-          <task>${agentRequest.map((request) => request.content).join(',')}</task>
-
           Here are the available agents:
           <agents>
-            ${agents.map(
-              (agent, index) =>
-                `<agent index="${index}">${agent.role} - ${agent.description}</agent>`
-            )}
+            ${Object.entries(workflow.team).map(([name, agent]) => `<agent name="${name}">${agent.description}</agent>`)}
           </agents>
-
-          Select the most suitable agent for this task.
         `,
       },
+      {
+        role: 'assistant',
+        content: 'What is the task?',
+      },
+      ...state.messages,
     ],
     temperature: 0.1,
     response_format: zodResponseFormat(
       z.object({
-        agentIndex: z.number(),
+        agent: z.enum(Object.keys(workflow.team) as [string, ...string[]]),
         reasoning: z.string(),
       }),
       'agent_selection'
@@ -59,10 +51,13 @@ export async function selectAgent(
     throw new Error('No content in response')
   }
 
-  const agent = agents[content.agentIndex]
+  const agent = workflow.team[content.agent]
   if (!agent) {
     throw new Error('Invalid agent')
   }
 
-  return agent
+  return workflowState({
+    agent,
+    messages: state.messages,
+  })
 }

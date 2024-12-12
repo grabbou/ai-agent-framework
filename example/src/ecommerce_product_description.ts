@@ -2,7 +2,7 @@ import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 
 const techExpert = agent({
   role: 'Technical expert',
@@ -25,7 +25,7 @@ const marketingManager = agent({
 })
 
 const productDescriptionWorkflow = workflow({
-  members: [techExpert, marketingManager],
+  team: { techExpert, marketingManager },
   description: `
     Based on the picture './example/assets/example-sneakers.jpg' make the eCommerce product to 
     list this product on the website.
@@ -47,4 +47,4 @@ const productDescriptionWorkflow = workflow({
 
 const result = await teamwork(productDescriptionWorkflow)
 
-console.log(solution(result))
+console.log(result)
