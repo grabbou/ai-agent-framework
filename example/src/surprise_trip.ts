@@ -68,7 +68,7 @@ const researchTripWorkflow = workflow({
   `,
   output: `
     Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
-    Ensure the itinerary integrates flights, hotel information, and all planned activities and dining experiences.
+    Ensure the itinerary includes flights, hotel information, and all planned activities and dining experiences.
   `,
   snapshot: logger,
 })

@@ -71,10 +71,10 @@ export const addToolResponse = (
       }),
     }
   }
-  if (state.child.length > 0) {
+  if (state.children.length > 0) {
     return {
       ...state,
-      child: state.child.map((child) => addToolResponse(child, toolCallId, content)),
+      children: state.children.map((child) => addToolResponse(child, toolCallId, content)),
     }
   }
   return state
@@ -96,10 +96,10 @@ export const resumeCompletedToolCalls = (state: WorkflowState): WorkflowState =>
     }
     return state
   }
-  if (state.child.length > 0) {
+  if (state.children.length > 0) {
     return {
       ...state,
-      child: state.child.map(resumeCompletedToolCalls),
+      children: state.children.map(resumeCompletedToolCalls),
     }
   }
   return state
@@ -124,8 +124,8 @@ export const getAllMissingToolCalls = (state: WorkflowState): ParsedFunctionTool
     (toolRequest) => !toolResponses.includes(toolRequest.id)
   )
 
-  if (state.child.length > 0) {
-    missingToolCalls.push(...state.child.flatMap(getAllMissingToolCalls))
+  if (state.children.length > 0) {
+    missingToolCalls.push(...state.children.flatMap(getAllMissingToolCalls))
   }
 
   return missingToolCalls

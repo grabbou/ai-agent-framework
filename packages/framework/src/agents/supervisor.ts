@@ -3,24 +3,12 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
+import { getSteps } from '../messages.js'
 import { childState } from '../state.js'
-
-const groupMessagePairs = <T>(messages: T[]): T[][] => {
-  return messages.reduce((pairs: T[][], message: T, index: number) => {
-    if (index % 2 === 0) {
-      pairs.push([message])
-    } else {
-      // Add to the last pair
-      pairs[pairs.length - 1].push(message)
-    }
-    return pairs
-  }, [])
-}
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {
     const [request, ...messages] = state.messages
-    const steps = groupMessagePairs(messages)
 
     const response = await workflow.team[state.agent].provider.completions({
       messages: [
@@ -49,13 +37,7 @@ const defaults: AgentOptions = {
           role: 'assistant',
           content: 'What has been completed so far?',
         },
-        ...steps.map(([task, result]) => ({
-          role: 'user' as const,
-          content: s`
-            Step name: ${task.content}
-            Step result: ${result.content}
-          `,
-        })),
+        ...getSteps(messages),
       ],
       temperature: 0.2,
       response_format: zodResponseFormat(
@@ -94,7 +76,7 @@ const defaults: AgentOptions = {
       return {
         ...state,
         status: 'running',
-        child: requests.map((request) =>
+        children: requests.map((request) =>
           childState({
             agent: 'resourcePlanner',
             messages: [request],
