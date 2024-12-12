@@ -6,8 +6,8 @@ import { agent, AgentOptions } from '../agent.js'
 import { childState } from '../state.js'
 
 const defaults: AgentOptions = {
-  run: async (state, context, team) => {
-    const response = await team[state.agent].provider.completions({
+  run: async (state, context, workflow) => {
+    const response = await workflow.team[state.agent].provider.completions({
       messages: [
         {
           role: 'system',
@@ -27,7 +27,7 @@ const defaults: AgentOptions = {
           content: s`
           Here are the available agents:
           <agents>
-            ${Object.entries(team).map(([name, agent]) =>
+            ${Object.entries(workflow.team).map(([name, agent]) =>
               agent.description ? `<agent name="${name}">${agent.description}</agent>` : ''
             )}
           </agents>
@@ -42,7 +42,7 @@ const defaults: AgentOptions = {
       temperature: 0.1,
       response_format: zodResponseFormat(
         z.object({
-          agent: z.enum(Object.keys(team) as [string, ...string[]]),
+          agent: z.enum(Object.keys(workflow.team) as [string, ...string[]]),
           reasoning: z.string(),
         }),
         'agent_selection'

@@ -57,7 +57,8 @@ const researchTripWorkflow = workflow({
       - highly-rated restaurants and dining experiences.
       - landmarks with historic context.
       - picturesque and entertaining locations.
-
+  `,
+  knowledge: `
     Traveler's information:
       - Origin: New York, USA
       - Destination: Wrocław, Poland
@@ -70,7 +71,6 @@ const researchTripWorkflow = workflow({
     Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
     Ensure the itinerary integrates flights, hotel information, and all planned activities and dining experiences.
   `,
-  snapshot: logger,
 })
 
 const result = await teamwork(researchTripWorkflow)

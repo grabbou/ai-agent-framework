@@ -6,7 +6,7 @@ import { openai, Provider } from './models.js'
 import { WorkflowState } from './state.js'
 import { Tool } from './tool.js'
 import { Message } from './types.js'
-import { Team } from './workflow.js'
+import { Workflow } from './workflow.js'
 
 export type AgentOptions = Partial<Agent>
 
@@ -16,7 +16,7 @@ export type Agent = {
     [key: string]: Tool
   }
   provider: Provider
-  run: (state: WorkflowState, context: Message[], team: Team) => Promise<WorkflowState>
+  run: (state: WorkflowState, context: Message[], workflow: Workflow) => Promise<WorkflowState>
 }
 
 export const agent = (options: AgentOptions = {}): Agent => {
@@ -28,7 +28,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
     provider,
     run:
       options.run ??
-      (async (state, context) => {
+      (async (state, context, workflow) => {
         const mappedTools = tools
           ? Object.entries(tools).map(([name, tool]) =>
               zodFunction({
@@ -38,6 +38,8 @@ export const agent = (options: AgentOptions = {}): Agent => {
               })
             )
           : []
+
+        const [, ...messages] = context
 
         const response = await provider.completions({
           messages: [
@@ -62,7 +64,17 @@ export const agent = (options: AgentOptions = {}): Agent => {
             },
             {
               role: 'user',
-              content: `Here is all the work done so far by other agents: ${JSON.stringify(context)}`,
+              content: `Here is all the work done so far by other agents: ${JSON.stringify(messages)}`,
+            },
+            {
+              role: 'assistant',
+              content: 'Is there anything else I need to know?',
+            },
+            {
+              role: 'user',
+              content: workflow.knowledge
+                ? `Here is all the knowledge available: ${workflow.knowledge}`
+                : 'No, I do not have any additional information.',
             },
             {
               role: 'assistant',
