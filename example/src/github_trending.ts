@@ -1,6 +1,7 @@
 import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawl'
 import { getApiKey } from '@fabrice-ai/tools/utils'
 import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
@@ -45,4 +46,4 @@ const wrapUpTrending = workflow({
 
 const result = await teamwork(wrapUpTrending)
 
-console.log(result)
+console.log(solution(result))

@@ -1,6 +1,7 @@
 import { createFileSystemTools } from '@fabrice-ai/tools/filesystem'
 import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
@@ -59,4 +60,4 @@ const bookLibraryWorkflow = workflow({
 
 const result = await teamwork(bookLibraryWorkflow)
 
-console.log(result)
+console.log(solution(result))

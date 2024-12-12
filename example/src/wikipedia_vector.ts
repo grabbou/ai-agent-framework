@@ -1,5 +1,6 @@
 import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
@@ -49,4 +50,4 @@ const wikipediaResearch = workflow({
 
 const result = await teamwork(wikipediaResearch)
 
-console.log(result)
+console.log(solution(result))

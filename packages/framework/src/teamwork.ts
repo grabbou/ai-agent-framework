@@ -1,3 +1,5 @@
+import s from 'dedent'
+
 import { iterate } from './iterate.js'
 import { workflowState } from './state.js'
 import { WorkflowState } from './state.js'
@@ -13,7 +15,11 @@ export async function teamwork(
     messages: [
       {
         role: 'user',
-        content: `<workflow>${workflow.description}</workflow><output>${workflow.output}`,
+        content: s`
+          Here is description of my workflow and expected output:
+          <workflow>${workflow.description}</workflow>
+          <output>${workflow.output}</output>
+        `,
       },
     ],
   })

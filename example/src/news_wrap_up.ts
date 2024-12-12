@@ -2,6 +2,7 @@ import { getCurrentDate } from '@fabrice-ai/tools/date'
 import { getApiKey } from '@fabrice-ai/tools/utils'
 import { createWebSearchTools } from '@fabrice-ai/tools/webSearch'
 import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
@@ -58,4 +59,4 @@ const wrapUpTheNewsWorkflow = workflow({
 
 const result = await teamwork(wrapUpTheNewsWorkflow)
 
-console.log(result)
+console.log(solution(result))
