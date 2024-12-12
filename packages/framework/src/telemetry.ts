@@ -11,8 +11,6 @@ export type Telemetry = ({
   nextState: WorkflowState
 }) => void
 
-export const noop: Telemetry = () => {}
-
 export const logger: Telemetry = ({ prevState, nextState }) => {
   if (prevState === nextState) return
 

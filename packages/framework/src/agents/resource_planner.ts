@@ -3,7 +3,7 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { workflowState } from '../state.js'
+import { childState } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, team) => {
@@ -54,7 +54,7 @@ const defaults: AgentOptions = {
       throw new Error('No content in response')
     }
 
-    return workflowState({
+    return childState({
       agent: content.agent,
       messages: state.messages,
     })

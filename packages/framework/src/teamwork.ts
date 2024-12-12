@@ -1,7 +1,5 @@
-import s from 'dedent'
-
 import { iterate } from './iterate.js'
-import { workflowState } from './state.js'
+import { rootState } from './state.js'
 import { WorkflowState } from './state.js'
 import { Workflow } from './workflow.js'
 
@@ -11,19 +9,7 @@ import { Workflow } from './workflow.js'
  */
 export async function teamwork(
   workflow: Workflow,
-  state: WorkflowState = workflowState({
-    agent: 'supervisor',
-    messages: [
-      {
-        role: 'user',
-        content: s`
-          Here is description of my workflow and expected output:
-          <workflow>${workflow.description}</workflow>
-          <output>${workflow.output}</output>
-        `,
-      },
-    ],
-  }),
+  state: WorkflowState = rootState(workflow),
   runTools: boolean = true
 ): Promise<WorkflowState> {
   if (state.status === 'finished' && state.child === null) {

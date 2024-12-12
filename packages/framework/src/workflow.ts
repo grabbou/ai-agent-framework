@@ -3,7 +3,7 @@ import { finalBoss } from './agents/final_boss.js'
 import { resourcePlanner } from './agents/resource_planner.js'
 import { supervisor } from './agents/supervisor.js'
 import { openai, Provider } from './models.js'
-import { noop, Telemetry } from './telemetry.js'
+import { logger, Telemetry } from './telemetry.js'
 
 type WorkflowOptions = {
   description: string
@@ -31,7 +31,7 @@ export const workflow = (options: WorkflowOptions): Workflow => {
   return {
     maxIterations: 50,
     provider: openai(),
-    snapshot: noop,
+    snapshot: logger,
     ...options,
     team,
   }

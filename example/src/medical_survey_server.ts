@@ -1,163 +1,147 @@
-// /**
-//  * This example demonstrates using framework in server-side environments.
-//  */
-// import chalk from 'chalk'
-// import s from 'dedent'
-// import { teamwork } from 'fabrice-ai/server'
-// import { WorkflowState, workflowState } from 'fabrice-ai/state'
-// import { isToolCallRequest } from 'fabrice-ai/supervisor/runTools'
-// import fastify, { FastifyRequest } from 'fastify'
+/**
+ * This example demonstrates using framework in server-side environments.
+ */
+import { randomUUID } from 'node:crypto'
 
-// import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
+import chalk from 'chalk'
+import s from 'dedent'
+import { rootState, WorkflowState } from 'fabrice-ai/state'
+import { isToolCallRequest } from 'fabrice-ai/supervisor/runTools'
+import { hasPausedStatus, teamwork } from 'fabrice-ai/teamwork'
+import fastify, { FastifyRequest } from 'fastify'
 
-// const server = fastify({ logger: false })
+import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
 
-// const visits: Record<string, WorkflowState> = {}
+const server = fastify({ logger: false })
 
-// /**
-//  * This will create a new workflow and return the initial state
-//  */
-// server.post('/visits', async () => {
-//   const state = workflowState(preVisitNoteWorkflow)
+const visits: Record<string, WorkflowState> = {}
 
-//   // Add the state to the visits map
-//   visits[state.id] = state
+/**
+ * This will create a new workflow and return the initial state
+ */
+server.post('/visits', async () => {
+  const id = randomUUID()
+  const state = rootState(preVisitNoteWorkflow)
 
-//   // Start the visit in the background
-//   runVisit(state.id)
+  // Add the state to the visits map
+  visits[id] = state
 
-//   return {
-//     id: state.id,
-//     status: state.status,
-//   }
-// })
+  // Start the visit in the background
+  runVisit(id)
 
-// /**
-//  * Call this endpoint to get status of the workflow, or the final result.
-//  */
-// server.get('/visits/:id', async (req: FastifyRequest<{ Params: { id: string } }>) => {
-//   const state = visits[req.params.id]
-//   if (!state) {
-//     throw new Error('Workflow not found')
-//   }
+  return {
+    id,
+    status: state.status,
+  }
+})
 
-//   if (state.status === 'finished') {
-//     return {
-//       status: state.status,
-//       result: state.messages.at(-1)!.content,
-//     }
-//   }
+/**
+ * Call this endpoint to get status of the workflow
+ */
+server.get('/visits/:id', async (req: FastifyRequest<{ Params: { id: string } }>) => {
+  const state = visits[req.params.id]
+  if (!state) {
+    throw new Error('Workflow not found')
+  }
+  return state
+})
 
-//   if (state.status === 'assigned') {
-//     if (state.agentStatus === 'tool') {
-//       return state.agentRequest.findLast(isToolCallRequest)!.tool_calls
-//     }
-//     return {
-//       status: state.status,
-//       agentStatus: state.agentStatus,
-//     }
-//   }
+/**
+ * Adds a message to the workflow.
+ */
+server.post(
+  '/visits/:id/messages',
+  async (req: FastifyRequest<{ Params: { id: string }; Body: ToolCallMessage }>) => {
+    const state = visits[req.params.id]
+    if (!state) {
+      throw new Error('Workflow not found')
+    }
 
-//   return {
-//     status: state.status,
-//   }
-// })
+    if (!hasPausedStatus(state)) {
+      throw new Error('Workflow is not waiting for a message right now')
+    }
 
-// /**
-//  * Adds a message to the workflow.
-//  */
-// server.post(
-//   '/visits/:id/messages',
-//   async (req: FastifyRequest<{ Params: { id: string }; Body: ToolCallMessage }>) => {
-//     const state = visits[req.params.id]
-//     if (!state) {
-//       throw new Error('Workflow not found')
-//     }
+    //   const toolRequestMessage = state.agentRequest.findLast(isToolCallRequest)
+    //   if (!toolRequestMessage) {
+    //     throw new Error('No tool request message found')
+    //   }
 
-//     if (state.status !== 'assigned' || state.agentStatus !== 'tool') {
-//       throw new Error('Workflow is not waiting for a message right now')
-//     }
+    //   const toolCall = toolRequestMessage.tool_calls.find(
+    //     (toolCall) => toolCall.id === req.body.tool_call_id
+    //   )
+    //   if (!toolCall) {
+    //     throw new Error('Tool call not found')
+    //   }
 
-//     const toolRequestMessage = state.agentRequest.findLast(isToolCallRequest)
-//     if (!toolRequestMessage) {
-//       throw new Error('No tool request message found')
-//     }
+    //   const agentRequest = state.agentRequest.concat({
+    //     role: 'tool',
+    //     tool_call_id: toolCall.id,
+    //     content: req.body.content,
+    //   })
 
-//     const toolCall = toolRequestMessage.tool_calls.find(
-//       (toolCall) => toolCall.id === req.body.tool_call_id
-//     )
-//     if (!toolCall) {
-//       throw new Error('Tool call not found')
-//     }
+    //   const allToolRequests = toolRequestMessage.tool_calls.map((toolCall) => toolCall.id)
+    //   const hasAllToolCalls = allToolRequests.every((toolCallId) =>
+    //     agentRequest.some(
+    //       (request) => 'tool_call_id' in request && request.tool_call_id === toolCallId
+    //     )
+    //   )
 
-//     const agentRequest = state.agentRequest.concat({
-//       role: 'tool',
-//       tool_call_id: toolCall.id,
-//       content: req.body.content,
-//     })
+    //   // Add tool response to the workflow
+    //   // Change agent status to `step` if all tool calls have been added, so
+    //   // runVisit will continue
+    //   if (hasAllToolCalls) {
+    //     visits[req.params.id] = {
+    //       ...state,
+    //       agentStatus: 'step',
+    //       agentRequest,
+    //     }
+    //     runVisit(req.params.id)
+    //   } else {
+    //     visits[req.params.id] = {
+    //       ...state,
+    //       agentRequest,
+    //     }
+    //   }
 
-//     const allToolRequests = toolRequestMessage.tool_calls.map((toolCall) => toolCall.id)
-//     const hasAllToolCalls = allToolRequests.every((toolCallId) =>
-//       agentRequest.some(
-//         (request) => 'tool_call_id' in request && request.tool_call_id === toolCallId
-//       )
-//     )
+    //   return {
+    //     hasAllToolCalls,
+    //   }
+    // }
+  }
+)
 
-//     // Add tool response to the workflow
-//     // Change agent status to `step` if all tool calls have been added, so
-//     // runVisit will continue
-//     if (hasAllToolCalls) {
-//       visits[req.params.id] = {
-//         ...state,
-//         agentStatus: 'step',
-//         agentRequest,
-//       }
-//       runVisit(req.params.id)
-//     } else {
-//       visits[req.params.id] = {
-//         ...state,
-//         agentRequest,
-//       }
-//     }
+/**
+ * Start the server
+ */
+const port = parseInt(process.env['PORT'] || '3000')
+server.listen({ port })
 
-//     return {
-//       hasAllToolCalls,
-//     }
-//   }
-// )
+console.log(s`
+  🚀 Server running at http://localhost:${port}
 
-// /**
-//  * Start the server
-//  */
-// const port = parseInt(process.env['PORT'] || '3000')
-// server.listen({ port })
+  Things to do:
 
-// console.log(s`
-//   🚀 Server running at http://localhost:${port}
+  ${chalk.bold('🩺 Create a new visit:')}
+  ${chalk.gray(`curl -X POST http://localhost:${port}/visits`)}
 
-//   Things to do:
+  ${chalk.bold('💻 Check the status of the visit:')}
+  ${chalk.gray(`curl -X GET http://localhost:${port}/visits/:id`)}
 
-//   ${chalk.bold('🩺 Create a new visit:')}
-//   ${chalk.gray(`curl -X POST http://localhost:${port}/visits`)}
+  ${chalk.bold('🔧 If the workflow is waiting for a tool call, you will get a response like this:')}
+  ${chalk.gray(`[{"id":"<tool_call_id>","type":"function"}]`)}
 
-//   ${chalk.bold('💻 Check the status of the visit:')}
-//   ${chalk.gray(`curl -X GET http://localhost:${port}/visits/:id`)}
+  ${chalk.bold('📝 Add a message to the visit:')}
+  ${chalk.gray(`curl -X POST http://localhost:${port}/visits/:id/messages -H "Content-Type: application/json" -d '{"tool_call_id":"...","content":"..."}'`)}
 
-//   ${chalk.bold('🔧 If the workflow is waiting for a tool call, you will get a response like this:')}
-//   ${chalk.gray(`[{"id":"<tool_call_id>","type":"function"}]`)}
+  Note:
+  - You can only add messages when the workflow is waiting for a tool call
+`)
 
-//   ${chalk.bold('📝 Add a message to the visit:')}
-//   ${chalk.gray(`curl -X POST http://localhost:${port}/visits/:id/messages -H "Content-Type: application/json" -d '{"tool_call_id":"...","content":"..."}'`)}
+type ToolCallMessage = {
+  tool_call_id: string
+  content: string
+}
 
-//   Note:
-//   - You can only add messages when the workflow is waiting for a tool call
-// `)
-
-// type ToolCallMessage = {
-//   tool_call_id: string
-//   content: string
-// }
-
-// async function runVisit(id: string) {
-//   visits[id] = await teamwork(preVisitNoteWorkflow, visits[id])
-// }
+async function runVisit(id: string) {
+  visits[id] = await teamwork(preVisitNoteWorkflow, visits[id])
+}

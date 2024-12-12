@@ -3,7 +3,7 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { workflowState } from '../state.js'
+import { childState } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, team) => {
@@ -68,7 +68,7 @@ const defaults: AgentOptions = {
         ...state,
         status: 'running',
         messages: [...state.messages, agentRequest],
-        child: workflowState({
+        child: childState({
           agent: 'resourcePlanner',
           messages: [agentRequest],
         }),
