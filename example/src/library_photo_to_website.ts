@@ -13,7 +13,6 @@ const { saveFile, readFile, listFilesFromDirectory } = createFileSystemTools({
 })
 
 const librarian = agent({
-  role: 'Librarian',
   description: `
     You are skilled at scanning and identifying books in the library.
     When asked, you will analyze the photo of the library and list all the books that you see, in details.
@@ -24,7 +23,6 @@ const librarian = agent({
 })
 
 const webmaster = agent({
-  role: 'HTML Webmaster',
   description: `
     You are skilled at creating HTML pages. 
     You are good at using templates for creating HTML pages.

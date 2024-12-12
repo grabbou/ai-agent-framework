@@ -5,7 +5,6 @@ import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
 
 const techExpert = agent({
-  role: 'Technical expert',
   description: `
     You are skilled at extracting and describing most detailed
     technical information about the product from the photo.
@@ -16,7 +15,6 @@ const techExpert = agent({
 })
 
 const marketingManager = agent({
-  role: 'Marketing content writer',
   description: `
     You are skilled at writing catchy product descriptions
     making customers to instantly fall in love with the product. 

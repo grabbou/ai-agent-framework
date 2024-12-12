@@ -12,7 +12,6 @@ const { firecrawl } = createFireCrawlTool({
 })
 
 const githubResearcher = agent({
-  role: 'Github Researcher',
   description: `
     You are skilled at browsing what's hot on Github trending page.
   `,
@@ -22,7 +21,6 @@ const githubResearcher = agent({
 })
 
 const wrapupRedactor = agent({
-  role: 'Redactor',
   description: `
     Your role is to wrap up reports.
     You're famous of beautiful Markdown formatting.

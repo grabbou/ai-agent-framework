@@ -1,26 +1,20 @@
-import { Agent } from './agent.js'
-import { supervisor } from './agents/supervisor.js'
-import { Message, RequiredOptionals } from './types.js'
+import { Message } from './types.js'
 
 type WorkflowStateOptions = {
-  status?: 'idle' | 'running' | 'paused' | 'finished' | 'failed'
+  agent: string
 
+  status?: 'idle' | 'running' | 'paused' | 'finished' | 'failed'
   messages?: Message[]
-  agent?: Agent
   child?: WorkflowState | null
 }
 
-const defaults: RequiredOptionals<WorkflowStateOptions> = {
-  status: 'idle',
-  agent: supervisor,
-  messages: [],
-  child: null,
-}
-
 export const workflowState = (options: WorkflowStateOptions): WorkflowState => {
+  const { status = 'idle', messages = [], agent, child = null } = options
   return {
-    ...defaults,
-    ...options,
+    status,
+    messages,
+    agent,
+    child,
   }
 }
 

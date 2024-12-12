@@ -9,7 +9,6 @@ import { lookupWikipedia } from './tools/wikipedia.js'
 const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools()
 
 const wikipediaIndexer = agent({
-  role: 'Wikipedia Indexer',
   description: `
     You are skilled at reading and understanding the context of Wikipedia articles.
     You split Wikipedia articles by each sentence to make it easy for other team members to search exact sentences in vector store.
@@ -21,7 +20,6 @@ const wikipediaIndexer = agent({
 })
 
 const reportCompiler = agent({
-  role: 'Report Compiler',
   description: `
     You are skilled at compiling information from various sources into a coherent report.
     You have access to Vector database with indexed sentences of Wikipedia articles.

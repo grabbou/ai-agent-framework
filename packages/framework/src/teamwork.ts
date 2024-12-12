@@ -9,6 +9,7 @@ import { Workflow } from './workflow.js'
 export async function teamwork(
   workflow: Workflow,
   state: WorkflowState = workflowState({
+    agent: 'supervisor',
     messages: [
       {
         role: 'user',

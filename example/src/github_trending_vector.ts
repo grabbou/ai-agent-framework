@@ -30,7 +30,6 @@ const { firecrawl } = createFireCrawlTool({
 })
 
 const githubResearcher = agent({
-  role: 'Github Researcher',
   description: `
     You are skilled at browsing what's hot on Github trending page.
     You are saving the documents to vector store for later usage
@@ -42,7 +41,6 @@ const githubResearcher = agent({
 })
 
 const wrapupRedactor = agent({
-  role: 'Redactor',
   description: `
     Your role is to wrap up reports.
     You ask users for which topic to focus on if it's defined in the task.

@@ -1,6 +1,6 @@
 import { WorkflowState } from './state.js'
-import { runTools } from './supervisor/runTools.js'
 import { Message } from './types.js'
+import { runTools } from './utils/runTools.js'
 import { Workflow } from './workflow.js'
 
 export async function run(
@@ -23,8 +23,10 @@ export async function run(
     }
   }
 
+  const agent = workflow.team[state.agent]
+
   if (state.status === 'paused') {
-    const toolsResponse = await runTools(state.agent, state.messages)
+    const toolsResponse = await runTools(agent, state.messages)
     return {
       ...state,
       status: 'running',
@@ -33,7 +35,7 @@ export async function run(
   }
 
   if (state.status === 'running' || state.status === 'idle') {
-    return state.agent(state, context, workflow)
+    return agent.run(state, context, workflow.team)
   }
 
   if (state.status === 'failed') {
