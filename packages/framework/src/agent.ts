@@ -6,7 +6,7 @@ import { openai, Provider } from './models.js'
 import { WorkflowState } from './state.js'
 import { Tool } from './tool.js'
 import { Message } from './types.js'
-import { Team } from './workflow.js'
+import { Workflow } from './workflow.js'
 
 export type AgentOptions = Partial<Agent>
 
@@ -16,7 +16,7 @@ export type Agent = {
     [key: string]: Tool
   }
   provider: Provider
-  run: (state: WorkflowState, context: Message[], team: Team) => Promise<WorkflowState>
+  run: (state: WorkflowState, context: Message[], workflow: Workflow) => Promise<WorkflowState>
 }
 
 export const agent = (options: AgentOptions = {}): Agent => {

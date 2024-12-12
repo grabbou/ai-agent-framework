@@ -43,7 +43,7 @@ export async function run(
   }
 
   if (state.status === 'running' || state.status === 'idle') {
-    return agent.run(state, context, workflow.team)
+    return agent.run(state, context, workflow)
   }
 
   if (state.status === 'failed') {

@@ -5,8 +5,8 @@ import { z } from 'zod'
 import { agent, AgentOptions } from '../agent.js'
 
 const defaults: AgentOptions = {
-  run: async (state, context, team) => {
-    const response = await team[state.agent].provider.completions({
+  run: async (state, context, workflow) => {
+    const response = await workflow.team[state.agent].provider.completions({
       messages: [
         {
           role: 'system',
