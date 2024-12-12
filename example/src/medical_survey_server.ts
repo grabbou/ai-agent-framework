@@ -5,11 +5,14 @@ import { randomUUID } from 'node:crypto'
 
 import chalk from 'chalk'
 import s from 'dedent'
+import {
+  addToolResponse,
+  getAllMissingToolCalls,
+  resumeCompletedToolCalls,
+} from 'fabrice-ai/server'
 import { rootState, WorkflowState } from 'fabrice-ai/state'
 import { hasPausedStatus, teamwork } from 'fabrice-ai/teamwork'
-import { isToolCallRequest } from 'fabrice-ai/tool'
 import fastify, { FastifyRequest } from 'fastify'
-import type { ParsedChatCompletionMessage } from 'openai/resources/beta/chat/completions'
 
 import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
 
@@ -115,70 +118,4 @@ type ToolCallMessage = {
 
 async function runVisit(id: string) {
   visits[id] = await teamwork(preVisitNoteWorkflow, visits[id], false)
-}
-
-const addToolResponse = (state: WorkflowState, toolCallId: string, content: string) => {
-  const toolRequestMessage = state.messages.findLast(isToolCallRequest)
-  if (toolRequestMessage) {
-    return {
-      ...state,
-      messages: state.messages.concat({
-        role: 'tool',
-        tool_call_id: toolCallId,
-        content,
-      }),
-    }
-  }
-  if (state.child) {
-    return addToolResponse(state.child, toolCallId, content)
-  }
-  return state
-}
-
-const resumeCompletedToolCalls = (state: WorkflowState) => {
-  const toolRequestMessage = state.messages.findLast(isToolCallRequest)
-  if (toolRequestMessage) {
-    const hasAllToolCalls = toolRequestMessage.tool_calls.every((tollCall) =>
-      state.messages.some(
-        (request) => 'tool_call_id' in request && tollCall.id === request.tool_call_id
-      )
-    )
-    if (hasAllToolCalls) {
-      return {
-        ...state,
-        status: 'running' as const,
-      }
-    }
-    return state
-  }
-  if (state.child) {
-    return resumeCompletedToolCalls(state.child)
-  }
-  return state
-}
-
-const getAllMissingToolCalls = (state: WorkflowState) => {
-  const toolRequests = state.messages.reduce((acc, message) => {
-    if (isToolCallRequest(message)) {
-      return acc.concat(message.tool_calls.map((toolCall) => toolCall.id))
-    }
-    return acc
-  }, [] as string[])
-
-  const toolResponses = state.messages.reduce((acc, message) => {
-    if ('tool_call_id' in message) {
-      return acc.concat(message.tool_call_id)
-    }
-    return acc
-  }, [] as string[])
-
-  const missingToolCalls = toolRequests.filter(
-    (toolRequest) => !toolResponses.includes(toolRequest)
-  )
-
-  if (state.child) {
-    missingToolCalls.push(...getAllMissingToolCalls(state.child))
-  }
-
-  return missingToolCalls
 }
