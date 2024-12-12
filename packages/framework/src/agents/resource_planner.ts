@@ -27,7 +27,9 @@ const defaults: AgentOptions = {
           content: s`
           Here are the available agents:
           <agents>
-            ${Object.entries(team).map(([name, agent]) => `<agent name="${name}">${agent.description}</agent>`)}
+            ${Object.entries(team).map(([name, agent]) =>
+              agent.description ? `<agent name="${name}">${agent.description}</agent>` : ''
+            )}
           </agents>
         `,
         },

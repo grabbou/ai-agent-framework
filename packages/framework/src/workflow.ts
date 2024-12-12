@@ -1,4 +1,5 @@
 import { Agent } from './agent.js'
+import { finalBoss } from './agents/final_boss.js'
 import { resourcePlanner } from './agents/resource_planner.js'
 import { supervisor } from './agents/supervisor.js'
 import { openai, Provider } from './models.js'
@@ -24,6 +25,7 @@ export const workflow = (options: WorkflowOptions): Workflow => {
   const team = {
     supervisor: supervisor(),
     resourcePlanner: resourcePlanner(),
+    finalBoss: finalBoss(),
     ...options.team,
   }
   return {

@@ -1,4 +1,4 @@
-import { WorkflowState } from './state.js'
+import { WorkflowState, workflowState } from './state.js'
 import { Message } from './types.js'
 import { runTools } from './utils/runTools.js'
 import { Workflow } from './workflow.js'
@@ -9,6 +9,13 @@ export async function run(
   context: Message[] = [],
   workflow: Workflow
 ): Promise<WorkflowState> {
+  if (state.messages.length > workflow.maxIterations) {
+    return workflowState({
+      ...state,
+      agent: 'finalBoss',
+    })
+  }
+
   if (state.child) {
     const child = await run(state.child, context.concat(state.messages), workflow)
     if (child.status === 'finished') {
