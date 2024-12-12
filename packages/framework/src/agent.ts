@@ -3,7 +3,7 @@ import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
 import { z } from 'zod'
 
 import { openai, Provider } from './models.js'
-import { WorkflowState } from './state.js'
+import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
@@ -131,11 +131,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
           }
         }
 
-        return {
-          ...state,
-          status: 'finished',
-          messages: [state.messages[0], agentResponse],
-        }
+        return finish(state, agentResponse)
       }),
   }
 }

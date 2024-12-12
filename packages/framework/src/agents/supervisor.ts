@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
 import { getSteps } from '../messages.js'
-import { childState } from '../state.js'
+import { delegate } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {
@@ -68,21 +68,16 @@ const defaults: AgentOptions = {
         }
       }
 
-      const requests = content.tasks.map((request) => ({
-        role: 'user' as const,
-        content: request.task,
-      }))
-
-      return {
-        ...state,
-        status: 'running',
-        children: requests.map((request) =>
-          childState({
-            agent: 'resourcePlanner',
-            messages: [request],
-          })
-        ),
-      }
+      return delegate(
+        state,
+        content.tasks.map((item) => [
+          'resourcePlanner',
+          {
+            role: 'user',
+            content: item.task,
+          },
+        ])
+      )
     } catch (error) {
       throw new Error('Failed to determine next task')
     }

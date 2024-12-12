@@ -3,6 +3,7 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
+import { finish } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {
@@ -34,11 +35,7 @@ const defaults: AgentOptions = {
     if (!result) {
       throw new Error('No parsed response received')
     }
-    return {
-      ...state,
-      status: 'finished',
-      messages: [...state.messages, { role: 'assistant', content: result.finalAnswer }],
-    }
+    return finish(state, { role: 'assistant', content: result.finalAnswer })
   },
 }
 

@@ -37,3 +37,39 @@ export const rootState = (workflow: Workflow): WorkflowState =>
   })
 
 export type WorkflowState = Required<WorkflowStateOptions>
+
+export const getRequest = (state: WorkflowState): Message => {
+  return state.messages[0]
+}
+
+export const finish = (state: WorkflowState, response: Message): WorkflowState => {
+  return {
+    ...state,
+    status: 'finished',
+    messages: [getRequest(state), response],
+  }
+}
+
+export const delegate = (state: WorkflowState, requests: [string, Message][]): WorkflowState => {
+  return {
+    ...state,
+    status: 'running',
+    children: requests.map(([agent, request]) =>
+      childState({
+        agent,
+        messages: [request],
+      })
+    ),
+  }
+}
+
+export const handoff = (
+  state: WorkflowState,
+  agent: string,
+  messages: Message[]
+): WorkflowState => {
+  return childState({
+    agent,
+    messages,
+  })
+}
