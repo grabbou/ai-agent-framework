@@ -16,18 +16,20 @@ export async function run(
     })
   }
 
-  if (state.child) {
-    const child = await run(state.child, context.concat(state.messages), workflow)
-    if (child.status === 'finished') {
+  if (state.child.length > 0) {
+    const children = await Promise.all(
+      state.child.map((child) => run(child, context.concat(state.messages), workflow))
+    )
+    if (children.every((child) => child.status === 'finished')) {
       return {
         ...state,
-        messages: state.messages.concat(child.messages),
-        child: null,
+        messages: state.messages.concat(children.flatMap((child) => child.messages)),
+        child: [],
       }
     }
     return {
       ...state,
-      child,
+      child: children,
     }
   }
 

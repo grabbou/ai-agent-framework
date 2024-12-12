@@ -33,5 +33,5 @@ export const hasPausedStatus = (state: WorkflowState): boolean => {
     return false
   }
 
-  return hasPausedStatus(state.child)
+  return state.child.some(hasPausedStatus)
 }

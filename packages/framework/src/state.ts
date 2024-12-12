@@ -8,11 +8,11 @@ type WorkflowStateOptions = {
 
   status?: 'idle' | 'running' | 'paused' | 'finished' | 'failed'
   messages?: Message[]
-  child?: WorkflowState | null
+  child?: WorkflowState[]
 }
 
 export const childState = (options: WorkflowStateOptions): WorkflowState => {
-  const { status = 'idle', messages = [], agent, child = null } = options
+  const { status = 'idle', messages = [], agent, child = [] } = options
   return {
     status,
     messages,

@@ -47,12 +47,12 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
   const printTree = (state: WorkflowState, level = 0) => {
     const indent = '  '.repeat(level)
     const arrow = level > 0 ? '└─▶ ' : ''
-    const statusText = state.child ? '' : getStatusText(state)
+    const statusText = state.child.length > 0 ? '' : getStatusText(state)
 
     console.log(`${indent}${arrow}${chalk.bold(state.agent)} ${statusText}`)
 
     if (state.child) {
-      printTree(state.child, level + 1)
+      state.child.forEach((child) => printTree(child, level + 1))
     }
   }
 
