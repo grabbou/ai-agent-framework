@@ -59,16 +59,16 @@ const wrapUpTrending = workflow({
     Research the URL "https://github.com/trending/typescript" page using firecrawl tool
     Select 3 top projects. Browse for details about these projects on ther subpages. 
     Save it to the vector store.
-    Then summarize it all into a comprehensive report markdown output.
 
     Ask user about which project he wants to learn more.
-    Search for the project in the vector store and provide more details in the report.
+    reate a comprehensive report markdown output:
+     - create a one, two sentence summary about every project.
+     - include detailed summary about the project selected by the user.
 
     Here are some ground rules to follow: 
-      - Include one sentence summary for each project.
-      - Print the list of projects to the user.
-      - Ask user about which project he wants to learn more.
-      - Display more information about this specific project from the vector store.
+      - Browser the pages onle once and store content in Vector Store. 
+      - Use Vector Store if you need information about the project.
+      - Before making up the record: ask user about which project he wants to learn more.
   `,
   output: `
     Comprehensive markdown report including:
