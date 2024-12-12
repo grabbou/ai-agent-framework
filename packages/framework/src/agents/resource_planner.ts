@@ -3,11 +3,11 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { handoff } from '../state.js'
+import { handoff, request, response } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {
-    const response = await workflow.team[state.agent].provider.completions({
+    const res = await workflow.team[state.agent].provider.completions({
       messages: [
         {
           role: 'system',
@@ -22,21 +22,14 @@ const defaults: AgentOptions = {
             4. Previous task context if available  
           `,
         },
-        {
-          role: 'user',
-          content: s`
+        request(s`
           Here are the available agents:
           <agents>
             ${Object.entries(workflow.team).map(([name, agent]) =>
               agent.description ? `<agent name="${name}">${agent.description}</agent>` : ''
             )}
-          </agents>
-        `,
-        },
-        {
-          role: 'assistant',
-          content: 'What is the task?',
-        },
+          </agents>`),
+        response('What is the task?'),
         ...state.messages,
       ],
       temperature: 0.1,
@@ -49,12 +42,12 @@ const defaults: AgentOptions = {
       ),
     })
 
-    const content = response.choices[0].message.parsed
-    if (!content) {
+    const message = res.choices[0].message.parsed
+    if (!message) {
       throw new Error('No content in response')
     }
 
-    return handoff(state, content.agent, state.messages)
+    return handoff(state, message.agent, state.messages)
   },
 }
 

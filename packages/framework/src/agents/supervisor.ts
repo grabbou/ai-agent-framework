@@ -4,13 +4,13 @@ import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
 import { getSteps } from '../messages.js'
-import { delegate } from '../state.js'
+import { delegate, request, response } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {
-    const [request, ...messages] = state.messages
+    const [workflowRequest, ...messages] = state.messages
 
-    const response = await workflow.team[state.agent].provider.completions({
+    const res = await workflow.team[state.agent].provider.completions({
       messages: [
         {
           role: 'system',
@@ -28,15 +28,9 @@ const defaults: AgentOptions = {
             5. Use context from completed tasks to inform next steps
           `,
         },
-        {
-          role: 'assistant',
-          content: 'What is the request?',
-        },
-        request,
-        {
-          role: 'assistant',
-          content: 'What has been completed so far?',
-        },
+        response('What is the request?'),
+        workflowRequest,
+        response('What has been completed so far?'),
         ...getSteps(messages),
       ],
       temperature: 0.2,
@@ -56,7 +50,7 @@ const defaults: AgentOptions = {
     })
 
     try {
-      const content = response.choices[0].message.parsed
+      const content = res.choices[0].message.parsed
       if (!content) {
         throw new Error('No content in response')
       }
@@ -70,13 +64,7 @@ const defaults: AgentOptions = {
 
       return delegate(
         state,
-        content.tasks.map((item) => [
-          'resourcePlanner',
-          {
-            role: 'user',
-            content: item.task,
-          },
-        ])
+        content.tasks.map((item) => ['resourcePlanner', request(item.task)])
       )
     } catch (error) {
       throw new Error('Failed to determine next task')

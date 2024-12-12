@@ -3,7 +3,7 @@ import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
 import { z } from 'zod'
 
 import { openai, Provider } from './models.js'
-import { finish, WorkflowState } from './state.js'
+import { finish, request, response, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
@@ -39,7 +39,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
             )
           : []
 
-        const response = await provider.completions({
+        const res = await provider.completions({
           messages: [
             {
               role: 'system',
@@ -56,18 +56,9 @@ export const agent = (options: AgentOptions = {}): Agent => {
                 Try to complete the task on your own.
               `,
             },
-            {
-              role: 'assistant',
-              content: 'What have been done so far?',
-            },
-            {
-              role: 'user',
-              content: `Here is all the work done so far by other agents: ${JSON.stringify(context)}`,
-            },
-            {
-              role: 'assistant',
-              content: 'What do you want me to do now?',
-            },
+            response('What have been done so far?'),
+            request(`Here is all the work done so far by other agents: ${JSON.stringify(context)}`),
+            response('What do you want me to do now?'),
             ...state.messages,
           ],
           tools: mappedTools.length > 0 ? mappedTools : undefined,
@@ -94,40 +85,30 @@ export const agent = (options: AgentOptions = {}): Agent => {
           ),
         })
 
-        if (response.choices[0].message.tool_calls.length > 0) {
+        if (res.choices[0].message.tool_calls.length > 0) {
           return {
             ...state,
             status: 'paused',
-            messages: state.messages.concat(response.choices[0].message),
+            messages: state.messages.concat(res.choices[0].message),
           }
         }
 
-        const result = response.choices[0].message.parsed
-        if (!result) {
+        const message = res.choices[0].message.parsed
+        if (!message) {
           throw new Error('No parsed response received')
         }
 
-        if (result.response.kind === 'error') {
-          throw new Error(result.response.reasoning)
+        if (message.response.kind === 'error') {
+          throw new Error(message.response.reasoning)
         }
 
-        const agentResponse = {
-          role: 'assistant' as const,
-          content: result.response.result,
-        }
+        const agentResponse = response(message.response.result)
 
-        if (result.response.nextStep) {
+        if (message.response.nextStep) {
           return {
             ...state,
             status: 'running',
-            messages: [
-              ...state.messages,
-              agentResponse,
-              {
-                role: 'user',
-                content: result.response.nextStep,
-              },
-            ],
+            messages: [...state.messages, agentResponse, request(message.response.nextStep)],
           }
         }
 

@@ -1,4 +1,4 @@
-import { childState, finish, WorkflowState } from './state.js'
+import { childState, finish, response, WorkflowState } from './state.js'
 import { runTools } from './tool_calls.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
@@ -48,10 +48,7 @@ export async function run(
     try {
       return agent.run(state, context, workflow)
     } catch (error) {
-      return finish(state, {
-        role: 'assistant',
-        content: error instanceof Error ? error.message : 'Unknown error',
-      })
+      return finish(state, response(error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 

@@ -25,14 +25,11 @@ export const rootState = (workflow: Workflow): WorkflowState =>
   childState({
     agent: 'supervisor',
     messages: [
-      {
-        role: 'user',
-        content: s`
-          Here is description of my workflow and expected output:
-          <workflow>${workflow.description}</workflow>
-          <output>${workflow.output}</output>
-        `,
-      },
+      request(s`
+        Here is description of my workflow and expected output:
+        <workflow>${workflow.description}</workflow>
+        <output>${workflow.output}</output>
+      `),
     ],
   })
 
@@ -72,4 +69,18 @@ export const handoff = (
     agent,
     messages,
   })
+}
+
+export const response = (content: string): Message => {
+  return {
+    role: 'assistant',
+    content,
+  }
+}
+
+export const request = (content: string): Message => {
+  return {
+    role: 'user',
+    content,
+  }
 }
