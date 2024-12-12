@@ -32,7 +32,7 @@ const { firecrawl } = createFireCrawlTool({
 
 const githubResearcher = agent({
   description: `
-    You are skilled at browsing what's hot on Github trending page.
+    You are skilled at browsing Github pages.
     You are saving the documents to vector store for later usage
   `,
   tools: {
@@ -48,7 +48,6 @@ const wrapupRedactor = agent({
     You're famous of beautiful Markdown formatting.
   `,
   tools: {
-    printTool,
     askUser,
     searchInVectorStore,
   },
@@ -57,8 +56,9 @@ const wrapupRedactor = agent({
 const wrapUpTrending = workflow({
   team: { githubResearcher, wrapupRedactor },
   description: `
-    Research the URL "https://github.com/trending/typescript" page using scraper tool
-    Get 3 top projects. You can get the title and description from the project page.
+    Research the URL "https://github.com/trending/typescript" page using firecrawl tool
+    Select 3 top projects. Browse for details about these projects on ther subpages. 
+    Save it to the vector store.
     Then summarize it all into a comprehensive report markdown output.
 
     Ask user about which project he wants to learn more.
@@ -71,8 +71,9 @@ const wrapUpTrending = workflow({
       - Display more information about this specific project from the vector store.
   `,
   output: `
-    Comprehensive markdown report with the top trending Typescript projects.
-    Detailed report about the project selected by the user.
+    Comprehensive markdown report including:
+    - summary on top trending Typescript projects.
+    - detailed info about the project selected by the user.
   `,
   snapshot: logger,
 })
