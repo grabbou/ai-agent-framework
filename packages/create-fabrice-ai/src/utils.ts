@@ -1,12 +1,7 @@
 import { execSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { dirname } from 'node:path'
 import { promises as Stream, Readable } from 'node:stream'
-import { fileURLToPath } from 'node:url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 import { extract } from 'tar'
 
@@ -58,6 +53,6 @@ export async function copyAdditionalTemplateFiles(root: string) {
   ]
 
   for (const file of files) {
-    execSync(`cp ${path.join(__dirname, file.src)} ${path.join(root, file.dest)}`)
+    execSync(`cp ${path.join(import.meta.dirname, file.src)} ${path.join(root, file.dest)}`)
   }
 }

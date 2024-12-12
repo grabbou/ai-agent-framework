@@ -28,7 +28,7 @@ const marketingManager = agent({
 const productDescriptionWorkflow = workflow({
   members: [techExpert, marketingManager],
   description: `
-    Based on the picture '${path.resolve(__dirname, '../assets/example-sneakers.jpg')}' make the eCommerce product to 
+    Based on the picture '${path.resolve(import.meta.dirname, '../assets/example-sneakers.jpg')}' make the eCommerce product to 
     list this product on the website.
 
     Focus:
