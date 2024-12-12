@@ -6,9 +6,10 @@ import { randomUUID } from 'node:crypto'
 import chalk from 'chalk'
 import s from 'dedent'
 import { rootState, WorkflowState } from 'fabrice-ai/state'
-import { isToolCallRequest } from 'fabrice-ai/supervisor/runTools'
 import { hasPausedStatus, teamwork } from 'fabrice-ai/teamwork'
+import { isToolCallRequest } from 'fabrice-ai/tool'
 import fastify, { FastifyRequest } from 'fastify'
+import type { ParsedChatCompletionMessage } from 'openai/resources/beta/chat/completions'
 
 import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
 
@@ -36,14 +37,14 @@ server.post('/visits', async () => {
 })
 
 /**
- * Call this endpoint to get status of the workflow
+ * Call this endpoint to get pending tool calls
  */
 server.get('/visits/:id', async (req: FastifyRequest<{ Params: { id: string } }>) => {
   const state = visits[req.params.id]
   if (!state) {
     throw new Error('Workflow not found')
   }
-  return state
+  return getAllMissingToolCalls(state)
 })
 
 /**
@@ -54,59 +55,29 @@ server.post(
   async (req: FastifyRequest<{ Params: { id: string }; Body: ToolCallMessage }>) => {
     const state = visits[req.params.id]
     if (!state) {
-      throw new Error('Workflow not found')
+      throw new Error('Workflow not found.')
     }
 
     if (!hasPausedStatus(state)) {
-      throw new Error('Workflow is not waiting for a message right now')
+      throw new Error('Workflow is not waiting for a message right now.')
     }
 
-    //   const toolRequestMessage = state.agentRequest.findLast(isToolCallRequest)
-    //   if (!toolRequestMessage) {
-    //     throw new Error('No tool request message found')
-    //   }
+    // Add the tool response to the workflow
+    // and update the statuses
+    const newState = resumeCompletedToolCalls(
+      addToolResponse(state, req.body.tool_call_id, req.body.content)
+    )
 
-    //   const toolCall = toolRequestMessage.tool_calls.find(
-    //     (toolCall) => toolCall.id === req.body.tool_call_id
-    //   )
-    //   if (!toolCall) {
-    //     throw new Error('Tool call not found')
-    //   }
+    const hasAllToolCalls = getAllMissingToolCalls(newState).length === 0
 
-    //   const agentRequest = state.agentRequest.concat({
-    //     role: 'tool',
-    //     tool_call_id: toolCall.id,
-    //     content: req.body.content,
-    //   })
+    // Run the workflow again
+    if (hasAllToolCalls) {
+      visits[req.params.id] = await teamwork(preVisitNoteWorkflow, newState)
+    }
 
-    //   const allToolRequests = toolRequestMessage.tool_calls.map((toolCall) => toolCall.id)
-    //   const hasAllToolCalls = allToolRequests.every((toolCallId) =>
-    //     agentRequest.some(
-    //       (request) => 'tool_call_id' in request && request.tool_call_id === toolCallId
-    //     )
-    //   )
-
-    //   // Add tool response to the workflow
-    //   // Change agent status to `step` if all tool calls have been added, so
-    //   // runVisit will continue
-    //   if (hasAllToolCalls) {
-    //     visits[req.params.id] = {
-    //       ...state,
-    //       agentStatus: 'step',
-    //       agentRequest,
-    //     }
-    //     runVisit(req.params.id)
-    //   } else {
-    //     visits[req.params.id] = {
-    //       ...state,
-    //       agentRequest,
-    //     }
-    //   }
-
-    //   return {
-    //     hasAllToolCalls,
-    //   }
-    // }
+    return {
+      hasAllToolCalls,
+    }
   }
 )
 
@@ -143,5 +114,71 @@ type ToolCallMessage = {
 }
 
 async function runVisit(id: string) {
-  visits[id] = await teamwork(preVisitNoteWorkflow, visits[id])
+  visits[id] = await teamwork(preVisitNoteWorkflow, visits[id], false)
+}
+
+const addToolResponse = (state: WorkflowState, toolCallId: string, content: string) => {
+  const toolRequestMessage = state.messages.findLast(isToolCallRequest)
+  if (toolRequestMessage) {
+    return {
+      ...state,
+      messages: state.messages.concat({
+        role: 'tool',
+        tool_call_id: toolCallId,
+        content,
+      }),
+    }
+  }
+  if (state.child) {
+    return addToolResponse(state.child, toolCallId, content)
+  }
+  return state
+}
+
+const resumeCompletedToolCalls = (state: WorkflowState) => {
+  const toolRequestMessage = state.messages.findLast(isToolCallRequest)
+  if (toolRequestMessage) {
+    const hasAllToolCalls = toolRequestMessage.tool_calls.every((tollCall) =>
+      state.messages.some(
+        (request) => 'tool_call_id' in request && tollCall.id === request.tool_call_id
+      )
+    )
+    if (hasAllToolCalls) {
+      return {
+        ...state,
+        status: 'running' as const,
+      }
+    }
+    return state
+  }
+  if (state.child) {
+    return resumeCompletedToolCalls(state.child)
+  }
+  return state
+}
+
+const getAllMissingToolCalls = (state: WorkflowState) => {
+  const toolRequests = state.messages.reduce((acc, message) => {
+    if (isToolCallRequest(message)) {
+      return acc.concat(message.tool_calls.map((toolCall) => toolCall.id))
+    }
+    return acc
+  }, [] as string[])
+
+  const toolResponses = state.messages.reduce((acc, message) => {
+    if ('tool_call_id' in message) {
+      return acc.concat(message.tool_call_id)
+    }
+    return acc
+  }, [] as string[])
+
+  const missingToolCalls = toolRequests.filter(
+    (toolRequest) => !toolResponses.includes(toolRequest)
+  )
+
+  if (state.child) {
+    missingToolCalls.push(...getAllMissingToolCalls(state.child))
+  }
+
+  return missingToolCalls
 }

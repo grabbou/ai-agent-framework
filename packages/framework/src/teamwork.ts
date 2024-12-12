@@ -18,7 +18,7 @@ export async function teamwork(
   if (runTools === false && hasPausedStatus(state)) {
     return state
   }
-  return teamwork(workflow, await iterate(workflow, state))
+  return teamwork(workflow, await iterate(workflow, state), runTools)
 }
 
 /**
