@@ -13,17 +13,6 @@ import { askUser } from './tools/askUser.js'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
 
-const printTool = tool({
-  description: 'Display information to the user',
-  parameters: z.object({
-    message: z.string().describe('The information to be displayed'),
-  }),
-  execute: async ({ message }) => {
-    console.log(message)
-    return ''
-  },
-})
-
 const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools()
 
 const { firecrawl } = createFireCrawlTool({
@@ -43,8 +32,8 @@ const githubResearcher = agent({
 
 const wrapupRedactor = agent({
   description: `
-    Your role is to wrap up reports.
     You ask users for which topic to focus on if it's defined in the task.
+    Your role is to wrap up reports.
     You're famous of beautiful Markdown formatting.
   `,
   tools: {
