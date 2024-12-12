@@ -2,11 +2,13 @@ import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawl'
 import { getApiKey } from '@fabrice-ai/tools/utils'
 import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
+import { supervisor } from 'fabrice-ai/agents/supervisor'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
 
+import { staticSupervisor } from './agents/static_supervisor.js'
 import { askUser } from './tools/askUser.js'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
@@ -49,7 +51,7 @@ const reportCompiler = agent({
 })
 
 const wrapUpTrending = workflow({
-  team: { webCrawler, human, reportCompiler },
+  team: { webCrawler, human, reportCompiler, supervisor: staticSupervisor() }, // an example of overriding supervisor
   description: `
     Research the URL "https://github.com/trending/typescript" page.
     Select 3 top projects. Browse details about these projects on their subpages.
