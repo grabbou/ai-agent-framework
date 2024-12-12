@@ -52,7 +52,6 @@ export async function run(
  * Iterates over the workflow and takes a snapshot of the state after each iteration.
  */
 export async function iterate(workflow: Workflow, state: WorkflowState) {
-  console.log('run')
   const nextState = await run(state, [], workflow)
   workflow.snapshot({ prevState: state, nextState })
   return nextState
