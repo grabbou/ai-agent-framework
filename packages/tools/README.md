@@ -173,7 +173,7 @@ File system tools for reading, writing and listing files. The tools are sandboxe
 ```typescript
 import { createFileSystemTools } from '@fabrice-ai/tools/filesystem'
 
-const workingDir = path.resolve(__dirname, '../assets/')
+const workingDir = path.resolve(import.meta.dirname, '../assets/')
 
 const { saveFile, readFile, listFilesFromDirectory } = createFileSystemTools({
   workingDir,

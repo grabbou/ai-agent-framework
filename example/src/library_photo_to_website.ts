@@ -6,7 +6,7 @@ import { logger } from 'fabrice-ai/telemetry'
 import { solution, workflow } from 'fabrice-ai/workflow'
 import path from 'path'
 
-const workingDir = path.resolve(__dirname, '../assets/')
+const workingDir = path.resolve(import.meta.dirname, '../assets/')
 
 const { saveFile, readFile, listFilesFromDirectory } = createFileSystemTools({
   workingDir,
