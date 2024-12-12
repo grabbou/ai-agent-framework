@@ -1,20 +1,37 @@
-import { iterate, nextTick } from './supervisor/nextTick.js'
-import { Workflow, WorkflowState, workflowState } from './workflow.js'
+import { iterate } from './iterate.js'
+import { rootState } from './state.js'
+import { WorkflowState } from './state.js'
+import { Workflow } from './workflow.js'
 
 /**
  * Teamwork runs given workflow and continues iterating over the workflow until it finishes.
+ * If you handle running tools manually, you can set runTools to false.
  */
 export async function teamwork(
   workflow: Workflow,
-  state: WorkflowState = workflowState(workflow)
+  state: WorkflowState = rootState(workflow),
+  runTools: boolean = true
 ): Promise<WorkflowState> {
-  if (state.status === 'finished') {
+  if (state.status === 'finished' && state.child === null) {
     return state
   }
-  return teamwork(workflow, await iterate(workflow, state))
+  if (runTools === false && hasPausedStatus(state)) {
+    return state
+  }
+  return teamwork(workflow, await iterate(workflow, state), runTools)
 }
 
 /**
- * Iterate performs single iteration over workflow and returns its next state
+ * Recursively checks if any state or nested state has a 'paused' status
  */
-export { nextTick as iterate }
+export const hasPausedStatus = (state: WorkflowState): boolean => {
+  if (state.status === 'paused') {
+    return true
+  }
+
+  if (!state.child) {
+    return false
+  }
+
+  return hasPausedStatus(state.child)
+}

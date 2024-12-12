@@ -38,18 +38,16 @@ import { solution, workflow } from 'fabrice-ai/workflow'
 import { lookupWikipedia } from './tools/wikipedia.js'
 
 const activityPlanner = agent({
-  role: 'Activity Planner',
   description: `You are skilled at creating personalized itineraries...`,
 })
 
 const landmarkScout = agent({
-  role: 'Landmark Scout',
   description: `You research interesting landmarks...`,
   tools: { lookupWikipedia },
 })
 
 const workflow = workflow({
-  members: [activityPlanner, landmarkScout],
+  team: { activityPlanner, landmarkScout },
   description: `Plan a trip to Wrocław, Poland...`,
 })
 
@@ -129,16 +127,15 @@ const state = await teamwork(workflow)
 
 #### Server-side Teamwork
 
-The server-side version of teamwork is perfectly suited for long-running workflows that require external tool execution or manual intervention. It will not wait for the tool to be executed, but will return the state of the workflow.
+We provide a server-side version of `teamwork` that is perfectly suited for long-running workflows that require external tool execution or manual intervention. It will not wait for the tool to be executed, but will return the state of the workflow.
 
 You can then handle tool calls on your own, and call `teamwork` again when ready.
 
 ```typescript
-import { teamwork } from 'fabrice-ai/server'
+import { teamwork } from 'fabrice-ai/teamwork'
 
-// If status is `assigned`, you need to handle tool calls on your own.
-// Otherwise, status is `finished` and you can read the result.
-const nextState = await teamwork(workflow)
+// Setting third argumenet to `false` will stop waiting for the tool to be executed.
+const nextState = await teamwork(workflow, prevState, false)
 ```
 
 This pattern is especially useful for:

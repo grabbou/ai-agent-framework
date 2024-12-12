@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
-import { isToolCallRequest } from './supervisor/runTools.js'
-import { WorkflowState } from './workflow.js'
+import { WorkflowState } from './state.js'
+import { isToolCallRequest } from './tool_calls.js'
 
 export type Telemetry = ({
   prevState,
@@ -11,74 +11,51 @@ export type Telemetry = ({
   nextState: WorkflowState
 }) => void
 
-export const noop: Telemetry = () => {}
-
 export const logger: Telemetry = ({ prevState, nextState }) => {
-  const { status } = nextState
+  if (prevState === nextState) return
 
-  const logMessage = (emoji: string, message: string, details: string = '') => {
-    console.log(`${emoji} ${chalk.bold(message)}${details ? `\n${chalk.gray(details)}` : ''}`)
-  }
-
-  if (prevState !== nextState) {
-    switch (status) {
-      case 'pending':
-        logMessage(
-          '🕒',
-          'Distributing the task...',
-          `Request: ${nextState.agentRequest[0].content}`
-        )
-        break
-      case 'assigned':
-        switch (nextState.agentStatus) {
-          case 'idle':
-            logMessage(
-              '🛠️',
-              `Agent "${nextState.agent}" is beginning to work on the task`,
-              `Step details: ${nextState.agentRequest.at(-1)!.content}`
-            )
-            break
-          case 'step':
-            logMessage(
-              '🔄',
-              `Agent "${nextState.agent}" is moving to the next step`,
-              `Step details: ${nextState.agentRequest.at(-1)!.content}`
-            )
-            break
-          case 'tool': {
-            const lastMessage = nextState.agentRequest[nextState.agentRequest.length - 1]
-            if (!isToolCallRequest(lastMessage)) {
-              return
-            }
-            const toolNames = lastMessage.tool_calls.map((tool) => tool.function.name)
-            logMessage(
-              '🔧',
-              `Agent "${nextState.agent}" is calling tools`,
-              `Tools: ${toolNames.join(', ')}`
-            )
-            break
-          }
-        }
-        break
+  const getStatusText = (state: WorkflowState) => {
+    if (state.agent === 'supervisor') {
+      return 'Looking for next task...'
+    }
+    if (state.agent === 'resourcePlanner') {
+      return 'Looking for best agent...'
+    }
+    switch (state.status) {
       case 'idle':
-        logMessage(
-          '✅',
-          'Moving to next task',
-          `Iterations: ${Math.floor((nextState.messages.length - 1) / 2)}`
-        )
-        break
+      case 'running': {
+        const lastMessage = state.messages.at(-1)!
+        if (lastMessage.role === 'tool') {
+          return `Processing tool response...`
+        }
+        return `Working on: ${lastMessage.content}`
+      }
+      case 'paused': {
+        const lastMessage = state.messages.at(-1)!
+        if (isToolCallRequest(lastMessage)) {
+          return `Waiting for tools: ${lastMessage.tool_calls.map((toolCall) => toolCall.function.name).join(', ')}`
+        }
+        return 'Paused'
+      }
       case 'finished':
-        logMessage(
-          '🎉',
-          'Workflow finished successfully!',
-          `Total messages: ${nextState.messages.length}`
-        )
-        break
+        return 'Done'
       case 'failed':
-        logMessage('❌', 'Workflow failed', `Check logs for more details`)
-        break
-      default:
-        logMessage('ℹ️', 'State changed', `New status: ${status}`)
+        return 'Failed'
     }
   }
+
+  const printTree = (state: WorkflowState, level = 0) => {
+    const indent = '  '.repeat(level)
+    const arrow = level > 0 ? '└─▶ ' : ''
+    const statusText = state.child ? '' : getStatusText(state)
+
+    console.log(`${indent}${arrow}${chalk.bold(state.agent)} ${statusText}`)
+
+    if (state.child) {
+      printTree(state.child, level + 1)
+    }
+  }
+
+  printTree(nextState)
+  console.log('') // Empty line for better readability
 }

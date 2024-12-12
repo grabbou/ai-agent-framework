@@ -1,9 +1,10 @@
 import { createFileSystemTools } from '@fabrice-ai/tools/filesystem'
 import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 import path from 'path'
 
 const workingDir = path.resolve(import.meta.dirname, '../assets/')
@@ -13,7 +14,6 @@ const { saveFile, readFile, listFilesFromDirectory } = createFileSystemTools({
 })
 
 const librarian = agent({
-  role: 'Librarian',
   description: `
     You are skilled at scanning and identifying books in the library.
     When asked, you will analyze the photo of the library and list all the books that you see, in details.
@@ -24,7 +24,6 @@ const librarian = agent({
 })
 
 const webmaster = agent({
-  role: 'HTML Webmaster',
   description: `
     You are skilled at creating HTML pages. 
     You are good at using templates for creating HTML pages.
@@ -41,7 +40,7 @@ const imagePath = path.join(workingDir, 'photo-library.jpg')
 const outputPath = path.join(workingDir, 'library.html')
 
 const bookLibraryWorkflow = workflow({
-  members: [librarian, webmaster],
+  team: { librarian, webmaster },
   description: `
     Analyze the photo of the library and list all the books in the library.
     Generate a website that lists all the books in the library.

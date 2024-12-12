@@ -1,18 +1,19 @@
 import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 
 import { lookupWikipedia } from './tools/wikipedia.js'
 
 const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools()
 
 const wikipediaIndexer = agent({
-  role: 'Wikipedia Indexer',
   description: `
     You are skilled at reading and understanding the context of Wikipedia articles.
-    You split Wikipedia articles by each sentence to make it easy for other team members to search exact sentences in vector store.
+    You split Wikipedia articles by each sentence.
+    Save each sentence as a document in Vector store.
   `,
   tools: {
     lookupWikipedia,
@@ -21,7 +22,6 @@ const wikipediaIndexer = agent({
 })
 
 const reportCompiler = agent({
-  role: 'Report Compiler',
   description: `
     You are skilled at compiling information from various sources into a coherent report.
     You have access to Vector database with indexed sentences of Wikipedia articles.
@@ -33,13 +33,12 @@ const reportCompiler = agent({
 })
 
 const wikipediaResearch = workflow({
-  members: [wikipediaIndexer, reportCompiler],
+  team: { wikipediaIndexer, reportCompiler },
   description: `
     Find information about John III Sobieski.
     Index the data into vector database. One sentence is one document saved in Vector store.
     List exact some example sentences related to:
      - Battle of Vienna.
-     - John III Youth,
      - John III later years and death.
   `,
   output: `

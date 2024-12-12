@@ -1,12 +1,12 @@
 import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 import path from 'path'
 
 const techExpert = agent({
-  role: 'Technical expert',
   description: `
     You are skilled at extracting and describing most detailed
     technical information about the product from the photo.
@@ -17,7 +17,6 @@ const techExpert = agent({
 })
 
 const marketingManager = agent({
-  role: 'Marketing content writer',
   description: `
     You are skilled at writing catchy product descriptions
     making customers to instantly fall in love with the product. 
@@ -26,7 +25,7 @@ const marketingManager = agent({
 })
 
 const productDescriptionWorkflow = workflow({
-  members: [techExpert, marketingManager],
+  team: { techExpert, marketingManager },
   description: `
     Based on the picture '${path.resolve(import.meta.dirname, '../assets/example-sneakers.jpg')}' make the eCommerce product to 
     list this product on the website.

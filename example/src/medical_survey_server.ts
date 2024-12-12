@@ -1,11 +1,17 @@
 /**
  * This example demonstrates using framework in server-side environments.
  */
+import { randomUUID } from 'node:crypto'
+
 import chalk from 'chalk'
 import s from 'dedent'
-import { teamwork } from 'fabrice-ai/server'
-import { isToolCallRequest } from 'fabrice-ai/supervisor/runTools'
-import { WorkflowState, workflowState } from 'fabrice-ai/workflow'
+import { rootState, WorkflowState } from 'fabrice-ai/state'
+import { hasPausedStatus, teamwork } from 'fabrice-ai/teamwork'
+import {
+  addToolResponse,
+  getAllMissingToolCalls,
+  resumeCompletedToolCalls,
+} from 'fabrice-ai/tool_calls'
 import fastify, { FastifyRequest } from 'fastify'
 
 import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
@@ -18,49 +24,30 @@ const visits: Record<string, WorkflowState> = {}
  * This will create a new workflow and return the initial state
  */
 server.post('/visits', async () => {
-  const state = workflowState(preVisitNoteWorkflow)
+  const id = randomUUID()
+  const state = rootState(preVisitNoteWorkflow)
 
   // Add the state to the visits map
-  visits[state.id] = state
+  visits[id] = state
 
   // Start the visit in the background
-  runVisit(state.id)
+  runVisit(id)
 
   return {
-    id: state.id,
+    id,
     status: state.status,
   }
 })
 
 /**
- * Call this endpoint to get status of the workflow, or the final result.
+ * Call this endpoint to get pending tool calls
  */
 server.get('/visits/:id', async (req: FastifyRequest<{ Params: { id: string } }>) => {
   const state = visits[req.params.id]
   if (!state) {
     throw new Error('Workflow not found')
   }
-
-  if (state.status === 'finished') {
-    return {
-      status: state.status,
-      result: state.messages.at(-1)!.content,
-    }
-  }
-
-  if (state.status === 'assigned') {
-    if (state.agentStatus === 'tool') {
-      return state.agentRequest.findLast(isToolCallRequest)!.tool_calls
-    }
-    return {
-      status: state.status,
-      agentStatus: state.agentStatus,
-    }
-  }
-
-  return {
-    status: state.status,
-  }
+  return getAllMissingToolCalls(state)
 })
 
 /**
@@ -71,53 +58,24 @@ server.post(
   async (req: FastifyRequest<{ Params: { id: string }; Body: ToolCallMessage }>) => {
     const state = visits[req.params.id]
     if (!state) {
-      throw new Error('Workflow not found')
+      throw new Error('Workflow not found.')
     }
 
-    if (state.status !== 'assigned' || state.agentStatus !== 'tool') {
-      throw new Error('Workflow is not waiting for a message right now')
+    if (!hasPausedStatus(state)) {
+      throw new Error('Workflow is not waiting for a message right now.')
     }
 
-    const toolRequestMessage = state.agentRequest.findLast(isToolCallRequest)
-    if (!toolRequestMessage) {
-      throw new Error('No tool request message found')
-    }
-
-    const toolCall = toolRequestMessage.tool_calls.find(
-      (toolCall) => toolCall.id === req.body.tool_call_id
-    )
-    if (!toolCall) {
-      throw new Error('Tool call not found')
-    }
-
-    const agentRequest = state.agentRequest.concat({
-      role: 'tool',
-      tool_call_id: toolCall.id,
-      content: req.body.content,
-    })
-
-    const allToolRequests = toolRequestMessage.tool_calls.map((toolCall) => toolCall.id)
-    const hasAllToolCalls = allToolRequests.every((toolCallId) =>
-      agentRequest.some(
-        (request) => 'tool_call_id' in request && request.tool_call_id === toolCallId
-      )
+    // Add the tool response to the workflow
+    // and update the statuses
+    const newState = resumeCompletedToolCalls(
+      addToolResponse(state, req.body.tool_call_id, req.body.content)
     )
 
-    // Add tool response to the workflow
-    // Change agent status to `step` if all tool calls have been added, so
-    // runVisit will continue
+    const hasAllToolCalls = getAllMissingToolCalls(newState).length === 0
+
+    // Run the workflow again
     if (hasAllToolCalls) {
-      visits[req.params.id] = {
-        ...state,
-        agentStatus: 'step',
-        agentRequest,
-      }
-      runVisit(req.params.id)
-    } else {
-      visits[req.params.id] = {
-        ...state,
-        agentRequest,
-      }
+      visits[req.params.id] = await teamwork(preVisitNoteWorkflow, newState)
     }
 
     return {
@@ -159,5 +117,5 @@ type ToolCallMessage = {
 }
 
 async function runVisit(id: string) {
-  visits[id] = await teamwork(preVisitNoteWorkflow, visits[id])
+  visits[id] = await teamwork(preVisitNoteWorkflow, visits[id], false)
 }

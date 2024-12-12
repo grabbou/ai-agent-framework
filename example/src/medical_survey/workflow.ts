@@ -3,9 +3,7 @@ import { workflow } from 'fabrice-ai/workflow'
 
 import { askUser } from '../tools/askUser.js'
 
-
 const nurse = agent({
-  role: 'Nurse',
   description: `
     You are skille nurse / doctor assistant.
     You role is to cooperate with reporter to create a pre-visit note for a patient that is about to come for a visit.
@@ -18,7 +16,6 @@ const nurse = agent({
 })
 
 const reporter = agent({
-  role: 'Reporter',
   description: `
     You are skilled at preparing great looking reports.
     You can prepare a report for a patient that is about to come for a visit.
@@ -27,7 +24,7 @@ const reporter = agent({
 })
 
 export const preVisitNoteWorkflow = workflow({
-  members: [nurse, reporter],
+  team: { nurse, reporter },
   description: `
     Create a pre-visit note for a patient that is about to come for a visit.
     The note should include the patient's health and symptoms.

@@ -1,12 +1,12 @@
 import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { solution, workflow } from 'fabrice-ai/workflow'
+import { workflow } from 'fabrice-ai/workflow'
 
 import { lookupWikipedia } from './tools/wikipedia.js'
 
 const personalizedActivityPlanner = agent({
-  role: 'Activity Planner',
   description: `
     You are skilled at creating personalized itineraries that cater to
     the specific preferences and demographics of travelers.
@@ -16,7 +16,6 @@ const personalizedActivityPlanner = agent({
 })
 
 const landmarkScout = agent({
-  role: 'Landmark Scout',
   description: `
     You are skilled at researching and finding interesting landmarks at the destination.
     Your goal is to find historical landmarks, museums, and other interesting places.
@@ -27,7 +26,6 @@ const landmarkScout = agent({
 })
 
 const restaurantScout = agent({
-  role: 'Restaurant Scout',
   description: `
     As a food lover, you know the best spots in town for a delightful culinary experience.
     You also have a knack for finding picturesque and entertaining locations.
@@ -37,7 +35,6 @@ const restaurantScout = agent({
 })
 
 const itineraryCompiler = agent({
-  role: 'Itinerary Compiler',
   description: `
     With an eye for detail, you organize all the information into a coherent and enjoyable travel plan.
     Your goal is to compile all researched information into a comprehensive day-by-day itinerary,
@@ -46,7 +43,12 @@ const itineraryCompiler = agent({
 })
 
 const researchTripWorkflow = workflow({
-  members: [personalizedActivityPlanner, restaurantScout, landmarkScout, itineraryCompiler],
+  team: {
+    personalizedActivityPlanner,
+    restaurantScout,
+    landmarkScout,
+    itineraryCompiler,
+  },
   description: `
     Research and find cool things to do in Wrocław, Poland.
 
