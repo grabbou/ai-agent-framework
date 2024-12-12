@@ -47,8 +47,8 @@ const wrapUpTrending = workflow({
   team: { githubResearcher, wrapupRedactor },
   description: `
     Research the URL "https://github.com/trending/typescript" page using firecrawl tool
-    Select 3 top projects. Browse for details about these projects on ther subpages. 
-    Save it to the vector store.
+    Select 3 top projects. Browse for details about these projects on their subpages. 
+    Save it all to the vector store.
 
     Ask user about which project he wants to learn more.
     reate a comprehensive report markdown output:
