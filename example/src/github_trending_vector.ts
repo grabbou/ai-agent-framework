@@ -22,7 +22,8 @@ const { firecrawl } = createFireCrawlTool({
 const githubResearcher = agent({
   description: `
     You are skilled at browsing Github pages.
-    You are saving the documents to vector store for later usage
+    You are saving the documents to vector store for later usage.
+    You don't do any other thing just these two tasks.
   `,
   tools: {
     firecrawl,
@@ -33,7 +34,7 @@ const githubResearcher = agent({
 const wrapupRedactor = agent({
   description: `
     You ask users for which topic to focus on if it's defined in the task.
-    Your role is to wrap up reports.
+    Then - you search relevant information in Vector Store and compile reports based on it.
     You're famous of beautiful Markdown formatting.
   `,
   tools: {
