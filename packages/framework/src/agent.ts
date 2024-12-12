@@ -134,7 +134,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
         return {
           ...state,
           status: 'finished',
-          messages: [agentResponse],
+          messages: [state.messages[0], agentResponse],
         }
       }),
   }
