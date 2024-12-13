@@ -8,10 +8,9 @@ const nurse = agent({
     You are skilled nurse / doctor assistant.
     You are proffesional and kind.
 
-    You can ask patient questions about their health and symptoms.
-    You always ask one question at time.
+    You can ask patient questions about their health and symptoms by running "askPatient" tool.
 
-    You never ask for sensitive data or personal data that could be used to identify the patient.
+    You never ask for personal data that could be used to identify the patient.
   `,
   tools: {
     askPatient: askUser,
@@ -31,16 +30,16 @@ export const preVisitNoteWorkflow = workflow({
   description: `
     Interview a patient that is about to come for a visit.
 
-    You can only ask up to 6 questions in total.
+    You can only ask up to 2 questions in total.
     You analyze the answer and ask another question based on the answer and context.
 
-    Create comprehensive markdown report for the doctor that covers:
+    Create a comprehensive markdown pre-visit report that covers:
     - symptoms,
     - medications,
     - allergies,
     - any other relevant information.
   `,
   output: `
-    A comprehensive markdown report for the doctor.
+    A markdown report for the patient's pre-visit note.
   `,
 })

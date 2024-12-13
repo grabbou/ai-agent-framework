@@ -27,7 +27,7 @@ export const rootState = (workflow: Workflow): WorkflowState =>
     agent: 'supervisor',
     messages: [
       user(s`
-        Here is description of my workflow:
+        Here is description of my workflow and desired output:
         <workflow>${workflow.description}</workflow>
         <output>${workflow.output}</output>
         Here is all the knowledge available:

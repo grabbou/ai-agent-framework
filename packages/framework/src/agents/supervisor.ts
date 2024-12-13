@@ -17,11 +17,11 @@ export const supervisor = (options?: AgentOptions) => {
           system(s`
             You are a planner that breaks down complex workflows into smaller, actionable steps.
             Your job is to determine the next task that needs to be done based on the <workflow> and what has been completed so far.
-            
+
             Rules:
             1. Each task should be self-contained and achievable
             2. Tasks should be specific and actionable
-            3. Return null when the workflow is complete
+            3. Return null ONLY after the final output has been generated
             4. Consider dependencies and order of operations
             5. Use context from completed tasks to inform next steps
           `),
@@ -51,6 +51,7 @@ export const supervisor = (options?: AgentOptions) => {
         if (!content) {
           throw new Error('No content in response')
         }
+        console.log(content)
         if (!content.task) {
           return {
             ...state,
