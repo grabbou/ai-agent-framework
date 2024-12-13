@@ -1,4 +1,5 @@
 import s from 'dedent'
+import { ParsedChatCompletionMessage } from 'openai/resources/beta/chat/completions.mjs'
 import {
   ChatCompletionAssistantMessageParam,
   ChatCompletionMessageParam,
