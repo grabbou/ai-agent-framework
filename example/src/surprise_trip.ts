@@ -48,7 +48,7 @@ const researchTripWorkflow = workflow({
     restaurantScout,
     landmarkScout,
     itineraryCompiler,
-    supervisor: parallelSupervisor({ parallelism: 2 }),
+    // supervisor: parallelSupervisor({ parallelism: 2 }),
   },
   description: `
     Research and find cool things to do in Wrocław, Poland.

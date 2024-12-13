@@ -12,6 +12,7 @@ export async function teamwork(
   state: WorkflowState = rootState(workflow),
   runTools: boolean = true
 ): Promise<WorkflowState> {
+  console.log('teamwork', state)
   if (state.status === 'finished') {
     return state
   }
