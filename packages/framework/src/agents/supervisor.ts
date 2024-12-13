@@ -11,7 +11,7 @@ type ParallelSupervisorOptions = AgentOptions & {
   parallelism?: number
 }
 
-export const parallelSupervisor = (options: ParallelSupervisorOptions) => {
+export const parallelSupervisor = (options: ParallelSupervisorOptions = {}) => {
   const { parallelism = 3 } = options
 
   return agent({
@@ -78,7 +78,7 @@ export const parallelSupervisor = (options: ParallelSupervisorOptions) => {
   })
 }
 
-export const supervisor = (options: AgentOptions) => {
+export const supervisor = (options?: AgentOptions) => {
   return agent({
     run: async (state, context, workflow) => {
       const [workflowRequest, ...messages] = state.messages

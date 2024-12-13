@@ -30,7 +30,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
     provider,
     run:
       options.run ??
-      (async (state, context) => {
+      (async (state, context, workflow) => {
         const mappedTools = tools
           ? Object.entries(tools).map(([name, tool]) =>
               zodFunction({
@@ -40,6 +40,8 @@ export const agent = (options: AgentOptions = {}): Agent => {
               })
             )
           : []
+
+        const [, ...messages] = context
 
         const res = await provider.completions({
           messages: [
@@ -59,7 +61,13 @@ export const agent = (options: AgentOptions = {}): Agent => {
               `,
             },
             response('What have been done so far?'),
-            request(`Here is all the work done so far by other agents: ${JSON.stringify(context)}`),
+            request(
+              `Here is all the work done so far by other agents: ${JSON.stringify(messages)}`
+            ),
+            response(`Is there anything else I need to know?`),
+            workflow.knowledge
+              ? request(`Here is all the knowledge available: ${workflow.knowledge}`)
+              : request(`No, I do not have any additional information.`),
             response('What do you want me to do now?'),
             ...state.messages,
           ],

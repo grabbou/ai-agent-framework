@@ -2,7 +2,6 @@ import { agent } from 'fabrice-ai/agent'
 import { parallelSupervisor } from 'fabrice-ai/agents/supervisor'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
-import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
 
 import { lookupWikipedia } from './tools/wikipedia.js'
@@ -59,7 +58,8 @@ const researchTripWorkflow = workflow({
       - highly-rated restaurants and dining experiences.
       - landmarks with historic context.
       - picturesque and entertaining locations.
-
+  `,
+  knowledge: `
     Traveler's information:
       - Origin: New York, USA
       - Destination: Wrocław, Poland
@@ -72,7 +72,6 @@ const researchTripWorkflow = workflow({
     Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
     Ensure the itinerary includes flights, hotel information, and all planned activities and dining experiences.
   `,
-  snapshot: logger,
 })
 
 const result = await teamwork(researchTripWorkflow)
