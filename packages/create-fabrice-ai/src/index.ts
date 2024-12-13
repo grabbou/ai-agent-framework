@@ -13,6 +13,7 @@ import {
   downloadAndExtractTemplate,
   formatTargetDir,
   isNodeError,
+  latestReleaseDownloadLink,
 } from './utils.js'
 
 console.log(
@@ -133,13 +134,11 @@ if (typeof template !== 'object') {
 
 const s = spinner()
 
-s.start('Downloading template...')
+const releaseTarballUrl = await latestReleaseDownloadLink('callstackincubator', 'fabrice-ai')
 
-await downloadAndExtractTemplate(
-  root,
-  'https://github.com/callstackincubator/fabrice-ai/archive/refs/heads/main.tar.gz',
-  template.files
-)
+s.start(`Downloading template...`)
+
+await downloadAndExtractTemplate(root, releaseTarballUrl, template.files)
 
 copyAdditionalTemplateFiles(root)
 
