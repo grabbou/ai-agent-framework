@@ -65,7 +65,7 @@ const researchTripWorkflow = workflow({
       - Hotel location: Main Square, Wrocław
       - Flight information: Flight AA123, arriving on 2023-12-15
       - How long is the trip: 7 days
-  `,
+    `,
   output: `
     Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
     Ensure the itinerary includes flights, hotel information, and all planned activities and dining experiences.

@@ -60,6 +60,9 @@ const wrapUpTrending = workflow({
       - Use Vector Store if you need information about the project.
       - Before making up the record: ask user about which project he wants to learn more.
   `,
+  knowledge: `
+    We are preparing a report for the Typescript community.
+  `,
   output: `
     Comprehensive markdown report including:
     - summary on top trending Typescript projects.
