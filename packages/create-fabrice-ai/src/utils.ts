@@ -9,52 +9,23 @@ export function formatTargetDir(targetDir: string) {
   return targetDir.trim().replace(/\/+$/g, '')
 }
 
-export interface GithubReleaseInfo {
-  url: string
-  assets_url: string
-  upload_url: string
-  html_url: string
-  id: number
-  author: {
-    login: string
-    id: number
-    avatar_url: string
-    gravatar_id: string
-    url: string
-    repos_url: string
-    events_url: string
-    type: string
-  }
-  node_id: string
-  tag_name: string
-  target_commitish: string
-  name: string
-  draft: boolean
-  prerelease: boolean
-  created_at: string
-  published_at: string
-  assets: any[]
-  tarball_url: string
-  zipball_url: string
-}
-
-export async function getLatestReleaseInfo(
+export async function latestReleaseDownloadLink(
   organization: string,
   repo: string
-): Promise<GithubReleaseInfo> {
+): Promise<string> {
   const response = await fetch(
     `https://api.github.com/repos/${organization}/${repo}/releases/latest`
   )
+  
   if (!response.ok) {
     throw new Error(`Failed to fetch release info from ${response.url}.`)
   }
-
-  return await response.json()
-}
-
-export async function latestReleaseDownloadLink(organization: string, repo: string) {
-  const latestRelease = await getLatestReleaseInfo(organization, repo)
-  return latestRelease.tarball_url
+  
+  const body = await response.json()
+  if (!('tarball_url' in body) || typeof body.tarball_url !== 'string') {
+    throw new Error()
+  }
+  return body.tarball_url
 }
 
 export async function downloadAndExtractTemplate(root: string, tarball: string, files: string[]) {
