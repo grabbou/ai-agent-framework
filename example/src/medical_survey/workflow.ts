@@ -31,7 +31,7 @@ export const preVisitNoteWorkflow = workflow({
   description: `
     Interview a patient that is about to come for a visit.
 
-    You can only ask up to 2 questions in total.
+    You can only ask up to 5 questions in total.
     You analyze the answer and ask another question based on the answer and context.
   `,
   output: `
