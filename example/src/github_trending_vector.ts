@@ -13,17 +13,6 @@ import { askUser } from './tools/askUser.js'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
 
-const printTool = tool({
-  description: 'Display information to the user',
-  parameters: z.object({
-    message: z.string().describe('The information to be displayed'),
-  }),
-  execute: async ({ message }) => {
-    console.log(message)
-    return ''
-  },
-})
-
 const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTools()
 
 const { firecrawl } = createFireCrawlTool({
@@ -32,8 +21,9 @@ const { firecrawl } = createFireCrawlTool({
 
 const githubResearcher = agent({
   description: `
-    You are skilled at browsing what's hot on Github trending page.
-    You are saving the documents to vector store for later usage
+    You are skilled at browsing Github pages.
+    You are saving the documents to vector store for later usage.
+    You don't do any other thing just these two tasks.
   `,
   tools: {
     firecrawl,
@@ -43,12 +33,11 @@ const githubResearcher = agent({
 
 const wrapupRedactor = agent({
   description: `
-    Your role is to wrap up reports.
     You ask users for which topic to focus on if it's defined in the task.
+    Then - you search relevant information in Vector Store and compile reports based on it.
     You're famous of beautiful Markdown formatting.
   `,
   tools: {
-    printTool,
     askUser,
     searchInVectorStore,
   },
@@ -57,22 +46,24 @@ const wrapupRedactor = agent({
 const wrapUpTrending = workflow({
   team: { githubResearcher, wrapupRedactor },
   description: `
-    Research the URL "https://github.com/trending/typescript" page using scraper tool
-    Get 3 top projects. You can get the title and description from the project page.
-    Then summarize it all into a comprehensive report markdown output.
+    Research the URL "https://github.com/trending/typescript" page using firecrawl tool
+    Select 3 top projects. Browse for details about these projects on their subpages. 
+    Save it all to the vector store.
 
     Ask user about which project he wants to learn more.
-    Search for the project in the vector store and provide more details in the report.
+    reate a comprehensive report markdown output:
+     - create a one, two sentence summary about every project.
+     - include detailed summary about the project selected by the user.
 
     Here are some ground rules to follow: 
-      - Include one sentence summary for each project.
-      - Print the list of projects to the user.
-      - Ask user about which project he wants to learn more.
-      - Display more information about this specific project from the vector store.
+      - Browser the pages onle once and store content in Vector Store. 
+      - Use Vector Store if you need information about the project.
+      - Before making up the record: ask user about which project he wants to learn more.
   `,
   output: `
-    Comprehensive markdown report with the top trending Typescript projects.
-    Detailed report about the project selected by the user.
+    Comprehensive markdown report including:
+    - summary on top trending Typescript projects.
+    - detailed info about the project selected by the user.
   `,
   snapshot: logger,
 })

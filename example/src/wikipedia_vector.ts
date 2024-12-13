@@ -12,7 +12,8 @@ const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTool
 const wikipediaIndexer = agent({
   description: `
     You are skilled at reading and understanding the context of Wikipedia articles.
-    You split Wikipedia articles by each sentence to make it easy for other team members to search exact sentences in vector store.
+    You split Wikipedia articles by each sentence.
+    Save each sentence as a document in Vector store.
   `,
   tools: {
     lookupWikipedia,
@@ -38,7 +39,6 @@ const wikipediaResearch = workflow({
     Index the data into vector database. One sentence is one document saved in Vector store.
     List exact some example sentences related to:
      - Battle of Vienna.
-     - John III Youth,
      - John III later years and death.
   `,
   output: `

@@ -4,6 +4,7 @@ import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
+import path from 'path'
 
 const techExpert = agent({
   description: `
@@ -26,7 +27,7 @@ const marketingManager = agent({
 const productDescriptionWorkflow = workflow({
   team: { techExpert, marketingManager },
   description: `
-    Based on the picture './example/assets/example-sneakers.jpg' make the eCommerce product to 
+    Based on the picture '${path.resolve(import.meta.dirname, '../assets/example-sneakers.jpg')}' make the eCommerce product to 
     list this product on the website.
 
     Focus:
@@ -43,7 +44,6 @@ const productDescriptionWorkflow = workflow({
   `,
   snapshot: logger,
 })
-
 const result = await teamwork(productDescriptionWorkflow)
 
 console.log(solution(result))
