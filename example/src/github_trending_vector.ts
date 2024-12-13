@@ -20,7 +20,7 @@ const { firecrawl } = createFireCrawlTool({
 const webCrawler = agent({
   description: `
     You are skilled at browsing Web pages.
-    You are saving the documents to vector store for later usage.
+    You can save the documents to Vector store for later usage.
   `,
   tools: {
     firecrawl,
@@ -39,9 +39,8 @@ const human = agent({
 
 const reportCompiler = agent({
   description: `
-    You can search Vector Store to find relevant informations and create reports based on it
-    Based on the information from Vector Store you can compile a comprehensive report.
-    You're famous of beautiful Markdown formatting.
+    You can create a comprehensive report based on the information from Vector store.
+    You're famous for beautiful Markdown formatting.
   `,
   tools: {
     searchInVectorStore,
@@ -51,26 +50,20 @@ const reportCompiler = agent({
 const wrapUpTrending = workflow({
   team: { webCrawler, human, reportCompiler },
   description: `
-    Research the URL "https://github.com/trending/typescript" page.
-    Select 3 top projects. Browse details about these projects on their subpages.
-    Store each page in Vector Store for further usage.
-    After you store the information you don't need to browse the page again 
-    because everything is stored in Vector Store.
-
-    Ask user about which project he wants to learn more. Ask user only once.
-  `, 
+    Research the "https://github.com/trending/typescript" page.
+    Select 3 top projects. 
+    For each project, browse details about it on their subpages.
+    Store each page in Vector store for later usage.
+  
+    Ask user about which project he wants to learn more.
+   `,
   knowledge: `
-    Create a comprehensive markdown report using information from Vector Store, based on user selection:
-     - create a one, two sentence summary about every project.
-     - include detailed summary about the project selected by the user.
-
-    Here are some ground rules to follow: 
-      - Use Vector Store if you need information about the project.
+    Each document in Vector store is a page from the website.
   `,
   output: `
-    Comprehensive markdown report including:
-    - summary on top trending Typescript projects.
-    - detailed info about the project selected by the user.
+    Create a comprehensive markdown report:
+     - create a one, two sentences summary about every project.
+     - include detailed summary about the project selected by the user. 
   `,
   snapshot: logger,
 })
