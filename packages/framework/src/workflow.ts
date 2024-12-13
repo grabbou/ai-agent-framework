@@ -11,6 +11,7 @@ type WorkflowOptions = {
 
   team: Team
 
+  knowledge?: string
   provider?: Provider
   maxIterations?: number
   snapshot?: Telemetry
@@ -37,4 +38,6 @@ export const workflow = (options: WorkflowOptions): Workflow => {
   }
 }
 
-export type Workflow = Required<WorkflowOptions>
+export type Workflow = Required<Omit<WorkflowOptions, 'knowledge'>> & {
+  knowledge?: string
+}
