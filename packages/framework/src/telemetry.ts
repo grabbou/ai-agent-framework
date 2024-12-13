@@ -52,9 +52,7 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
 
     console.log(`${indent}${arrow}${chalk.bold(state.agent)} ${statusText}`)
 
-    if (state.children) {
-      state.children.forEach((child) => printTree(child, level + 1))
-    }
+    state.children.forEach((child) => printTree(child, level + 1))
   }
 
   printTree(nextState)
