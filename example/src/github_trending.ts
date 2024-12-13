@@ -39,7 +39,7 @@ const wrapUpTrending = workflow({
       - Include one sentence summary for each project.
   `,
   knowledge: `
-    We are preparing a report for the Python community.
+    We are preparing a report for the Typescript community.
   `,
   output: `
     Comprehensive markdown report with the top trending typescript projects.

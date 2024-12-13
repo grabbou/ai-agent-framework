@@ -58,7 +58,8 @@ const wrapUpTrending = workflow({
     because everything is stored in Vector Store.
 
     Ask user about which project he wants to learn more. Ask user only once.
-
+  `, 
+  knowledge: `
     Create a comprehensive markdown report using information from Vector Store, based on user selection:
      - create a one, two sentence summary about every project.
      - include detailed summary about the project selected by the user.
