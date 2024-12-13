@@ -1,5 +1,4 @@
 import { agent } from 'fabrice-ai/agent'
-import { parallelSupervisor } from 'fabrice-ai/agents/supervisor'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { workflow } from 'fabrice-ai/workflow'
@@ -48,7 +47,6 @@ const researchTripWorkflow = workflow({
     restaurantScout,
     landmarkScout,
     itineraryCompiler,
-    // supervisor: parallelSupervisor({ parallelism: 2 }),
   },
   description: `
     Research and find cool things to do in Wrocław, Poland.
