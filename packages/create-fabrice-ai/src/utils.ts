@@ -16,15 +16,16 @@ export async function latestReleaseDownloadLink(
   const response = await fetch(
     `https://api.github.com/repos/${organization}/${repo}/releases/latest`
   )
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch release info from ${response.url}.`)
   }
-  
+
   const body = await response.json()
   if (!('tarball_url' in body) || typeof body.tarball_url !== 'string') {
-    throw new Error()
+    throw new Error(`Failed to get tarball url from ${response.url}.`)
   }
+
   return body.tarball_url
 }
 
@@ -38,7 +39,7 @@ export async function downloadAndExtractTemplate(root: string, tarball: string, 
     // @ts-ignore
     Readable.fromWeb(response.body),
     extract({
-      cwd: tmpdir(),
+      cwd: path.join(import.meta.dirname),
       strip: 1,
     }),
   ])
