@@ -12,7 +12,7 @@ export async function teamwork(
   state: WorkflowState = rootState(workflow),
   runTools: boolean = true
 ): Promise<WorkflowState> {
-  if (state.status === 'finished' && state.child === null) {
+  if (state.status === 'finished') {
     return state
   }
   if (runTools === false && hasPausedStatus(state)) {
@@ -28,10 +28,5 @@ export const hasPausedStatus = (state: WorkflowState): boolean => {
   if (state.status === 'paused') {
     return true
   }
-
-  if (!state.child) {
-    return false
-  }
-
-  return hasPausedStatus(state.child)
+  return state.children.some(hasPausedStatus)
 }

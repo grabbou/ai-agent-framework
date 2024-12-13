@@ -35,11 +35,15 @@ const reportCompiler = agent({
 const wikipediaResearch = workflow({
   team: { wikipediaIndexer, reportCompiler },
   description: `
-    Find information about John III Sobieski.
-    Index the data into vector database. One sentence is one document saved in Vector store.
+    Find information about John III Sobieski on Wikipedia.
+    Index the data into vector database. 
     List exact some example sentences related to:
      - Battle of Vienna.
      - John III later years and death.
+  `,
+  knowledge:`
+    Wikipedia article should be splited into sentences. 
+    Every sentence should be stored as a document in Vector Store.
   `,
   output: `
     Report with:

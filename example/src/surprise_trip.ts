@@ -1,7 +1,6 @@
 import { agent } from 'fabrice-ai/agent'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
-import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
 
 import { lookupWikipedia } from './tools/wikipedia.js'
@@ -66,10 +65,10 @@ const researchTripWorkflow = workflow({
       - Hotel location: Main Square, Wrocław
       - Flight information: Flight AA123, arriving on 2023-12-15
       - How long is the trip: 7 days
-  `,
+    `,
   output: `
     Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
-    Ensure the itinerary integrates flights, hotel information, and all planned activities and dining experiences.
+    Ensure the itinerary includes flights, hotel information, and all planned activities and dining experiences.
   `,
 })
 
