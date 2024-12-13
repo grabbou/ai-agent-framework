@@ -1,7 +1,7 @@
 import OpenAI, { ClientOptions } from 'openai'
 import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions'
 
-type OpenAIOptions = {
+export type OpenAIOptions = {
   model?: string
   options?: ClientOptions
 }
