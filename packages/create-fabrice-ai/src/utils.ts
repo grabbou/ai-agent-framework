@@ -39,7 +39,7 @@ export async function downloadAndExtractTemplate(root: string, tarball: string, 
     // @ts-ignore
     Readable.fromWeb(response.body),
     extract({
-      cwd: path.join(import.meta.dirname),
+      cwd: tmpdir(),
       strip: 1,
     }),
   ])
