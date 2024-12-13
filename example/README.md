@@ -52,7 +52,7 @@ Researches and summarizes the top news from the past week into a comprehensive r
 
 > `src/github_trending.ts`
 
-Scrapes and analyzes trending Python projects from GitHub, creating a markdown summary report.
+Scrapes and analyzes trending Typescript projects from GitHub, creating a markdown summary report.
 
 **Actors:** Github Researcher, Redactor
 
