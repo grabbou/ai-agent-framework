@@ -64,7 +64,3 @@ export const getSteps = (conversation: Message[]): Message[] => {
     `)
   )
 }
-
-export const getRequest = (messages: Conversation): Request => {
-  return messages[0]
-}

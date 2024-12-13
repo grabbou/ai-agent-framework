@@ -38,15 +38,11 @@ export const rootState = (workflow: Workflow): WorkflowState =>
 
 export type WorkflowState = Required<WorkflowStateOptions>
 
-export const getRequest = (state: WorkflowState): Request => {
-  return state.messages[0]
-}
-
 export const finish = (state: WorkflowState, response: Response): WorkflowState => {
   return {
     ...state,
     status: 'finished',
-    messages: [getRequest(state), response],
+    messages: [state.messages[0], response],
   }
 }
 
