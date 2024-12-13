@@ -2,10 +2,11 @@ import s from 'dedent'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
 import { z } from 'zod'
 
-import { Message, request, response } from './messages.js'
+import { request, response } from './messages.js'
 import { openai, Provider } from './models.js'
 import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
+import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 export type AgentOptions = Partial<Agent>
