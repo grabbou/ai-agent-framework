@@ -3,7 +3,9 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { finish, request, response } from '../state.js'
+import { response } from '../messages.js'
+import { request } from '../messages.js'
+import { finish } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {

@@ -33,7 +33,8 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
       case 'paused': {
         const lastMessage = state.messages.at(-1)!
         if (isToolCallRequest(lastMessage)) {
-          return `Waiting for tools: ${lastMessage.tool_calls.map((toolCall) => toolCall.function.name).join(', ')}`
+          const tools = lastMessage.tool_calls.map((toolCall) => toolCall.function.name).join(', ')
+          return `Waiting for tools: ${tools}`
         }
         return 'Paused'
       }

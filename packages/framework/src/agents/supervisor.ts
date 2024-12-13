@@ -3,8 +3,9 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { getSteps } from '../messages.js'
-import { delegate, request, response } from '../state.js'
+import { Message, system } from '../messages.js'
+import { request, response } from '../messages.js'
+import { delegate } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {
@@ -12,22 +13,19 @@ const defaults: AgentOptions = {
 
     const res = await workflow.team[state.agent].provider.completions({
       messages: [
-        {
-          role: 'system',
-          content: s`
-            You are a planner that breaks down complex workflows into smaller, actionable steps.
-            Your job is to determine the next task that needs to be done based on the <workflow> and what has been completed so far.
+        system(s`
+          You are a planner that breaks down complex workflows into smaller, actionable steps.
+          Your job is to determine the next task that needs to be done based on the <workflow> and what has been completed so far.
 
-            You can run tasks in parallel, if they do not depend on each other. Otherwise, run them sequentially.
+          You can run tasks in parallel, if they do not depend on each other results. Otherwise, run them sequentially.
 
-            Rules:
-            1. Each task should be self-contained and achievable
-            2. Tasks should be specific and actionable
-            3. Return null when the workflow is complete
-            4. Consider dependencies and order of operations
-            5. Use context from completed tasks to inform next steps
-          `,
-        },
+          Rules:
+          1. Each task should be self-contained and achievable
+          2. Tasks should be specific and actionable
+          3. Return null when the workflow is complete
+          4. Consider dependencies and order of operations
+          5. Use context from completed tasks to inform next steps
+        `),
         response('What is the request?'),
         workflowRequest,
         response('What has been completed so far?'),
@@ -77,3 +75,23 @@ export const supervisor = (options?: AgentOptions) =>
     ...defaults,
     ...options,
   })
+
+const getSteps = (conversation: Message[]): Message[] => {
+  const messagePairs = conversation.reduce(
+    (pairs: Message[][], message: Message, index: number) => {
+      if (index % 2 === 0) {
+        pairs.push([message])
+      } else {
+        pairs[pairs.length - 1].push(message)
+      }
+      return pairs
+    },
+    []
+  )
+  return messagePairs.map(([task, result]) =>
+    request(s`
+      Step name: ${task.content}
+      Step result: ${result.content}
+    `)
+  )
+}

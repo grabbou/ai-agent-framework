@@ -1,6 +1,6 @@
-import { childState, finish, response, WorkflowState } from './state.js'
+import { Message, response } from './messages.js'
+import { childState, finish, WorkflowState } from './state.js'
 import { runTools } from './tool_calls.js'
-import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 // tbd: finalize workflow
@@ -23,7 +23,7 @@ export async function run(
     if (children.every((child) => child.status === 'finished')) {
       return {
         ...state,
-        messages: state.messages.concat(children.flatMap((child) => child.messages)),
+        messages: [...state.messages, ...children.flatMap((child) => child.messages)],
         children: [],
       }
     }
@@ -40,7 +40,7 @@ export async function run(
     return {
       ...state,
       status: 'running',
-      messages: state.messages.concat(toolsResponse),
+      messages: [...state.messages, ...toolsResponse],
     }
   }
 

@@ -2,18 +2,19 @@ import s from 'dedent'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
 import { z } from 'zod'
 
+import { Message, request, response } from './messages.js'
 import { openai, Provider } from './models.js'
-import { finish, request, response, WorkflowState } from './state.js'
+import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
-import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 export type AgentOptions = Partial<Agent>
 
+export type AgentName = string
 export type Agent = {
   description?: string
   tools: {
-    [key: string]: Tool
+    [key: AgentName]: Tool
   }
   provider: Provider
   run: (state: WorkflowState, context: Message[], workflow: Workflow) => Promise<WorkflowState>
@@ -89,7 +90,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
           return {
             ...state,
             status: 'paused',
-            messages: state.messages.concat(res.choices[0].message),
+            messages: [...state.messages, res.choices[0].message],
           }
         }
 

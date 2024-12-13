@@ -3,7 +3,9 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { handoff, request, response } from '../state.js'
+import { response } from '../messages.js'
+import { request } from '../messages.js'
+import { handoff } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {
@@ -47,7 +49,7 @@ const defaults: AgentOptions = {
       throw new Error('No content in response')
     }
 
-    return handoff(state, message.agent, state.messages)
+    return handoff(state, message.agent)
   },
 }
 

@@ -1,18 +1,19 @@
 import s from 'dedent'
 
-import { Message } from './types.js'
+import { AgentName } from './agent.js'
+import { Conversation, Request, request, Response } from './messages.js'
 import { Workflow } from './workflow.js'
 
 type WorkflowStateOptions = {
   agent: string
+  messages: Conversation
 
   status?: 'idle' | 'running' | 'paused' | 'finished' | 'failed'
-  messages?: Message[]
   children?: WorkflowState[]
 }
 
 export const childState = (options: WorkflowStateOptions): WorkflowState => {
-  const { status = 'idle', messages = [], agent, children = [] } = options
+  const { status = 'idle', messages, agent, children = [] } = options
   return {
     status,
     messages,
@@ -35,11 +36,11 @@ export const rootState = (workflow: Workflow): WorkflowState =>
 
 export type WorkflowState = Required<WorkflowStateOptions>
 
-export const getRequest = (state: WorkflowState): Message => {
+export const getRequest = (state: WorkflowState): Request => {
   return state.messages[0]
 }
 
-export const finish = (state: WorkflowState, response: Message): WorkflowState => {
+export const finish = (state: WorkflowState, response: Response): WorkflowState => {
   return {
     ...state,
     status: 'finished',
@@ -47,7 +48,8 @@ export const finish = (state: WorkflowState, response: Message): WorkflowState =
   }
 }
 
-export const delegate = (state: WorkflowState, requests: [string, Message][]): WorkflowState => {
+type DelegationRequest = [AgentName, Request]
+export const delegate = (state: WorkflowState, requests: DelegationRequest[]): WorkflowState => {
   return {
     ...state,
     status: 'running',
@@ -60,27 +62,9 @@ export const delegate = (state: WorkflowState, requests: [string, Message][]): W
   }
 }
 
-export const handoff = (
-  state: WorkflowState,
-  agent: string,
-  messages: Message[]
-): WorkflowState => {
+export const handoff = (state: WorkflowState, agent: AgentName): WorkflowState => {
   return childState({
     agent,
-    messages,
+    messages: state.messages,
   })
-}
-
-export const response = (content: string): Message => {
-  return {
-    role: 'assistant',
-    content,
-  }
-}
-
-export const request = (content: string): Message => {
-  return {
-    role: 'user',
-    content,
-  }
 }

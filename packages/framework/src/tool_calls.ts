@@ -4,8 +4,8 @@ import type {
 } from 'openai/resources/beta/chat/completions'
 import { ChatCompletionToolMessageParam } from 'openai/resources/chat/completions'
 
+import { Message, toolResult } from './messages.js'
 import { WorkflowState } from './state.js'
-import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 /**
@@ -44,11 +44,7 @@ export async function runTools(
         messages: context.concat(state.messages),
       })
 
-      return {
-        role: 'tool' as const,
-        tool_call_id: toolCall.id,
-        content: JSON.stringify(content),
-      }
+      return toolResult(toolCall.id, content)
     })
   )
 
@@ -64,11 +60,7 @@ export const addToolResponse = (
   if (toolRequestMessage) {
     return {
       ...state,
-      messages: state.messages.concat({
-        role: 'tool',
-        tool_call_id: toolCallId,
-        content,
-      }),
+      messages: [...state.messages, toolResult(toolCallId, content)],
     }
   }
   if (state.children.length > 0) {
