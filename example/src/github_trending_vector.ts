@@ -2,13 +2,13 @@ import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawl'
 import { getApiKey } from '@fabrice-ai/tools/utils'
 import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
+import { supervisor } from 'fabrice-ai/agents/supervisor'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { tool } from 'fabrice-ai/tool'
 import { workflow } from 'fabrice-ai/workflow'
-import { z } from 'zod'
 
+import { staticSupervisor } from './agents/static_supervisor.js'
 import { askUser } from './tools/askUser.js'
 
 const apiKey = await getApiKey('Firecrawl.dev API Key', 'FIRECRAWL_API_KEY')
@@ -19,11 +19,10 @@ const { firecrawl } = createFireCrawlTool({
   apiKey,
 })
 
-const githubResearcher = agent({
+const webCrawler = agent({
   description: `
-    You are skilled at browsing Github pages.
+    You are skilled at browsing Web pages.
     You are saving the documents to vector store for later usage.
-    You don't do any other thing just these two tasks.
   `,
   tools: {
     firecrawl,
@@ -31,34 +30,43 @@ const githubResearcher = agent({
   },
 })
 
-const wrapupRedactor = agent({
+const human = agent({
   description: `
-    You ask users for which topic to focus on if it's defined in the task.
-    Then - you search relevant information in Vector Store and compile reports based on it.
-    You're famous of beautiful Markdown formatting.
+    You can ask user and get their answer to questions that are needed by other agents.
   `,
   tools: {
     askUser,
+  },
+})
+
+const reportCompiler = agent({
+  description: `
+    You can search Vector Store to find relevant informations and create reports based on it
+    Based on the information from Vector Store you can compile a comprehensive report.
+    You're famous of beautiful Markdown formatting.
+  `,
+  tools: {
     searchInVectorStore,
   },
 })
 
 const wrapUpTrending = workflow({
-  team: { githubResearcher, wrapupRedactor },
+  team: { webCrawler, human, reportCompiler, supervisor: staticSupervisor() }, // an example of overriding supervisor
   description: `
-    Research the URL "https://github.com/trending/typescript" page using firecrawl tool
-    Select 3 top projects. Browse for details about these projects on their subpages. 
-    Save it all to the vector store.
+    Research the URL "https://github.com/trending/typescript" page.
+    Select 3 top projects. Browse details about these projects on their subpages.
+    Store each page in Vector Store for further usage.
+    After you store the information you don't need to browse the page again 
+    because everything is stored in Vector Store.
 
-    Ask user about which project he wants to learn more.
-    reate a comprehensive report markdown output:
+    Ask user about which project he wants to learn more. Ask user only once.
+
+    Create a comprehensive markdown report using information from Vector Store, based on user selection:
      - create a one, two sentence summary about every project.
      - include detailed summary about the project selected by the user.
 
     Here are some ground rules to follow: 
-      - Browser the pages onle once and store content in Vector Store. 
       - Use Vector Store if you need information about the project.
-      - Before making up the record: ask user about which project he wants to learn more.
   `,
   output: `
     Comprehensive markdown report including:
