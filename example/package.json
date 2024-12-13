@@ -11,7 +11,6 @@
     "dotenv": "^16.4.7",
     "fabrice-ai": "0.4.4",
     "fastify": "^5.1.0",
-    "import": "^0.0.6",
     "zod": "^3.24.0"
   },
   "devDependencies": {
