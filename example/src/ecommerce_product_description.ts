@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'
 import { solution } from 'fabrice-ai/solution'

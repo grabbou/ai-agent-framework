@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
 import { agent } from 'fabrice-ai/agent'
 import { solution } from 'fabrice-ai/solution'

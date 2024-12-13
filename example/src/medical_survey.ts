@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 

@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { createFileSystemTools } from '@fabrice-ai/tools/filesystem'
 import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'

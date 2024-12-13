@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { createFireCrawlTool } from '@fabrice-ai/tools/firecrawl'
 import { getApiKey } from '@fabrice-ai/tools/utils'
 import { createVectorStoreTools } from '@fabrice-ai/tools/vector'
