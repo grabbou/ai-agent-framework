@@ -146,7 +146,7 @@ copyAdditionalTemplateFiles(root)
 
 s.stop('Downloaded and extracted template!')
 
-await requireApiKey('Open AI API Key', 'OPENAI_API_KEY2', root) // make sure the OPENAI_API_KEY is set
+await requireApiKey('Open AI API Key', 'OPENAI_API_KEY', root) // make sure the OPENAI_API_KEY is set
 
 outro('The project has been successfully created!')
 
