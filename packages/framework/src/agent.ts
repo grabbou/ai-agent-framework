@@ -2,18 +2,20 @@ import s from 'dedent'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
 import { z } from 'zod'
 
+import { assistant, getSteps, system, user } from './messages.js'
 import { openai, Provider } from './models.js'
-import { WorkflowState } from './state.js'
+import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 export type AgentOptions = Partial<Agent>
 
+export type AgentName = string
 export type Agent = {
   description?: string
   tools: {
-    [key: string]: Tool
+    [key: AgentName]: Tool
   }
   provider: Provider
   run: (state: WorkflowState, context: Message[], workflow: Workflow) => Promise<WorkflowState>
@@ -28,7 +30,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
     provider,
     run:
       options.run ??
-      (async (state, context) => {
+      (async (state, context, workflow) => {
         const mappedTools = tools
           ? Object.entries(tools).map(([name, tool]) =>
               zodFunction({
@@ -39,35 +41,31 @@ export const agent = (options: AgentOptions = {}): Agent => {
             )
           : []
 
+        const [, ...messages] = context
+
         const response = await provider.completions({
           messages: [
-            {
-              role: 'system',
-              content: s`
-                ${description}
+            system(s`
+              ${description}
 
-                Your job is to complete the assigned task:
-                - You can break down complex tasks into multiple steps if needed.
-                - You can use available tools if needed.
+              Your job is to complete the assigned task:
+              - You can break down complex tasks into multiple steps if needed.
+              - You can use available tools if needed.
 
-                If tool requires arguments, get them from the input, or use other tools to get them.
-                Do not fabricate or assume information not present in the input.
+              If tool requires arguments, get them from the input, or use other tools to get them.
+              Do not fabricate or assume information not present in the input.
 
-                Try to complete the task on your own.
-              `,
-            },
-            {
-              role: 'assistant',
-              content: 'What have been done so far?',
-            },
-            {
-              role: 'user',
-              content: `Here is all the work done so far by other agents: ${JSON.stringify(context)}`,
-            },
-            {
-              role: 'assistant',
-              content: 'What do you want me to do now?',
-            },
+              Try to complete the task on your own.
+            `),
+            assistant('What have been done so far?'),
+            user(
+              `Here is all the work done so far by other agents: ${JSON.stringify(getSteps(messages))}`
+            ),
+            assistant(`Is there anything else I need to know?`),
+            workflow.knowledge
+              ? user(`Here is all the knowledge available: ${workflow.knowledge}`)
+              : user(`No, I do not have any additional information.`),
+            assistant('What is the task assigned to me?'),
             ...state.messages,
           ],
           tools: mappedTools.length > 0 ? mappedTools : undefined,
@@ -98,44 +96,30 @@ export const agent = (options: AgentOptions = {}): Agent => {
           return {
             ...state,
             status: 'paused',
-            messages: state.messages.concat(response.choices[0].message),
+            messages: [...state.messages, response.choices[0].message],
           }
         }
 
-        const result = response.choices[0].message.parsed
-        if (!result) {
+        const message = response.choices[0].message.parsed
+        if (!message) {
           throw new Error('No parsed response received')
         }
 
-        if (result.response.kind === 'error') {
-          throw new Error(result.response.reasoning)
+        if (message.response.kind === 'error') {
+          throw new Error(message.response.reasoning)
         }
 
-        const agentResponse = {
-          role: 'assistant' as const,
-          content: result.response.result,
-        }
+        const agentResponse = assistant(message.response.result)
 
-        if (result.response.nextStep) {
+        if (message.response.nextStep) {
           return {
             ...state,
             status: 'running',
-            messages: [
-              ...state.messages,
-              agentResponse,
-              {
-                role: 'user',
-                content: result.response.nextStep,
-              },
-            ],
+            messages: [...state.messages, agentResponse, user(message.response.nextStep)],
           }
         }
 
-        return {
-          ...state,
-          status: 'finished',
-          messages: [agentResponse],
-        }
+        return finish(state, agentResponse)
       }),
   }
 }

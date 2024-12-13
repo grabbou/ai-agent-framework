@@ -1,7 +1,7 @@
 import z, { ZodTypeAny } from 'zod'
 
+import { Message } from './messages.js'
 import { Provider } from './models.js'
-import { Message } from './types.js'
 
 export type Tool<P extends ZodTypeAny = any> = {
   description: string

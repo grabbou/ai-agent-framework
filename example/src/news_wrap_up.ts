@@ -45,14 +45,14 @@ const wrapUpTheNewsWorkflow = workflow({
   description: `
     Research the top news and trends for the last week - get title and headline description.
     Then summarize it all into a comprehensive report markdown output.
-
+  `,
+  knowledge: `
     Here are some ground rules to follow: 
-      - Include one sentence summary for each article.
-      - Include top takeaways - bulletpoints from each article.
+    - Include one sentence summary for each article.
+    - Include top takeaways - bulletpoints from each article.
   `,
   output: `
-    Comprehensive markdown report with the top news and trends for the last week.
-    Add one sentence of "State of the Affairs" summary.
+    Comprehensive markdown report with the listing including top news headlines for the last week.
   `,
   snapshot: logger,
 })
