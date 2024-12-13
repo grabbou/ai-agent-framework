@@ -3,8 +3,8 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { response } from '../messages.js'
-import { request } from '../messages.js'
+import { assistant } from '../messages.js'
+import { user } from '../messages.js'
 import { finish } from '../state.js'
 
 const defaults: AgentOptions = {
@@ -18,7 +18,7 @@ const defaults: AgentOptions = {
           `,
         },
         ...context,
-        request(s`
+        user(s`
           Please summarize all executed steps and do your best to achieve 
           the main goal while responding with the final answer
         `),
@@ -34,7 +34,7 @@ const defaults: AgentOptions = {
     if (!message) {
       throw new Error('No parsed response received')
     }
-    return finish(state, response(message.finalAnswer))
+    return finish(state, assistant(message.finalAnswer))
   },
 }
 

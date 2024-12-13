@@ -1,7 +1,7 @@
 import s from 'dedent'
 
 import { AgentName } from './agent.js'
-import { Conversation, Request, request, Response } from './messages.js'
+import { Conversation, Request, Response, user } from './messages.js'
 import { Workflow } from './workflow.js'
 
 type WorkflowStateOptions = {
@@ -26,10 +26,12 @@ export const rootState = (workflow: Workflow): WorkflowState =>
   childState({
     agent: 'supervisor',
     messages: [
-      request(s`
-        Here is description of my workflow and expected output:
+      user(s`
+        Here is description of my workflow:
         <workflow>${workflow.description}</workflow>
         <output>${workflow.output}</output>
+        Here is all the knowledge available:
+        <knowledge>${workflow.knowledge}</knowledge>
       `),
     ],
   })

@@ -2,7 +2,7 @@ import s from 'dedent'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
 import { z } from 'zod'
 
-import { request, response } from './messages.js'
+import { assistant, getSteps, system, user } from './messages.js'
 import { openai, Provider } from './models.js'
 import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
@@ -43,32 +43,29 @@ export const agent = (options: AgentOptions = {}): Agent => {
 
         const [, ...messages] = context
 
-        const res = await provider.completions({
+        const response = await provider.completions({
           messages: [
-            {
-              role: 'system',
-              content: s`
-                ${description}
+            system(s`
+              ${description}
 
-                Your job is to complete the assigned task:
-                - You can break down complex tasks into multiple steps if needed.
-                - You can use available tools if needed.
+              Your job is to complete the assigned task:
+              - You can break down complex tasks into multiple steps if needed.
+              - You can use available tools if needed.
 
-                If tool requires arguments, get them from the input, or use other tools to get them.
-                Do not fabricate or assume information not present in the input.
+              If tool requires arguments, get them from the input, or use other tools to get them.
+              Do not fabricate or assume information not present in the input.
 
-                Try to complete the task on your own.
-              `,
-            },
-            response('What have been done so far?'),
-            request(
-              `Here is all the work done so far by other agents: ${JSON.stringify(messages)}`
+              Try to complete the task on your own.
+            `),
+            assistant('What have been done so far?'),
+            user(
+              `Here is all the work done so far by other agents: ${JSON.stringify(getSteps(messages))}`
             ),
-            response(`Is there anything else I need to know?`),
+            assistant(`Is there anything else I need to know?`),
             workflow.knowledge
-              ? request(`Here is all the knowledge available: ${workflow.knowledge}`)
-              : request(`No, I do not have any additional information.`),
-            response('What do you want me to do now?'),
+              ? user(`Here is all the knowledge available: ${workflow.knowledge}`)
+              : user(`No, I do not have any additional information.`),
+            assistant('What is the task assigned to me?'),
             ...state.messages,
           ],
           tools: mappedTools.length > 0 ? mappedTools : undefined,
@@ -95,15 +92,15 @@ export const agent = (options: AgentOptions = {}): Agent => {
           ),
         })
 
-        if (res.choices[0].message.tool_calls.length > 0) {
+        if (response.choices[0].message.tool_calls.length > 0) {
           return {
             ...state,
             status: 'paused',
-            messages: [...state.messages, res.choices[0].message],
+            messages: [...state.messages, response.choices[0].message],
           }
         }
 
-        const message = res.choices[0].message.parsed
+        const message = response.choices[0].message.parsed
         if (!message) {
           throw new Error('No parsed response received')
         }
@@ -112,13 +109,13 @@ export const agent = (options: AgentOptions = {}): Agent => {
           throw new Error(message.response.reasoning)
         }
 
-        const agentResponse = response(message.response.result)
+        const agentResponse = assistant(message.response.result)
 
         if (message.response.nextStep) {
           return {
             ...state,
             status: 'running',
-            messages: [...state.messages, agentResponse, request(message.response.nextStep)],
+            messages: [...state.messages, agentResponse, user(message.response.nextStep)],
           }
         }
 

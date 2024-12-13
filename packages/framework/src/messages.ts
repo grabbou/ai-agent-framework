@@ -1,3 +1,4 @@
+import s from 'dedent'
 import {
   ChatCompletionAssistantMessageParam,
   ChatCompletionMessageParam,
@@ -7,7 +8,7 @@ import {
 } from 'openai/resources/index.js'
 
 export type Response = ChatCompletionAssistantMessageParam
-export const response = (content: string): Response => {
+export const assistant = (content: string): Response => {
   return {
     role: 'assistant',
     content,
@@ -15,7 +16,7 @@ export const response = (content: string): Response => {
 }
 
 export type Request = ChatCompletionUserMessageParam
-export const request = (content: string): Request => {
+export const user = (content: string): Request => {
   return {
     role: 'user',
     content,
@@ -41,3 +42,29 @@ export const toolResult = (toolCallId: string, content: string): Tool => {
 
 export type Message = ChatCompletionMessageParam
 export type Conversation = [Request, ...Message[]]
+
+export const getSteps = (conversation: Message[]): Message[] => {
+  const messagePairs = conversation.reduce(
+    (pairs: Message[][], message: Message, index: number) => {
+      if (index % 2 === 0) {
+        pairs.push([message])
+      } else {
+        pairs[pairs.length - 1].push(message)
+      }
+      return pairs
+    },
+    []
+  )
+  return messagePairs.map(([task, result]) =>
+    user(s`
+      <step>
+        <name>${task.content}</name>
+        <result>${result.content}</result>
+      </step>
+    `)
+  )
+}
+
+export const getRequest = (messages: Conversation): Request => {
+  return messages[0]
+}

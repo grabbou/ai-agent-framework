@@ -3,8 +3,8 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { response } from '../messages.js'
-import { request } from '../messages.js'
+import { assistant } from '../messages.js'
+import { user } from '../messages.js'
 import { handoff } from '../state.js'
 
 const defaults: AgentOptions = {
@@ -24,14 +24,14 @@ const defaults: AgentOptions = {
             4. Previous task context if available  
           `,
         },
-        request(s`
+        user(s`
           Here are the available agents:
           <agents>
             ${Object.entries(workflow.team).map(([name, agent]) =>
               agent.description ? `<agent name="${name}">${agent.description}</agent>` : ''
             )}
           </agents>`),
-        response('What is the task?'),
+        assistant('What is the task?'),
         ...state.messages,
       ],
       temperature: 0.1,
