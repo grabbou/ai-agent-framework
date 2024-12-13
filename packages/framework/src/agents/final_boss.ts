@@ -9,7 +9,7 @@ import { finish } from '../state.js'
 
 const defaults: AgentOptions = {
   run: async (state, context, workflow) => {
-    const res = await workflow.team[state.agent].provider.completions({
+    const response = await workflow.team[state.agent].provider.completions({
       messages: [
         {
           role: 'system',
@@ -30,7 +30,7 @@ const defaults: AgentOptions = {
         'task_result'
       ),
     })
-    const message = res.choices[0].message.parsed
+    const message = response.choices[0].message.parsed
     if (!message) {
       throw new Error('No parsed response received')
     }

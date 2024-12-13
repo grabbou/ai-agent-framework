@@ -12,7 +12,7 @@ export const supervisor = (options?: AgentOptions) => {
     run: async (state, context, workflow) => {
       const [workflowRequest, ...messages] = state.messages
 
-      const res = await workflow.team[state.agent].provider.completions({
+      const response = await workflow.team[state.agent].provider.completions({
         messages: [
           system(s`
             You are a planner that breaks down complex workflows into smaller, actionable steps.
@@ -47,7 +47,7 @@ export const supervisor = (options?: AgentOptions) => {
         ),
       })
       try {
-        const content = res.choices[0].message.parsed
+        const content = response.choices[0].message.parsed
         if (!content) {
           throw new Error('No content in response')
         }
