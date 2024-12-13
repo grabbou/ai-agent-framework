@@ -1,6 +1,6 @@
-import { childState, WorkflowState } from './state.js'
+import { assistant, Message } from './messages.js'
+import { childState, finish, WorkflowState } from './state.js'
 import { runTools } from './tool_calls.js'
-import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 // tbd: finalize workflow
@@ -16,18 +16,20 @@ export async function run(
     })
   }
 
-  if (state.child) {
-    const child = await run(state.child, context.concat(state.messages), workflow)
-    if (child.status === 'finished') {
+  if (state.children.length > 0) {
+    const children = await Promise.all(
+      state.children.map((child) => run(child, context.concat(state.messages), workflow))
+    )
+    if (children.every((child) => child.status === 'finished')) {
       return {
         ...state,
-        messages: state.messages.concat(child.messages),
-        child: null,
+        messages: [...state.messages, ...children.flatMap((child) => child.messages)],
+        children: [],
       }
     }
     return {
       ...state,
-      child,
+      children,
     }
   }
 
@@ -38,18 +40,15 @@ export async function run(
     return {
       ...state,
       status: 'running',
-      messages: state.messages.concat(toolsResponse),
+      messages: [...state.messages, ...toolsResponse],
     }
   }
 
   if (state.status === 'running' || state.status === 'idle') {
-    return agent.run(state, context, workflow)
-  }
-
-  if (state.status === 'failed') {
-    return {
-      ...state,
-      status: 'finished',
+    try {
+      return agent.run(state, context, workflow)
+    } catch (error) {
+      return finish(state, assistant(error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 

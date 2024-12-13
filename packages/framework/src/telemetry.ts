@@ -33,7 +33,8 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
       case 'paused': {
         const lastMessage = state.messages.at(-1)!
         if (isToolCallRequest(lastMessage)) {
-          return `Waiting for tools: ${lastMessage.tool_calls.map((toolCall) => toolCall.function.name).join(', ')}`
+          const tools = lastMessage.tool_calls.map((toolCall) => toolCall.function.name).join(', ')
+          return `Waiting for tools: ${tools}`
         }
         return 'Paused'
       }
@@ -47,13 +48,11 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
   const printTree = (state: WorkflowState, level = 0) => {
     const indent = '  '.repeat(level)
     const arrow = level > 0 ? '└─▶ ' : ''
-    const statusText = state.child ? '' : getStatusText(state)
+    const statusText = state.children.length > 0 ? '' : getStatusText(state)
 
     console.log(`${indent}${arrow}${chalk.bold(state.agent)} ${statusText}`)
 
-    if (state.child) {
-      printTree(state.child, level + 1)
-    }
+    state.children.forEach((child) => printTree(child, level + 1))
   }
 
   printTree(nextState)
