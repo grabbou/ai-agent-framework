@@ -30,17 +30,14 @@ async function callOpenAI(
         ],
       },
     ],
-    response_format: z.object({
-      response: z.discriminatedUnion('type', [
-        z.object({
-          type: z.literal('success'),
-          text: z.string(),
-        }),
-        z.object({
+    response_format: {
+      vision_request_success: z.object({
+        type: z.literal('success'),
+        text: z.string(),
+      }),
+      vision_request_failure: z.object({
           type: z.literal('failure'),
           error: z.string(),
-        }),
-      ]),
     }),
     name: 'vision_request',
   })
