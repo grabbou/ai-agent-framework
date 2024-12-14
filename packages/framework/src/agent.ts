@@ -1,9 +1,8 @@
 import s from 'dedent'
 import { z } from 'zod'
 
-import { assistant, getSteps, system, user } from './messages.js'
+import { assistant, getSteps, system, toolCalls, user } from './messages.js'
 import { Provider } from './models.js'
-import { openai } from './providers/openai.js'
 import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
 import { Message } from './types.js'
@@ -64,51 +63,41 @@ export const agent = (options: AgentOptions = {}): Agent => {
             ...state.messages,
           ],
           tools,
-          response_format: z.object({
-            response: z.discriminatedUnion('kind', [
-              z.object({
-                kind: z.literal('step'),
-                name: z.string().describe('The name of the step'),
-                result: z.string().describe('The result of the step'),
-                reasoning: z.string().describe('The reasoning for this step'),
-                nextStep: z
-                  .string()
-                  .nullable()
-                  .describe('The next step to complete the task, or null if task is complete'),
-              }),
-              z.object({
-                kind: z.literal('error'),
-                reasoning: z.string().describe('The reason why you cannot complete the task'),
-              }),
-            ]),
-          }),
-          name: 'task_result',
+          response_format: {
+            step_result: z.object({
+              name: z.string().describe('The name of the step'),
+              result: z.string().describe('The result of the step'),
+              reasoning: z.string().describe('The reasoning for this step'),
+              nextStep: z
+                .string()
+                .nullable()
+                .describe('The next step to complete the task, or null if task is complete'),
+            }),
+            error: z.object({
+              reasoning: z.string().describe('The reason why you cannot complete the task'),
+            }),
+          },
         })
 
-        if (response.tool_calls.length > 0) {
+        if (response.type === 'tool_call') {
           return {
             ...state,
             status: 'paused',
-            messages: [...state.messages, response],
+            messages: [...state.messages, toolCalls(response.value)],
           }
         }
 
-        const message = response.parsed
-        if (!message) {
-          throw new Error('No parsed response received')
+        if (response.type === 'error') {
+          throw new Error(response.value.reasoning)
         }
 
-        if (message.response.kind === 'error') {
-          throw new Error(message.response.reasoning)
-        }
+        const agentResponse = assistant(response.value.result)
 
-        const agentResponse = assistant(message.response.result)
-
-        if (message.response.nextStep) {
+        if (response.value.nextStep) {
           return {
             ...state,
             status: 'running',
-            messages: [...state.messages, agentResponse, user(message.response.nextStep)],
+            messages: [...state.messages, agentResponse, user(response.value.nextStep)],
           }
         }
 

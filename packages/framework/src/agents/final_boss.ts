@@ -22,16 +22,13 @@ const defaults: AgentOptions = {
           the main goal while responding with the final answer
         `),
       ],
-      response_format: z.object({
-        finalAnswer: z.string().describe('The final result of the task'),
-      }),
-      name: 'task_result',
+      response_format: {
+        task_result: z.object({
+          final_answer: z.string().describe('The final result of the task'),
+        }),
+      },
     })
-    const message = response.parsed
-    if (!message) {
-      throw new Error('No parsed response received')
-    }
-    return finish(state, assistant(message.finalAnswer))
+    return finish(state, assistant(response.value.final_answer))
   },
 }
 

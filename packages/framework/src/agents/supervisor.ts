@@ -30,29 +30,28 @@ export const supervisor = (options?: AgentOptions) => {
           ...getSteps(messages),
         ],
         temperature: 0.2,
-        response_format: z.object({
-          task: z
-            .string()
-            .describe('The next task to be completed or null if the workflow is complete')
-            .nullable(),
-          reasoning: z
-            .string()
-            .describe('The reasoning for selecting the next task or why the workflow is complete'),
-        }),
-        name: 'next_task',
+        response_format: {
+          next_task: z.object({
+            task: z
+              .string()
+              .describe('The next task to be completed or null if the workflow is complete')
+              .nullable(),
+            reasoning: z
+              .string()
+              .describe(
+                'The reasoning for selecting the next task or why the workflow is complete'
+              ),
+          }),
+        },
       })
       try {
-        const content = response.parsed
-        if (!content) {
-          throw new Error('No content in response')
-        }
-        if (!content.task) {
+        if (!response.value.task) {
           return {
             ...state,
             status: 'finished',
           }
         }
-        return delegate(state, [['resourcePlanner', user(content.task)]])
+        return delegate(state, [['resourcePlanner', user(response.value.task)]])
       } catch (error) {
         throw new Error('Failed to determine next task')
       }

@@ -34,19 +34,14 @@ const defaults: AgentOptions = {
         ...state.messages,
       ],
       temperature: 0.1,
-      response_format: z.object({
-        agent: z.enum(Object.keys(workflow.team) as [string, ...string[]]),
-        reasoning: z.string(),
-      }),
-      name: 'agent_selection',
+      response_format: {
+        agent_selection: z.object({
+          agent: z.enum(Object.keys(workflow.team) as [string, ...string[]]),
+          reasoning: z.string(),
+        }),
+      },
     })
-
-    const message = response.parsed
-    if (!message) {
-      throw new Error('No content in response')
-    }
-
-    return handoff(state, message.agent)
+    return handoff(state, response.value.agent)
   },
 }
 

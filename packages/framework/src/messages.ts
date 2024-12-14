@@ -1,4 +1,5 @@
 import s from 'dedent'
+import { ParsedFunctionToolCall } from 'openai/resources/beta/chat/completions.mjs'
 import {
   ChatCompletionAssistantMessageParam,
   ChatCompletionMessageParam,
@@ -37,6 +38,14 @@ export const toolResult = (toolCallId: string, content: string): Tool => {
     role: 'tool',
     tool_call_id: toolCallId,
     content,
+  }
+}
+
+export type ToolCall = ChatCompletionAssistantMessageParam
+export const toolCalls = (tool_calls: ParsedFunctionToolCall[]): ToolCall => {
+  return {
+    role: 'assistant',
+    tool_calls,
   }
 }
 
