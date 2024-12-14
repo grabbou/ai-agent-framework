@@ -1,5 +1,4 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
@@ -31,23 +30,19 @@ export const supervisor = (options?: AgentOptions) => {
           ...getSteps(messages),
         ],
         temperature: 0.2,
-        response_format: zodResponseFormat(
-          z.object({
-            task: z
-              .string()
-              .describe('The next task to be completed or null if the workflow is complete')
-              .nullable(),
-            reasoning: z
-              .string()
-              .describe(
-                'The reasoning for selecting the next task or why the workflow is complete'
-              ),
-          }),
-          'next_task'
-        ),
+        response_format: z.object({
+          task: z
+            .string()
+            .describe('The next task to be completed or null if the workflow is complete')
+            .nullable(),
+          reasoning: z
+            .string()
+            .describe('The reasoning for selecting the next task or why the workflow is complete'),
+        }),
+        name: 'next_task',
       })
       try {
-        const content = response.choices[0].message.parsed
+        const content = response.parsed
         if (!content) {
           throw new Error('No content in response')
         }

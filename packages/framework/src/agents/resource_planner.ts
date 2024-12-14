@@ -1,5 +1,4 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
@@ -35,16 +34,14 @@ const defaults: AgentOptions = {
         ...state.messages,
       ],
       temperature: 0.1,
-      response_format: zodResponseFormat(
-        z.object({
-          agent: z.enum(Object.keys(workflow.team) as [string, ...string[]]),
-          reasoning: z.string(),
-        }),
-        'agent_selection'
-      ),
+      response_format: z.object({
+        agent: z.enum(Object.keys(workflow.team) as [string, ...string[]]),
+        reasoning: z.string(),
+      }),
+      name: 'agent_selection',
     })
 
-    const message = response.choices[0].message.parsed
+    const message = response.parsed
     if (!message) {
       throw new Error('No content in response')
     }

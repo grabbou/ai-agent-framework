@@ -4,7 +4,6 @@ import path from 'node:path'
 import s from 'dedent'
 import { Provider } from 'fabrice-ai/models'
 import { tool } from 'fabrice-ai/tool'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 const encodeImage = async (imagePath: string): Promise<string> => {
@@ -31,23 +30,21 @@ async function callOpenAI(
         ],
       },
     ],
-    response_format: zodResponseFormat(
-      z.object({
-        response: z.discriminatedUnion('type', [
-          z.object({
-            type: z.literal('success'),
-            text: z.string(),
-          }),
-          z.object({
-            type: z.literal('failure'),
-            error: z.string(),
-          }),
-        ]),
-      }),
-      'vision_request'
-    ),
+    response_format: z.object({
+      response: z.discriminatedUnion('type', [
+        z.object({
+          type: z.literal('success'),
+          text: z.string(),
+        }),
+        z.object({
+          type: z.literal('failure'),
+          error: z.string(),
+        }),
+      ]),
+    }),
+    name: 'vision_request',
   })
-  const message = response.choices[0].message.parsed
+  const message = response.parsed
   if (!message) {
     throw new Error('No message returned from OpenAI')
   }

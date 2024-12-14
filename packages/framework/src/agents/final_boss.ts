@@ -1,5 +1,4 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
@@ -23,14 +22,12 @@ const defaults: AgentOptions = {
           the main goal while responding with the final answer
         `),
       ],
-      response_format: zodResponseFormat(
-        z.object({
-          finalAnswer: z.string().describe('The final result of the task'),
-        }),
-        'task_result'
-      ),
+      response_format: z.object({
+        finalAnswer: z.string().describe('The final result of the task'),
+      }),
+      name: 'task_result',
     })
-    const message = response.choices[0].message.parsed
+    const message = response.parsed
     if (!message) {
       throw new Error('No parsed response received')
     }

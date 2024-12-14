@@ -1,7 +1,6 @@
 import axios from 'axios'
 import s from 'dedent'
 import { tool } from 'fabrice-ai/tool'
-import { RequiredOptionals } from 'fabrice-ai/types'
 import { z } from 'zod'
 
 /**
@@ -28,11 +27,6 @@ interface FireCrawlOptions {
   url?: string
 }
 
-const defaults: RequiredOptionals<FireCrawlOptions> = {
-  formats: ['markdown'],
-  url: 'https://api.firecrawl.dev/v1/scrape',
-}
-
 const FireCrawlResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
@@ -54,11 +48,16 @@ const FireCrawlResponseSchema = z.object({
   }),
 })
 
+const defaults = {
+  formats: ['markdown'],
+  url: 'https://api.firecrawl.dev/v1/scrape',
+}
+
 export const createFireCrawlTool = (options: FireCrawlOptions) => {
   const config = {
     ...defaults,
     ...options,
-  }
+  } satisfies Required<FireCrawlOptions>
 
   const request = {
     headers: {
