@@ -57,10 +57,10 @@ export const getSteps = (conversation: Message[]): Message[] => {
   )
   return messagePairs.map(([task, result]) =>
     user(s`
-      <task>
+      <step>
         <name>${task.content}</name>
         <result>${result.content}</result>
-      </task>
+      </step>
     `)
   )
 }
