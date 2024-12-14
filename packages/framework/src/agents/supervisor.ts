@@ -3,7 +3,7 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
-import { getCompletedTasks, system } from '../messages.js'
+import { getSteps, system } from '../messages.js'
 import { assistant, user } from '../messages.js'
 import { delegate } from '../state.js'
 
@@ -15,32 +15,33 @@ export const supervisor = (options?: AgentOptions) => {
       const response = await workflow.team[state.agent].provider.completions({
         messages: [
           system(s`
-            You are a planner that breaks down complex requests into smaller, actionable steps.
-            Your job is to achieve the requested <output /> by first breaking down the <workflow /> into actionable tasks.
-            When all tasks from workflow are complete, add "Generate <output />" as the final task.
-
+            You are a planner that breaks down complex workflows into smaller, actionable steps.
+            Your job is to determine the next task that needs to be done based on the <workflow> and what has been completed so far.
+            
             Rules:
             1. Each task should be self-contained and achievable
             2. Tasks should be specific and actionable
-            3. Return null ONLY after output generation is complete
+            3. Return null when the workflow is complete
             4. Consider dependencies and order of operations
             5. Use context from completed tasks to inform next steps
           `),
           assistant('What is the request?'),
           workflowRequest,
           assistant('What has been completed so far?'),
-          ...getCompletedTasks(messages),
+          ...getSteps(messages),
         ],
         temperature: 0.2,
         response_format: zodResponseFormat(
           z.object({
             task: z
               .string()
-              .describe('The next task to be completed or null if the request is complete')
+              .describe('The next task to be completed or null if the workflow is complete')
               .nullable(),
             reasoning: z
               .string()
-              .describe('The reasoning for selecting the next task or why the request is complete'),
+              .describe(
+                'The reasoning for selecting the next task or why the workflow is complete'
+              ),
           }),
           'next_task'
         ),

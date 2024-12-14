@@ -27,13 +27,13 @@ export const rootState = (workflow: Workflow): WorkflowState =>
     agent: 'supervisor',
     messages: [
       user(s`
-        Here is my request: 
-        <request>
-          <workflow>${workflow.description}</workflow>
-          <output>${workflow.output}</output>
-        </request>
+        Here is description of my workflow:
+        <workflow>
+          ${workflow.description}
+          Create ${workflow.output}
+        </workflow>
 
-        Here is all important knowledge:
+        Here is all the knowledge available:
         <knowledge>${workflow.knowledge}</knowledge>
       `),
     ],

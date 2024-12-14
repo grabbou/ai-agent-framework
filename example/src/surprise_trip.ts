@@ -36,7 +36,6 @@ const restaurantScout = agent({
 const itineraryCompiler = agent({
   description: `
     With an eye for detail, you organize all the information into a coherent and enjoyable travel plan.
-    Your compile all researched information into a comprehensive day-by-day itinerary.
   `,
 })
 
@@ -68,8 +67,8 @@ const researchTripWorkflow = workflow({
     Consider flights confirmed.
   `,
   output: `
-    Comprehensive day-by-day itinerary for the trip to Wrocław, Poland.
-    Ensure the itinerary includes flights, hotel information, and all planned activities and dining experiences.
+    Comprehensive day-by-day plan for the trip to Wrocław, Poland.
+    Ensure the plan includes flights, hotel information, and all planned activities and dining experiences.
   `,
 })
 

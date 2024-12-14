@@ -13,7 +13,7 @@ const wikipediaIndexer = agent({
   description: `
     You are skilled at reading and understanding the context of Wikipedia articles.
     You can save Wikipedia articles in Vector store for later use.
-    When saving Wikipedia articles, you must save first 10 sentences in Vector store.
+    When saving articles in Vector store, you only save first 10 sentences.
   `,
   tools: {
     lookupWikipedia,
@@ -40,10 +40,10 @@ const wikipediaResearch = workflow({
      - "John III later years and death"
   `,
   knowledge: `
-    Each document in vector store is a sentence.
+    Each document in Vector store is a sentence.
   `,
   output: `
-    List of 2 sentences from Vector store per each topic, in bullet points.
+    List of sentences looked up for each topic. Each sentence should be in separate bullet point.
   `,
   snapshot: logger,
 })
