@@ -28,7 +28,8 @@ const productDescriptionWorkflow = workflow({
   description: `
     Based on the picture '${path.resolve(import.meta.dirname, '../assets/example-sneakers.jpg')}'
     make the product description to list it on the website.
-
+  `,
+  knowledge: `
     Focus on all technical features of the product, including color, size, material, brand if possible, etc.
   `,
   output: `
