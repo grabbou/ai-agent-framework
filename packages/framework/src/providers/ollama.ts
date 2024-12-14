@@ -54,8 +54,6 @@ export const ollama = (options: OllamaOptions): Provider => {
 
       const jsonSchema = zodResponseFormat(response_format, name).json_schema
 
-      console.log(mappedTools)
-
       const response = await fetch(`${baseUrl}/api/chat`, {
         method: 'POST',
         headers: {
@@ -71,14 +69,19 @@ export const ollama = (options: OllamaOptions): Provider => {
         }),
       })
 
-      const message = ResponseSchema.parse(await response.json()).message
-      const parsed = response_format.parse(JSON.parse(message.content))
+      const modelResponse = await response.json()
+      if (modelResponse.error) {
+        throw new Error(modelResponse.error)
+      }
+
+      const { content, tool_calls } = ResponseSchema.parse(modelResponse).message
+      const parsed = response_format.parse(JSON.parse(content))
 
       return {
         role: 'assistant',
-        content: message.content,
+        content,
         tool_calls:
-          message.tool_calls?.map((toolCall) => ({
+          tool_calls?.map((toolCall) => ({
             id: randomUUID(),
             type: 'function',
             function: {
@@ -91,7 +94,6 @@ export const ollama = (options: OllamaOptions): Provider => {
         parsed,
       }
     },
-
     embeddings: async (input: string) => {
       const response = await fetch(`${baseUrl}/api/embeddings`, {
         method: 'POST',

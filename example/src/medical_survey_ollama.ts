@@ -7,7 +7,7 @@ import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
 const result = await teamwork({
   ...preVisitNoteWorkflow,
   provider: ollama({
-    model: 'phi3',
+    model: 'llama3.1',
   }),
 })
 

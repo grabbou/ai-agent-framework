@@ -33,6 +33,8 @@ export const preVisitNoteWorkflow = workflow({
 
     You can only ask up to 5 questions in total.
     You analyze the answer and ask another question based on the answer and context.
+
+    Start with a question about the patient's current symptoms.
   `,
   output: `
     Comprehensive markdown pre-visit report that covers:
