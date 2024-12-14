@@ -43,7 +43,7 @@ export const toolResult = (toolCallId: string, content: string): Tool => {
 export type Message = ChatCompletionMessageParam
 export type Conversation = [Request, ...Message[]]
 
-export const getSteps = (conversation: Message[]): Message[] => {
+export const getCompletedTasks = (conversation: Message[]): Message[] => {
   const messagePairs = conversation.reduce(
     (pairs: Message[][], message: Message, index: number) => {
       if (index % 2 === 0) {
@@ -57,10 +57,10 @@ export const getSteps = (conversation: Message[]): Message[] => {
   )
   return messagePairs.map(([task, result]) =>
     user(s`
-      <step>
+      <task>
         <name>${task.content}</name>
         <result>${result.content}</result>
-      </step>
+      </task>
     `)
   )
 }

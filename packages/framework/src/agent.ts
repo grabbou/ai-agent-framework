@@ -2,7 +2,7 @@ import s from 'dedent'
 import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
 import { z } from 'zod'
 
-import { assistant, getSteps, system, user } from './messages.js'
+import { assistant, getCompletedTasks, system, user } from './messages.js'
 import { openai, Provider } from './models.js'
 import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
@@ -59,7 +59,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
             `),
             assistant('What have been done so far?'),
             user(
-              `Here is all the work done so far by other agents: ${JSON.stringify(getSteps(messages))}`
+              `Here is all the work done so far by other agents: ${JSON.stringify(getCompletedTasks(messages))}`
             ),
             assistant(`Is there anything else I need to know?`),
             workflow.knowledge
