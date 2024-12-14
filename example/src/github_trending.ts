@@ -32,17 +32,15 @@ const wrapupRedactor = agent({
 const wrapUpTrending = workflow({
   team: { githubResearcher, wrapupRedactor },
   description: `
-    Research the URL "https://github.com/trending/typescript" page using firecrawl tool
-    Summarize information about 3 top projects into a comprehensive report markdown output.
-
-    Here are some ground rules to follow: 
-      - Include one sentence summary for each project.
+    Research the "https://github.com/trending/typescript" page.
+    Summarize information about 3 top projects into a comprehensive markdown report.
+    Include one sentence summary for each project.
   `,
   knowledge: `
-    We are preparing a report for the Typescript community.
+    We are preparing a report for the TypeScript community.
   `,
   output: `
-    Comprehensive markdown report with the top trending typescript projects.
+    Comprehensive markdown report with the top trending TypeScript projects.
   `,
   snapshot: logger,
 })

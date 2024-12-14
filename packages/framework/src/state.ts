@@ -28,8 +28,11 @@ export const rootState = (workflow: Workflow): WorkflowState =>
     messages: [
       user(s`
         Here is description of my workflow:
-        <workflow>${workflow.description}</workflow>
-        <output>${workflow.output}</output>
+        <workflow>
+          ${workflow.description}
+          Create ${workflow.output}
+        </workflow>
+
         Here is all the knowledge available:
         <knowledge>${workflow.knowledge}</knowledge>
       `),
