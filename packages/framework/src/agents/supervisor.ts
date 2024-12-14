@@ -26,7 +26,7 @@ export const supervisor = (options?: AgentOptions) => {
             4. Consider dependencies and order of operations
             5. Use context from completed tasks to inform next steps
           `),
-          assistant('What is the workflow?'),
+          assistant('What is the request?'),
           workflowRequest,
           assistant('What has been completed so far?'),
           ...getCompletedTasks(messages),
