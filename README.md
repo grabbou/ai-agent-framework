@@ -170,6 +170,36 @@ This approach offers several benefits:
 
 This functional approach makes the framework particularly well-suited for building long-running workflows that are distributed across multiple servers in the cloud.
 
+## Guides
+
+### Custom providers
+
+By default, Fabrice uses OpenAI `gpt-4o` model. You can change the default model either for the entire system, or for specific agent.
+
+To do it for the entire workflow:
+
+```ts
+import { ollama } from 'fabrice-ai/providers/ollama'
+
+workflow({
+  /** other options go here */
+  provider: ollama({ model: 'llama3.2' })
+})
+```
+
+To change it for specific agent:
+
+```ts
+import { ollama } from 'fabrice-ai/providers/ollama'
+
+agent({
+  /** other options go here */
+  provider: ollama({ model: 'llama3.2' })
+})
+```
+
+Note that agent provider always takes precedence over workflow provider. Tools always receive provider from the agent that triggered their execution.
+
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->

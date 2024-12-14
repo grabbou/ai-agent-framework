@@ -60,11 +60,11 @@ const researchTripWorkflow = workflow({
       - Origin: New York, USA
       - Destination: Wrocław, Poland
       - Age of the traveler: 30
-      - Hotel location: Main Square, Wrocław
+      - Hotel location: Hilton, Main Square, Wrocław
       - Flight information: Flight AA123, arriving on 2023-12-15
       - How long is the trip: 7 days
-
-    Consider flights confirmed.
+    
+    Flights and hotels are already confirmed.
   `,
   output: `
     Comprehensive day-by-day plan for the trip to Wrocław, Poland.

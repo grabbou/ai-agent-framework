@@ -17,7 +17,7 @@ async function callOpenAI(
   image_url: string,
   detail: 'low' | 'high'
 ) {
-  const response = await provider.completions({
+  const response = await provider.chat({
     messages: [
       {
         role: 'user',

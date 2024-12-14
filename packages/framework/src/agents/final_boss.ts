@@ -7,8 +7,8 @@ import { user } from '../messages.js'
 import { finish } from '../state.js'
 
 const defaults: AgentOptions = {
-  run: async (state, context, workflow) => {
-    const response = await workflow.team[state.agent].provider.completions({
+  run: async (provider, state, context) => {
+    const response = await provider.chat({
       messages: [
         {
           role: 'system',

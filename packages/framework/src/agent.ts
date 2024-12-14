@@ -17,12 +17,17 @@ export type Agent = {
   tools: {
     [key: AgentName]: Tool
   }
-  provider: Provider
-  run: (state: WorkflowState, context: Message[], workflow: Workflow) => Promise<WorkflowState>
+  provider?: Provider
+  run: (
+    provider: Provider,
+    state: WorkflowState,
+    context: Message[],
+    workflow: Workflow
+  ) => Promise<WorkflowState>
 }
 
 export const agent = (options: AgentOptions = {}): Agent => {
-  const { description, tools = {}, provider = openai() } = options
+  const { description, tools = {}, provider } = options
 
   return {
     description,
@@ -30,10 +35,10 @@ export const agent = (options: AgentOptions = {}): Agent => {
     provider,
     run:
       options.run ??
-      (async (state, context, workflow) => {
+      (async (provider, state, context, workflow) => {
         const [, ...messages] = context
 
-        const response = await provider.completions({
+        const response = await provider.chat({
           messages: [
             system(s`
               ${description}

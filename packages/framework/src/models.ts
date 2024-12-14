@@ -13,6 +13,6 @@ type LLMCall<T> = {
 }
 
 export type Provider = {
-  completions<T>(args: LLMCall<T>): Promise<ParsedChatCompletionMessage<T>>
+  chat<T>(args: LLMCall<T>): Promise<ParsedChatCompletionMessage<T>>
   embeddings(input: string): Promise<number[]>
 }

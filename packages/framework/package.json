@@ -18,6 +18,12 @@
       "types": "./dist/types/*.d.ts",
       "require": "./dist/*.cjs",
       "import": "./dist/*.js"
+    },
+    "./providers/*": {
+      "bun": "./src/providers/*.ts",
+      "types": "./dist/providers/*.d.ts",
+      "require": "./dist/providers/*.cjs",
+      "import": "./dist/providers/*.js"
     }
   },
   "type": "module",

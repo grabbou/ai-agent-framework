@@ -8,10 +8,10 @@ import { delegate } from '../state.js'
 
 export const supervisor = (options?: AgentOptions) => {
   return agent({
-    run: async (state, context, workflow) => {
+    run: async (provider, state) => {
       const [workflowRequest, ...messages] = state.messages
 
-      const response = await workflow.team[state.agent].provider.completions({
+      const response = await provider.chat({
         messages: [
           system(s`
             You are a planner that breaks down complex workflows into smaller, actionable steps.

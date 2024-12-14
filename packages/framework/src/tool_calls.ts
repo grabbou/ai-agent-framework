@@ -5,6 +5,7 @@ import type {
 import { ChatCompletionToolMessageParam } from 'openai/resources/chat/completions'
 
 import { Message, toolResult } from './messages.js'
+import { Provider } from './models.js'
 import { WorkflowState } from './state.js'
 import { Workflow } from './workflow.js'
 
@@ -16,6 +17,7 @@ export function isToolCallRequest(message?: Message): message is ParsedChatCompl
 }
 
 export async function runTools(
+  provider: Provider,
   state: WorkflowState,
   context: Message[],
   workflow: Workflow
@@ -26,7 +28,7 @@ export async function runTools(
     throw new Error('Invalid tool request')
   }
 
-  const { tools, provider } = workflow.team[state.agent]
+  const { tools } = workflow.team[state.agent]
 
   const toolResults = await Promise.all(
     toolRequests.map(async (toolCall) => {

@@ -11,14 +11,14 @@ type OpenAIOptions = {
 
 export const openai = (options: OpenAIOptions = {}): Provider => {
   const {
-    model = 'gpt-4',
+    model = 'gpt-4o',
     embeddingsModel = 'text-embedding-ada-002',
     options: clientOptions,
   } = options
   const client = new OpenAI(clientOptions)
 
   return {
-    completions: async ({ name, messages, tools = {}, response_format, temperature }) => {
+    chat: async ({ name, messages, tools = {}, response_format, temperature }) => {
       const mappedTools = tools
         ? Object.entries(tools).map(([name, tool]) =>
             zodFunction({
