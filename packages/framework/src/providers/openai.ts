@@ -18,7 +18,7 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
   const client = new OpenAI(clientOptions)
 
   return {
-    completions: async ({ name, messages, tools = {}, response_format }) => {
+    completions: async ({ name, messages, tools = {}, response_format, temperature }) => {
       const mappedTools = tools
         ? Object.entries(tools).map(([name, tool]) =>
             zodFunction({
@@ -33,6 +33,7 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
         model,
         messages,
         tools: mappedTools.length > 0 ? mappedTools : undefined,
+        temperature,
         response_format: zodResponseFormat(response_format, name),
       })
 
