@@ -1,9 +1,7 @@
 import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'
-import { grok } from 'fabrice-ai/providers/grok'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
-import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
 import path from 'path'
 
@@ -36,7 +34,6 @@ const productDescriptionWorkflow = workflow({
   output: `
     Catchy product description covering all the product features.
   `,
-  provider: grok(),
 })
 const result = await teamwork(productDescriptionWorkflow)
 
