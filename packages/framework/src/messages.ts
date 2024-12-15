@@ -45,6 +45,7 @@ export type ToolCall = ChatCompletionAssistantMessageParam
 export const toolCalls = (tool_calls: ParsedFunctionToolCall[]): ToolCall => {
   return {
     role: 'assistant',
+    content: '',
     tool_calls,
   }
 }

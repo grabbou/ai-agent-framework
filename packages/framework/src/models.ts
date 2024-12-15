@@ -1,5 +1,6 @@
 import { ParsedFunctionToolCall } from 'openai/resources/beta/chat/completions'
 import { z } from 'zod'
+import { zodToJsonSchema } from 'zod-to-json-schema'
 
 import { Tool } from './tool.js'
 import { Message } from './types.js'
@@ -34,4 +35,15 @@ export interface Provider {
   ): Promise<FunctionToolCall | LLMResponse<T>>
   chat<T extends LLMResponseFormat>(args: LLMCall<T>): Promise<LLMResponse<T>>
   embeddings(input: string): Promise<number[]>
+}
+
+export const toLLMTools = (tools: Record<string, Tool>) => {
+  return Object.entries(tools).map(([name, tool]) => ({
+    type: 'function' as const,
+    function: {
+      name,
+      parameters: zodToJsonSchema(tool.parameters, name),
+      description: tool.description,
+    },
+  }))
 }

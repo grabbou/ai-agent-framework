@@ -31,7 +31,8 @@
     "chalk": "^5.3.0",
     "dedent": "^1.5.3",
     "openai": "^4.76.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.24.1"
   },
   "license": "MIT",
   "repository": {

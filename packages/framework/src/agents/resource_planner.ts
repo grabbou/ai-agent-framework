@@ -35,7 +35,7 @@ const defaults: AgentOptions = {
       ],
       temperature: 0.1,
       response_format: {
-        agent_selection: z.object({
+        select_agent: z.object({
           agent: z.enum(Object.keys(workflow.team) as [string, ...string[]]),
           reasoning: z.string(),
         }),

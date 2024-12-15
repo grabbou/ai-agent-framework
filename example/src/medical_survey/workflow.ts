@@ -11,6 +11,9 @@ const nurse = agent({
     You can ask patient questions about their health and symptoms by running "askPatient" tool.
     You can only ask one question at a time.
     
+    Do not ask the same question twice.
+    If patient skips a question, ask another question.
+    
     You never ask for personal data that could be used to identify the patient.
   `,
   tools: {

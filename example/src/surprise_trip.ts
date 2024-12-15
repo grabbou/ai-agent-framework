@@ -1,4 +1,5 @@
 import { agent } from 'fabrice-ai/agent'
+import { grok } from 'fabrice-ai/providers/grok'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { workflow } from 'fabrice-ai/workflow'
@@ -65,11 +66,13 @@ const researchTripWorkflow = workflow({
       - How long is the trip: 7 days
     
     Flights and hotels are already confirmed.
+    If you do not have a tool to call, use your knowledge to answer the question.
   `,
   output: `
     Comprehensive day-by-day plan for the trip to Wrocław, Poland.
     Ensure the plan includes flights, hotel information, and all planned activities and dining experiences.
   `,
+  provider: grok(),
 })
 
 const result = await teamwork(researchTripWorkflow)

@@ -1,10 +1,10 @@
 import OpenAI, { ClientOptions } from 'openai'
-import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
+import { zodResponseFormat } from 'openai/helpers/zod.js'
 import { z, ZodObject } from 'zod'
 
-import { Provider } from '../models.js'
+import { Provider, toLLMTools } from '../models.js'
 
-type OpenAIOptions = {
+export type OpenAIOptions = {
   model?: string
   embeddingsModel?: string
   options?: ClientOptions
@@ -20,16 +20,7 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
 
   return {
     chat: async ({ messages, response_format, temperature, ...options }) => {
-      const mappedTools =
-        'tools' in options
-          ? Object.entries(options.tools).map(([name, tool]) =>
-              zodFunction({
-                name,
-                parameters: tool.parameters,
-                description: tool.description,
-              })
-            )
-          : []
+      const mappedTools = 'tools' in options ? toLLMTools(options.tools) : []
 
       const response = await client.beta.chat.completions.parse({
         model,
@@ -68,6 +59,19 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
   }
 }
 
+/**
+ * Converts an object such as
+ * ```
+ * { a: z.object({ b: z.string() }) }
+ * ```
+ * to a discriminated union such as
+ * ```
+ * z.discriminatedUnion('type', [
+ *   z.object({ type: z.literal('a'), value: z.object({ b: z.string() }) }),
+ * ])
+ * ```
+ * to be used as a response format for OpenAI.
+ */
 const objectToDiscriminatedUnion = (object: Record<string, any>) => {
   const [first, ...rest] = Object.entries(object)
   return z.discriminatedUnion('type', [entryToObject(first), ...rest.map(entryToObject)])
