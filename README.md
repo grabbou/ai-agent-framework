@@ -6,6 +6,33 @@ A lightweight, functional, and composable framework for building AI agents that 
 
 Built with TypeScript and designed to be serverless-ready.
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+  - [Using create-fabrice-ai](#using-create-fabrice-ai)
+  - [Manual Installation](#manual-installation) 
+- [Why Another AI Agent Framework?](#why-another-ai-agent-framework)
+- [Core Concepts](#core-concepts)
+- [Workflows](#workflows)
+- [Agents](#agents)
+  - [Built-in Agents](#built-in-agents)
+  - [Creating Custom Agents](#creating-custom-agents)
+  - [Replacing Built-in Agents](#replacing-built-in-agents)
+- [Providers](#providers)
+  - [Built-in Providers](#built-in-providers)
+  - [Using Different Providers](#using-different-providers)
+  - [Creating Custom Providers](#creating-custom-providers)
+- [Tools](#tools)
+  - [Built-in Tools](#built-in-tools)
+  - [Creating Custom Tools](#creating-custom-tools)
+  - [Using Tools](#using-tools)
+- [Execution](#execution)
+  - [Running Workflows](#running-workflows)
+  - [Long-running Operations](#long-running-operations)
+- [Examples](#examples)
+- [Contributors](#contributors)
+- [Made with ❤️ at Callstack](#made-with-❤️-at-callstack)
+
 ## Getting Started
 
 It is very easy to get started. All you have to do is to create a file with your agents and workflow, then run it.
@@ -15,7 +42,7 @@ It is very easy to get started. All you have to do is to create a file with your
 Use our creator tool to quickly create a new AI agent project.
 
 ```bash
-$ npx create-fabrice-ai
+npx create-fabrice-ai
 ```
 
 You can choose from a few templates. You can see a full list of them [here](./example/README.md).
@@ -23,7 +50,7 @@ You can choose from a few templates. You can see a full list of them [here](./ex
 ### Manually
 
 ```bash
-$ npm install fabrice-ai
+npm install fabrice-ai
 ```
 
 #### Create your first workflow
@@ -88,22 +115,9 @@ The framework is designed around the idea that AI agents should be:
 - Minimal in dependencies
 - Focused on team collaboration
 
-### Agents
+[TBD]
 
-Agents are specialized workers with specific roles and capabilities. Each agent has:
-- A defined role
-- A clear description of capabilities
-- Optional tools they can use
-- A configured language model provider
-
-### Tools
-
-Tools extend agent capabilities by providing concrete actions they can perform. Tools are pure functions with:
-- A description
-- Typed parameters (using Zod)
-- An execute function
-
-### Workflows
+## Workflows
 
 Workflows define how agents collaborate to achieve a goal. They specify:
 - Team members
@@ -111,98 +125,64 @@ Workflows define how agents collaborate to achieve a goal. They specify:
 - Expected output
 - Optional configuration
 
-### Iteration
+## Agents
 
-The framework provides two main ways to orchestrate agent collaboration:
+Agents are specialized workers with specific roles and capabilities. Each agent has:
+- A defined role
+- A clear description of capabilities
+- Optional tools they can use
+- A configured language model provider
 
-#### Teamwork
+### Built-in Agents
+TBD
 
-The `teamwork` function handles complete workflow execution from start to finish, managing the entire process automatically. It's perfect for simple use cases where you want to get results in a single call.
+### Creating Custom Agents
+TBD
 
-```typescript
-import { teamwork } from 'fabrice'
+### Replacing Built-in Agents
+TBD
 
-const state = await teamwork(workflow)
-```
+## Providers
 
-#### Server-side Teamwork
+### Built-in Providers
+TBD
 
-We provide a server-side version of `teamwork` that is perfectly suited for long-running workflows that require external tool execution or manual intervention. It will not wait for the tool to be executed, but will return the state of the workflow.
+### Using Different Providers
+TBD
 
-You can then handle tool calls on your own, and call `teamwork` again when ready.
+### Creating Custom Providers
+TBD
 
-```typescript
-import { teamwork } from 'fabrice-ai/teamwork'
+## Tools
 
-// Setting third argumenet to `false` will stop waiting for the tool to be executed.
-const nextState = await teamwork(workflow, prevState, false)
-```
+Tools extend agent capabilities by providing concrete actions they can perform. Tools are pure functions with:
+- A description
+- Typed parameters (using Zod)
+- An execute function
 
-This pattern is especially useful for:
-- Running workflows in serverless environments
-- Handling long-running tool executions
-- Implementing manual review steps
-- Building interactive workflows
-- Managing rate limits and quotas
+### Built-in Tools
+TBD
 
-#### Iterate
+### Creating Custom Tools
+TBD
 
-The `iterate` function provides a stateless, step-by-step execution model. Each call returns the new state without maintaining any internal state.
+### Using Tools
+TBD
 
-```typescript
-// Initialize, or get from storage
-const initialState = workflowState(workflow)
+## Server-side Usage
 
-// Iterate over the workflow
-const newState = await iterate(workflow, initialState)
+### Serverless Deployment
+TBD
 
-// Check status
-console.log(newState.status)
-```
+### Long-running Operations
+TBD
 
-This approach offers several benefits:
-
-- **Pausable Execution**: Stop and resume workflow execution at any point
-- **State Persistence**: Save the state between iterations to your preferred storage
-- **Progress Monitoring**: Inspect the workflow state after each iteration
-- **Error Recovery**: Handle failures gracefully by retrying from the last successful state
-- **Custom Control Flow**: Implement your own execution patterns and recovery strategies
-
-This functional approach makes the framework particularly well-suited for building long-running workflows that are distributed across multiple servers in the cloud.
-
-## Guides
-
-### Custom providers
-
-By default, Fabrice uses OpenAI `gpt-4o` model. You can change the default model either for the entire system, or for specific agent.
-
-To do it for the entire workflow:
-
-```ts
-import { grok } from 'fabrice-ai/providers/grok'
-
-workflow({
-  /** other options go here */
-  provider: grok()
-})
-```
-
-To change it for specific agent:
-
-```ts
-import { grok } from 'fabrice-ai/providers/grok'
-
-agent({
-  /** other options go here */
-  provider: grok()
-})
-```
-
-Note that agent provider always takes precedence over workflow provider. Tools always receive provider from the agent that triggered their execution.
+## Examples
+TBD
 
 ## Contributors
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- ALL-CONTRIBUTORS-LIST:START -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
