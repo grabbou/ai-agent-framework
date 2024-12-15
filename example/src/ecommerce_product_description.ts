@@ -1,5 +1,6 @@
 import { visionTool } from '@fabrice-ai/tools/vision'
 import { agent } from 'fabrice-ai/agent'
+import { grok } from 'fabrice-ai/providers/grok'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
@@ -26,18 +27,16 @@ const marketingManager = agent({
 const productDescriptionWorkflow = workflow({
   team: { techExpert, marketingManager },
   description: `
-    Based on the picture '${path.resolve(import.meta.dirname, '../assets/example-sneakers.jpg')}'
-    make the product description to list it on the website.
-    Make sure you are using visionTool just once as it's very time consuming operation.
-    Then use the extracted information for other agents.
+    Based on the picture of the product, make the product description to list it on the website.
   `,
   knowledge: `
     Focus on all technical features of the product, including color, size, material, brand if possible, etc.
+    Picture is at "${path.resolve(import.meta.dirname, '../assets/example-sneakers.jpg')}". 
   `,
   output: `
     Catchy product description covering all the product features.
   `,
-  snapshot: logger,
+  provider: grok(),
 })
 const result = await teamwork(productDescriptionWorkflow)
 
