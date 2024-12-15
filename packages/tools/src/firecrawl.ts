@@ -74,8 +74,7 @@ export const createFireCrawlTool = (options: FireCrawlOptions) => {
         url: z.string().describe('URL of the website to scrape'),
         formats: z
           .array(z.string())
-          .optional()
-          .describe('Output formats to include (options: markdown, html)'),
+          .describe('Output formats to include (options: markdown, html). Default: markdown'),
       }),
       execute: async ({ url, formats }) => {
         const body = {
