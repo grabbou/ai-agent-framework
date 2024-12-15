@@ -61,7 +61,6 @@ const bookLibraryWorkflow = workflow({
   output: `
     Valid HTML page with the list of books in the library, stored in "${outputPath}" file.
   `,
-  snapshot: logger,
 })
 
 const result = await teamwork(bookLibraryWorkflow)
