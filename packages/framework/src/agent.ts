@@ -50,6 +50,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
               Do not fabricate or assume information not present in the input.
 
               Try to complete the task on your own.
+              If you do not have tool to call, use general knowledge to complete the task.
             `),
             assistant('What have been done so far?'),
             user(
@@ -64,7 +65,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
           ],
           tools,
           response_format: {
-            step_result: z.object({
+            step: z.object({
               name: z.string().describe('The name of the step'),
               result: z.string().describe('The result of the step'),
               reasoning: z.string().describe('The reasoning for this step'),

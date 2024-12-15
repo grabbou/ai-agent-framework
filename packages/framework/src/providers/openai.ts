@@ -34,6 +34,7 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
           Object.keys(response_format).join('_')
         ),
       })
+
       const message = response.choices[0].message
 
       if (message.tool_calls.length > 0) {

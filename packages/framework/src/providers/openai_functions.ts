@@ -17,7 +17,7 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
 
   return {
     chat: async ({ messages, response_format, temperature, ...options }) => {
-      const tools = 'tools' in options ? toLLMTools(options.tools) : []
+      const tools = 'tools' in options ? toLLMTools(options.tools, false) : []
 
       tools.push(
         ...Object.entries(response_format).map(([name, schema]) => ({
@@ -29,14 +29,15 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
               Call this function when you are done processing user request
               and want to return "${name}" as the result.
             `,
+            strict: false,
           },
         }))
       )
 
       const response = await client.chat.completions.create({
         model,
-        messages,
         tools,
+        messages,
         temperature,
         tool_choice: 'required',
       })

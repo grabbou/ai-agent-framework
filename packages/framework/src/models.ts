@@ -37,13 +37,14 @@ export interface Provider {
   embeddings(input: string): Promise<number[]>
 }
 
-export const toLLMTools = (tools: Record<string, Tool>) => {
+export const toLLMTools = (tools: Record<string, Tool>, strict: boolean = true) => {
   return Object.entries(tools).map(([name, tool]) => ({
     type: 'function' as const,
     function: {
       name,
       parameters: zodToJsonSchema(tool.parameters, name),
       description: tool.description,
+      strict,
     },
   }))
 }

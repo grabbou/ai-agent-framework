@@ -1,5 +1,6 @@
 import { agent } from 'fabrice-ai/agent'
 import { grok } from 'fabrice-ai/providers/grok'
+import { ollama } from 'fabrice-ai/providers/ollama'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { workflow } from 'fabrice-ai/workflow'
@@ -51,7 +52,7 @@ const researchTripWorkflow = workflow({
     Research and find cool things to do in Wrocław, Poland.
 
     Focus:
-      - activities and events that match the traveler's interests and age group.
+      - activities and events that match the traveler's age group.
       - highly-rated restaurants and dining experiences.
       - landmarks with historic context.
       - picturesque and entertaining locations.
@@ -66,13 +67,13 @@ const researchTripWorkflow = workflow({
       - How long is the trip: 7 days
     
     Flights and hotels are already confirmed.
-    If you do not have a tool to call, use your knowledge to answer the question.
   `,
   output: `
     Comprehensive day-by-day plan for the trip to Wrocław, Poland.
     Ensure the plan includes flights, hotel information, and all planned activities and dining experiences.
   `,
-  provider: grok(),
+  // provider: grok(),
+  // provider: ollama(),
 })
 
 const result = await teamwork(researchTripWorkflow)

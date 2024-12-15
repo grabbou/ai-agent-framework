@@ -32,20 +32,17 @@ export const supervisor = (options?: AgentOptions) => {
         temperature: 0.2,
         response_format: {
           next_task: z.object({
-            task: z
-              .string()
-              .describe('The next task to be completed or null if the workflow is complete')
-              .nullable(),
-            reasoning: z
-              .string()
-              .describe(
-                'The reasoning for selecting the next task or why the workflow is complete'
-              ),
+            task: z.string().describe('The next task to be completed'),
+            reasoning: z.string().describe('The reasoning for selecting the next task'),
+          }),
+          final_answer: z.object({
+            answer: z.string().describe('The final answer to the user request'),
+            reasoning: z.string().describe('The reasoning why workflow is complete'),
           }),
         },
       })
       try {
-        if (!response.value.task) {
+        if (response.type === 'final_answer') {
           return {
             ...state,
             status: 'finished',
