@@ -28,6 +28,8 @@ const productDescriptionWorkflow = workflow({
   description: `
     Based on the picture '${path.resolve(import.meta.dirname, '../assets/example-sneakers.jpg')}'
     make the product description to list it on the website.
+    Make sure you are using visionTool just once as it's very time consuming operation.
+    Then use the extracted information for other agents.
   `,
   knowledge: `
     Focus on all technical features of the product, including color, size, material, brand if possible, etc.
