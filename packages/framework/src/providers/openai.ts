@@ -1,8 +1,8 @@
 import OpenAI, { ClientOptions as OpenAIOptions } from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod.js'
-import { z, ZodObject } from 'zod'
+import { z } from 'zod'
 
-import { Provider, toLLMTools } from '../models.js'
+import { Provider, responseToDiscriminatedUnion, toLLMTools } from '../models.js'
 
 export type OpenAIProviderOptions = {
   model?: string
@@ -29,7 +29,7 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
         temperature,
         response_format: zodResponseFormat(
           z.object({
-            response: objectToDiscriminatedUnion(response_format),
+            response: responseToDiscriminatedUnion(response_format),
           }),
           'task_result'
         ),
@@ -39,7 +39,7 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
 
       if (message.tool_calls.length > 0) {
         return {
-          kind: 'tool_call',
+          type: 'tool_call',
           value: message.tool_calls,
         }
       }
@@ -58,26 +58,4 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
       return response.data[0].embedding
     },
   }
-}
-
-/**
- * Converts an object such as
- * ```
- * { a: z.object({ b: z.string() }) }
- * ```
- * to a discriminated union such as
- * ```
- * z.discriminatedUnion('type', [
- *   z.object({ type: z.literal('a'), value: z.object({ b: z.string() }) }),
- * ])
- * ```
- * to be used as a response format for OpenAI.
- */
-const objectToDiscriminatedUnion = (object: Record<string, any>) => {
-  const [first, ...rest] = Object.entries(object)
-  return z.discriminatedUnion('kind', [entryToObject(first), ...rest.map(entryToObject)])
-}
-
-const entryToObject = ([key, value]: [string, ZodObject<any>]) => {
-  return z.object({ kind: z.literal(key), value })
 }

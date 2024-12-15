@@ -39,7 +39,7 @@ async function callOpenAI(
       }),
     },
   })
-  if (response.kind === 'vision_request_error') {
+  if (response.type === 'vision_request_error') {
     throw new Error(response.value.message)
   }
   return response.value.text
