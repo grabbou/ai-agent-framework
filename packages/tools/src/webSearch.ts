@@ -1,7 +1,6 @@
 import axios from 'axios'
 import s from 'dedent'
 import { tool } from 'fabrice-ai/tool'
-import { RequiredOptionals } from 'fabrice-ai/types'
 import { z } from 'zod'
 
 /**
@@ -36,7 +35,7 @@ interface SerplyOptions {
   proxyLocation?: string
 }
 
-const defaults: RequiredOptionals<SerplyOptions> = {
+const defaults = {
   limit: 5,
   hl: 'en',
   proxyLocation: 'US',
@@ -72,7 +71,7 @@ export const createWebSearchTools = (options: SerplyOptions) => {
   const config = {
     ...defaults,
     ...options,
-  }
+  } satisfies Required<SerplyOptions>
 
   const request = {
     headers: {
