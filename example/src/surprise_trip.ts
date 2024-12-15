@@ -1,4 +1,5 @@
 import { agent } from 'fabrice-ai/agent'
+import { openrouter } from 'fabrice-ai/providers/openrouter'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { workflow } from 'fabrice-ai/workflow'
@@ -29,6 +30,7 @@ const restaurantScout = agent({
     Your find highly-rated restaurants and dining experiences at the destination,
     and recommend scenic locations and fun activities.
   `,
+  provider: openrouter(),
 })
 
 const itineraryCompiler = agent({

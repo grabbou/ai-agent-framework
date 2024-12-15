@@ -48,7 +48,7 @@ export const openai = (options: OpenAIProviderOptions): Provider => {
         temperature,
         tool_choice: 'required',
       })
-
+      console.log(response.choices[0].message)
       /**
        * Tool choice is required. If tools are missing in the response,
        * we throw an error.

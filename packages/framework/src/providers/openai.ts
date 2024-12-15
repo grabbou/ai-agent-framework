@@ -2,10 +2,11 @@ import OpenAI, { ClientOptions as OpenAIOptions } from 'openai'
 
 import { Provider, responseAsStructuredOutput, toLLMTools } from '../models.js'
 
-type OpenAIProviderOptions = {
+export type OpenAIProviderOptions = {
   model?: string
   embeddingsModel?: string
   options?: OpenAIOptions
+  body?: Record<string, any>
 }
 
 /**
@@ -21,6 +22,7 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
     model = 'gpt-4o',
     embeddingsModel = 'text-embedding-ada-002',
     options: clientOptions,
+    body = {},
   } = options
   const client = new OpenAI(clientOptions)
 
@@ -34,6 +36,7 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
         tools: mappedTools.length > 0 ? mappedTools : undefined,
         temperature,
         response_format: responseAsStructuredOutput(response_format),
+        ...body,
       })
 
       const message = response.choices[0].message
