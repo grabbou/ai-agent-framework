@@ -48,18 +48,18 @@ const bookLibraryWorkflow = workflow({
   description: `
     Analyze the photo of the library and list all the books in the library.
     Find the best template to use for the website.
-    Copy the template to "${outputPath}" file.
-    Replace the content of the new with the list of books.
+    Use the template to create a HTML page with the list of books and save it to "${outputPath}" file.
   `,
   knowledge: `
     Important information:
     - The photo of books in the library is in the "${imagePath}" file.
     - All available templates are in "${workingDir}" directory.
     - You only have access to files in "${workingDir}" directory.
+    - File system operations are expensive, use them wisely. Especially saving files.
     - Use absolute paths for tool calls.
   `,
   output: `
-    Valid HTML page with the list of books in the library, stored in "${outputPath}" file.
+    Valid HTML page with the list of books in the library, saved in "${outputPath}" file.
   `,
   snapshot: logger,
 })
