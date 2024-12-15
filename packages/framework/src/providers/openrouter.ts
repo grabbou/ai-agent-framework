@@ -15,7 +15,7 @@ type OpenRouterOptions = Partial<OpenAIProviderOptions>
  */
 export const openrouter = (options: OpenRouterOptions = {}): Provider => {
   const {
-    model = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+    model = 'meta-llama/llama-3.1-405b-instruct',
     embeddingsModel = 'tbd',
     options: clientOptions,
     body = {},
