@@ -179,22 +179,22 @@ By default, Fabrice uses OpenAI `gpt-4o` model. You can change the default model
 To do it for the entire workflow:
 
 ```ts
-import { ollama } from 'fabrice-ai/providers/ollama'
+import { grok } from 'fabrice-ai/providers/grok'
 
 workflow({
   /** other options go here */
-  provider: ollama({ model: 'llama3.2' })
+  provider: grok()
 })
 ```
 
 To change it for specific agent:
 
 ```ts
-import { ollama } from 'fabrice-ai/providers/ollama'
+import { ollama } from 'fabrice-ai/providers/grok'
 
 agent({
   /** other options go here */
-  provider: ollama({ model: 'llama3.2' })
+  provider: grok()
 })
 ```
 

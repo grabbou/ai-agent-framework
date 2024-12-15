@@ -1,10 +1,8 @@
 import { randomUUID } from 'node:crypto'
 
-import s from 'dedent'
 import OpenAI from 'openai'
-import { zodToJsonSchema } from 'zod-to-json-schema'
 
-import { Provider, toLLMTools } from '../models.js'
+import { Provider, responseToToolCalls, toLLMTools } from '../models.js'
 import { OpenAIProviderOptions } from './openai.js'
 
 export const openai = (options: OpenAIProviderOptions = {}): Provider => {
@@ -19,20 +17,7 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
     chat: async ({ messages, response_format, temperature, ...options }) => {
       const tools = 'tools' in options ? toLLMTools(options.tools, false) : []
 
-      tools.push(
-        ...Object.entries(response_format).map(([name, schema]) => ({
-          type: 'function' as const,
-          function: {
-            name,
-            parameters: zodToJsonSchema(schema),
-            description: s`
-              Call this function when you are done processing user request
-              and want to return "${name}" as the result.
-            `,
-            strict: false,
-          },
-        }))
-      )
+      tools.push(...responseToToolCalls(response_format))
 
       const response = await client.chat.completions.create({
         model,
@@ -50,13 +35,13 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
       if (Object.keys(response_format).includes(message.tool_calls[0].function.name)) {
         const schema = response_format[message.tool_calls[0].function.name]
         return {
-          kind: message.tool_calls[0].function.name,
+          type: message.tool_calls[0].function.name,
           value: schema.parse(JSON.parse(message.tool_calls[0].function.arguments)),
         }
       }
 
       return {
-        kind: 'tool_call',
+        type: 'tool_call',
         value: message.tool_calls.map((tollCall) => ({
           ...tollCall,
           id: randomUUID(),

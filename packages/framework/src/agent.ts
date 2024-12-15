@@ -76,7 +76,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
           },
         })
 
-        if (response.kind === 'tool_call') {
+        if (response.type === 'tool_call') {
           return {
             ...state,
             status: 'paused',
@@ -84,7 +84,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
           }
         }
 
-        if (response.kind === 'error') {
+        if (response.type === 'error') {
           throw new Error(response.value.reasoning)
         }
 

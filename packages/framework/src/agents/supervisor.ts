@@ -34,7 +34,7 @@ export const supervisor = (options?: AgentOptions) => {
           next_task: z.object({
             task: z
               .string()
-              .describe('The next task to be completed, or null if workflow is complete'),
+              .describe('The next task to be completed, or empty string if workflow is complete'),
             reasoning: z
               .string()
               .describe(

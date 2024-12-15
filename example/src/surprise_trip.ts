@@ -1,5 +1,6 @@
 import { agent } from 'fabrice-ai/agent'
 import { grok } from 'fabrice-ai/providers/grok'
+import { ollama } from 'fabrice-ai/providers/ollama'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { workflow } from 'fabrice-ai/workflow'
@@ -71,7 +72,10 @@ const researchTripWorkflow = workflow({
     Comprehensive day-by-day plan for the trip to Wrocław, Poland.
     Ensure the plan includes flights, hotel information, and all planned activities and dining experiences.
   `,
-  provider: grok(),
+  // provider: grok(),
+  provider: ollama({
+    model: 'llama3.1',
+  }),
 })
 
 const result = await teamwork(researchTripWorkflow)
