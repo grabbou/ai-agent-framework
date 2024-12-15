@@ -50,13 +50,13 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
       if (Object.keys(response_format).includes(message.tool_calls[0].function.name)) {
         const schema = response_format[message.tool_calls[0].function.name]
         return {
-          type: message.tool_calls[0].function.name,
+          kind: message.tool_calls[0].function.name,
           value: schema.parse(JSON.parse(message.tool_calls[0].function.arguments)),
         }
       }
 
       return {
-        type: 'tool_call',
+        kind: 'tool_call',
         value: message.tool_calls.map((tollCall) => ({
           ...tollCall,
           id: randomUUID(),

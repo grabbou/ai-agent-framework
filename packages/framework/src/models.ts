@@ -19,13 +19,13 @@ type LLMCallWithTools<T extends LLMResponseFormat> = LLMCall<T> & {
 
 type LLMResponse<T extends LLMResponseFormat> = {
   [K in keyof T]: {
-    type: K
+    kind: K
     value: z.infer<T[K]>
   }
 }[keyof T]
 
 type FunctionToolCall = {
-  type: 'tool_call'
+  kind: 'tool_call'
   value: ParsedFunctionToolCall[]
 }
 
@@ -42,7 +42,7 @@ export const toLLMTools = (tools: Record<string, Tool>, strict: boolean = true) 
     type: 'function' as const,
     function: {
       name,
-      parameters: zodToJsonSchema(tool.parameters, name),
+      parameters: zodToJsonSchema(tool.parameters),
       description: tool.description,
       strict,
     },

@@ -32,23 +32,17 @@ async function callOpenAI(
     ],
     response_format: {
       vision_request_success: z.object({
-        type: z.literal('success'),
         text: z.string(),
       }),
-      vision_request_failure: z.object({
-          type: z.literal('failure'),
-          error: z.string(),
-    }),
-    name: 'vision_request',
+      vision_request_error: z.object({
+        message: z.string(),
+      }),
+    },
   })
-  const message = response.parsed
-  if (!message) {
-    throw new Error('No message returned from OpenAI')
+  if (response.kind === 'vision_request_error') {
+    throw new Error(response.value.message)
   }
-  if (message.response.type !== 'success') {
-    throw new Error(message.response.error)
-  }
-  return message.response.text
+  return response.value.text
 }
 
 export const visionTool = tool({

@@ -46,11 +46,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
               - You can break down complex tasks into multiple steps if needed.
               - You can use available tools if needed.
 
-              If tool requires arguments, get them from the input, or use other tools to get them.
-              Do not fabricate or assume information not present in the input.
-
               Try to complete the task on your own.
-              If you do not have tool to call, use general knowledge to complete the task.
             `),
             assistant('What have been done so far?'),
             user(
@@ -72,7 +68,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
               nextStep: z
                 .string()
                 .nullable()
-                .describe('The next step to complete the task, or null if task is complete'),
+                .describe('The next step to complete the task, or null if this is final step'),
             }),
             error: z.object({
               reasoning: z.string().describe('The reason why you cannot complete the task'),
@@ -80,7 +76,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
           },
         })
 
-        if (response.type === 'tool_call') {
+        if (response.kind === 'tool_call') {
           return {
             ...state,
             status: 'paused',
@@ -88,7 +84,7 @@ export const agent = (options: AgentOptions = {}): Agent => {
           }
         }
 
-        if (response.type === 'error') {
+        if (response.kind === 'error') {
           throw new Error(response.value.reasoning)
         }
 

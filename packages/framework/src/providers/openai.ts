@@ -31,7 +31,7 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
           z.object({
             response: objectToDiscriminatedUnion(response_format),
           }),
-          Object.keys(response_format).join('_')
+          'task_result'
         ),
       })
 
@@ -39,7 +39,7 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
 
       if (message.tool_calls.length > 0) {
         return {
-          type: 'tool_call',
+          kind: 'tool_call',
           value: message.tool_calls,
         }
       }
@@ -75,9 +75,9 @@ export const openai = (options: OpenAIOptions = {}): Provider => {
  */
 const objectToDiscriminatedUnion = (object: Record<string, any>) => {
   const [first, ...rest] = Object.entries(object)
-  return z.discriminatedUnion('type', [entryToObject(first), ...rest.map(entryToObject)])
+  return z.discriminatedUnion('kind', [entryToObject(first), ...rest.map(entryToObject)])
 }
 
 const entryToObject = ([key, value]: [string, ZodObject<any>]) => {
-  return z.object({ type: z.literal(key), value })
+  return z.object({ kind: z.literal(key), value })
 }
