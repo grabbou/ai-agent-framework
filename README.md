@@ -190,7 +190,7 @@ workflow({
 To change it for specific agent:
 
 ```ts
-import { ollama } from 'fabrice-ai/providers/grok'
+import { grok } from 'fabrice-ai/providers/grok'
 
 agent({
   /** other options go here */

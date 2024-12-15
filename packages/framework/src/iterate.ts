@@ -3,7 +3,6 @@ import { childState, finish, WorkflowState } from './state.js'
 import { runTools } from './tool_calls.js'
 import { Workflow } from './workflow.js'
 
-// tbd: finalize workflow
 export async function run(
   state: WorkflowState,
   context: Message[] = [],

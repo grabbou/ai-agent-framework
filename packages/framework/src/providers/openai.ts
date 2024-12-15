@@ -1,15 +1,21 @@
 import OpenAI, { ClientOptions as OpenAIOptions } from 'openai'
-import { zodResponseFormat } from 'openai/helpers/zod.js'
-import { z } from 'zod'
 
-import { Provider, responseToDiscriminatedUnion, toLLMTools } from '../models.js'
+import { Provider, responseAsStructuredOutput, toLLMTools } from '../models.js'
 
-export type OpenAIProviderOptions = {
+type OpenAIProviderOptions = {
   model?: string
   embeddingsModel?: string
   options?: OpenAIOptions
 }
 
+/**
+ * OpenAI provider.
+ *
+ * This provider uses response_format / structured output, together with tools.
+ *
+ * When using this provider with other LLMs, make sure they support both tools and structured_output,
+ * otherwise you will get an error. Otherwise, use the one from `openai_response_functions.js` instead.
+ */
 export const openai = (options: OpenAIProviderOptions = {}): Provider => {
   const {
     model = 'gpt-4o',
@@ -27,12 +33,7 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
         messages,
         tools: mappedTools.length > 0 ? mappedTools : undefined,
         temperature,
-        response_format: zodResponseFormat(
-          z.object({
-            response: responseToDiscriminatedUnion(response_format),
-          }),
-          'task_result'
-        ),
+        response_format: responseAsStructuredOutput(response_format),
       })
 
       const message = response.choices[0].message

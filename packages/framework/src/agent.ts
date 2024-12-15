@@ -49,26 +49,28 @@ export const agent = (options: AgentOptions = {}): Agent => {
               Try to complete the task on your own.
             `),
             assistant('What have been done so far?'),
-            user(
-              `Here is all the work done so far by other agents: ${JSON.stringify(getSteps(messages))}`
-            ),
+            user(`Here is all the work done so far by other agents:`),
+            ...getSteps(messages),
             assistant(`Is there anything else I need to know?`),
             workflow.knowledge
               ? user(`Here is all the knowledge available: ${workflow.knowledge}`)
               : user(`No, I do not have any additional information.`),
-            assistant('What is the task assigned to me?'),
+            assistant('What is the request?'),
             ...state.messages,
           ],
           tools,
           response_format: {
             step: z.object({
-              name: z.string().describe('The name of the step'),
-              result: z.string().describe('The result of the step'),
-              reasoning: z.string().describe('The reasoning for this step'),
-              nextStep: z
+              name: z.string().describe('Name of the current step or action being performed'),
+              result: z
                 .string()
-                .nullable()
-                .describe('The next step to complete the task, or null if this is final step'),
+                .describe('The output of this step. Include all relevant details and information.'),
+              reasoning: z.string().describe('The reasoning for performing this step.'),
+              nextStep: z.string().nullable().describe(s`
+                The next step ONLY if required by the original request.
+                Return null if you have fully answered the current request, even if
+                you can think of additional tasks.
+              `),
             }),
             error: z.object({
               reasoning: z.string().describe('The reason why you cannot complete the task'),

@@ -7,9 +7,7 @@ import { lookupWikipedia } from './tools/wikipedia.js'
 
 const personalizedActivityPlanner = agent({
   description: `
-    You are skilled at creating personalized itineraries that cater to
-    the specific preferences and demographics of travelers.
-    Your research and find cool things to do at the destination,
+    You are skilled at researching and finding cool things to do at the destination,
     including activities and events that match the traveler's interests and age group.
   `,
 })
@@ -71,7 +69,6 @@ const researchTripWorkflow = workflow({
     Comprehensive day-by-day plan for the trip to Wrocław, Poland.
     Ensure the plan includes flights, hotel information, and all planned activities and dining experiences.
   `,
-  // provider: grok(),
 })
 
 const result = await teamwork(researchTripWorkflow)
