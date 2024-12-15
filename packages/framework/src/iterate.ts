@@ -3,7 +3,6 @@ import { childState, finish, WorkflowState } from './state.js'
 import { runTools } from './tool_calls.js'
 import { Workflow } from './workflow.js'
 
-// tbd: finalize workflow
 export async function run(
   state: WorkflowState,
   context: Message[] = [],
@@ -34,9 +33,10 @@ export async function run(
   }
 
   const agent = workflow.team[state.agent]
+  const provider = agent.provider || workflow.provider
 
   if (state.status === 'paused') {
-    const toolsResponse = await runTools(state, context, workflow)
+    const toolsResponse = await runTools(provider, state, context, workflow)
     return {
       ...state,
       status: 'running',
@@ -46,7 +46,7 @@ export async function run(
 
   if (state.status === 'running' || state.status === 'idle') {
     try {
-      return agent.run(state, context, workflow)
+      return agent.run(provider, state, context, workflow)
     } catch (error) {
       return finish(state, assistant(error instanceof Error ? error.message : 'Unknown error'))
     }

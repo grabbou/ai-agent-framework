@@ -49,9 +49,9 @@ export const createFileSystemTools = ({ workingDir }: FileSystemOptions) => {
       parameters: z.object({
         path: z.string().describe('Absolute path to file to read'),
         is_image: z.boolean().describe('Specify if the file is an image'),
-        encoding: fileEncodingSchema
-          .describe('Encoding format for reading the file')
-          .default('utf-8'),
+        encoding: fileEncodingSchema.describe(
+          'Encoding format for reading the file. Use "utf-8" as default for text files'
+        ),
       }),
       execute: async ({ path: userPath, is_image, encoding }) => {
         const filePath = sanitizePath(workingDir, userPath)
@@ -70,9 +70,9 @@ export const createFileSystemTools = ({ workingDir }: FileSystemOptions) => {
       parameters: z.object({
         path: z.string().describe('Absolute path to file to save to'),
         content: z.string().describe('Content to save in the file'),
-        encoding: fileEncodingSchema
-          .describe('Encoding format for saving the file')
-          .default('utf-8'),
+        encoding: fileEncodingSchema.describe(
+          'Encoding format for saving the file. Use "utf-8" as default for text files'
+        ),
       }),
       execute: async ({ path: userPath, content, encoding }) => {
         const filePath = sanitizePath(workingDir, userPath)
@@ -83,18 +83,16 @@ export const createFileSystemTools = ({ workingDir }: FileSystemOptions) => {
   }
 }
 
-const fileEncodingSchema = z
-  .enum([
-    'ascii',
-    'utf8',
-    'utf-8',
-    'utf16le',
-    'ucs2',
-    'ucs-2',
-    'base64',
-    'base64url',
-    'latin1',
-    'binary',
-    'hex',
-  ])
-  .default('utf-8')
+const fileEncodingSchema = z.enum([
+  'ascii',
+  'utf8',
+  'utf-8',
+  'utf16le',
+  'ucs2',
+  'ucs-2',
+  'base64',
+  'base64url',
+  'latin1',
+  'binary',
+  'hex',
+])

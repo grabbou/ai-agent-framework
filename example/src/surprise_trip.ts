@@ -7,9 +7,7 @@ import { lookupWikipedia } from './tools/wikipedia.js'
 
 const personalizedActivityPlanner = agent({
   description: `
-    You are skilled at creating personalized itineraries that cater to
-    the specific preferences and demographics of travelers.
-    Your research and find cool things to do at the destination,
+    You are skilled at researching and finding cool things to do at the destination,
     including activities and events that match the traveler's interests and age group.
   `,
 })
@@ -50,7 +48,7 @@ const researchTripWorkflow = workflow({
     Research and find cool things to do in Wrocław, Poland.
 
     Focus:
-      - activities and events that match the traveler's interests and age group.
+      - activities and events that match the traveler's age group.
       - highly-rated restaurants and dining experiences.
       - landmarks with historic context.
       - picturesque and entertaining locations.
@@ -60,11 +58,12 @@ const researchTripWorkflow = workflow({
       - Origin: New York, USA
       - Destination: Wrocław, Poland
       - Age of the traveler: 30
-      - Hotel location: Main Square, Wrocław
+      - Hotel location: Hilton, Main Square, Wrocław
       - Flight information: Flight AA123, arriving on 2023-12-15
       - How long is the trip: 7 days
-
-    Consider flights confirmed.
+      - Likes: history, italian food, vintage cars.
+    
+    Flights and hotels are already confirmed.
   `,
   output: `
     Comprehensive day-by-day plan for the trip to Wrocław, Poland.

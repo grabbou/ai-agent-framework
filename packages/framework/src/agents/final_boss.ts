@@ -1,5 +1,4 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
@@ -8,8 +7,8 @@ import { user } from '../messages.js'
 import { finish } from '../state.js'
 
 const defaults: AgentOptions = {
-  run: async (state, context, workflow) => {
-    const response = await workflow.team[state.agent].provider.completions({
+  run: async (provider, state, context) => {
+    const response = await provider.chat({
       messages: [
         {
           role: 'system',
@@ -23,18 +22,13 @@ const defaults: AgentOptions = {
           the main goal while responding with the final answer
         `),
       ],
-      response_format: zodResponseFormat(
-        z.object({
-          finalAnswer: z.string().describe('The final result of the task'),
+      response_format: {
+        task_result: z.object({
+          final_answer: z.string().describe('The final result of the task'),
         }),
-        'task_result'
-      ),
+      },
     })
-    const message = response.choices[0].message.parsed
-    if (!message) {
-      throw new Error('No parsed response received')
-    }
-    return finish(state, assistant(message.finalAnswer))
+    return finish(state, assistant(response.value.final_answer))
   },
 }
 

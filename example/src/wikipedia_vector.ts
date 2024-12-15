@@ -12,8 +12,9 @@ const { saveDocumentInVectorStore, searchInVectorStore } = createVectorStoreTool
 const wikipediaIndexer = agent({
   description: `
     You are skilled at reading and understanding the context of Wikipedia articles.
-    You can save Wikipedia articles in Vector store for later use.
-    When saving articles in Vector store, you only save first 10 sentences.
+    You can save information in Vector store for later use.
+    When saving articles in Vector store, you store every sentence as a separate document and 
+    you only save first 10 sentences.
   `,
   tools: {
     lookupWikipedia,
@@ -36,11 +37,11 @@ const wikipediaResearch = workflow({
   description: `
     Find information about John III Sobieski on Wikipedia and save it in Vector store.
     Lookup sentences related to the following topics:
-     - "Battle of Vienna"
-     - "John III later years and death"
+     - "Dates of reign as King of Poland"
+     - "John III education"
   `,
   knowledge: `
-    Each document in Vector store is a sentence.
+    Each document in Vector store is a sentence from the Wikipedia article.
   `,
   output: `
     List of sentences looked up for each topic. Each sentence should be in separate bullet point.

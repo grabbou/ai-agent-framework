@@ -1,5 +1,4 @@
 import s from 'dedent'
-import { Provider } from 'fabrice-ai/models'
 import { tool } from 'fabrice-ai/tool'
 import { z } from 'zod'
 
@@ -38,7 +37,7 @@ export const createVectorStoreTools = (vectorStore: VectorStore = createInMemory
         metadata: z.string().describe('Additional metadata for the document'),
       }),
       execute: async ({ id, content, metadata }, { provider }) => {
-        const embedding = await computeEmbedding(provider, content)
+        const embedding = await provider.embeddings(content)
         vectorStore.set(id, { content, metadata, embedding })
         return `Document saved with id: ${id}`
       },
@@ -55,7 +54,7 @@ export const createVectorStoreTools = (vectorStore: VectorStore = createInMemory
         topK: z.number().describe('Number of top results to return'),
       }),
       execute: async ({ query, topK }, { provider }) => {
-        const queryEmbedding = await computeEmbedding(provider, query)
+        const queryEmbedding = await provider.embeddings(query)
         const entries = await vectorStore.entries()
 
         const results = entries
@@ -89,18 +88,6 @@ const cosineSimilarity = (vecA: number[], vecB: number[]): number => {
   const magnitudeA = Math.sqrt(vecA.reduce((sum, a) => sum + a ** 2, 0))
   const magnitudeB = Math.sqrt(vecB.reduce((sum, b) => sum + b ** 2, 0))
   return dotProduct / (magnitudeA * magnitudeB)
-}
-
-/**
- * Computes an embedding vector for the given text using the OpenAI API.
- */
-const computeEmbedding = async (provider: Provider, text: string): Promise<number[]> => {
-  const response = await provider.client.embeddings.create({
-    model: 'text-embedding-ada-002',
-    input: text,
-  })
-
-  return response.data[0].embedding
 }
 
 /**

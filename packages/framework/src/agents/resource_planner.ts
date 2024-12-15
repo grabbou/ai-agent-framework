@@ -1,5 +1,4 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
@@ -8,8 +7,8 @@ import { user } from '../messages.js'
 import { handoff } from '../state.js'
 
 const defaults: AgentOptions = {
-  run: async (state, context, workflow) => {
-    const response = await workflow.team[state.agent].provider.completions({
+  run: async (provider, state, context, workflow) => {
+    const response = await provider.chat({
       messages: [
         {
           role: 'system',
@@ -35,21 +34,14 @@ const defaults: AgentOptions = {
         ...state.messages,
       ],
       temperature: 0.1,
-      response_format: zodResponseFormat(
-        z.object({
+      response_format: {
+        select_agent: z.object({
           agent: z.enum(Object.keys(workflow.team) as [string, ...string[]]),
           reasoning: z.string(),
         }),
-        'agent_selection'
-      ),
+      },
     })
-
-    const message = response.choices[0].message.parsed
-    if (!message) {
-      throw new Error('No content in response')
-    }
-
-    return handoff(state, message.agent)
+    return handoff(state, response.value.agent)
   },
 }
 

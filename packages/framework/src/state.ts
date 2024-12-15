@@ -4,11 +4,26 @@ import { AgentName } from './agent.js'
 import { Conversation, Request, Response, user } from './messages.js'
 import { Workflow } from './workflow.js'
 
+/**
+ * Workflow Status
+ */
+type WorkflowStatus =
+  /** No work has been started yet. */
+  | 'idle'
+  /** Work is in progress. */
+  | 'running'
+  /** ork is paused and there are tools that must be called to resume. */
+  | 'paused'
+  /** Work is complete. */
+  | 'finished'
+  /** Work has failed due to an error. */
+  | 'failed'
+
 type WorkflowStateOptions = {
   agent: string
   messages: Conversation
 
-  status?: 'idle' | 'running' | 'paused' | 'finished' | 'failed'
+  status?: WorkflowStatus
   children?: WorkflowState[]
 }
 
@@ -22,6 +37,10 @@ export const childState = (options: WorkflowStateOptions): WorkflowState => {
   }
 }
 
+/**
+ * Creates a root state for the given workflow.
+ * Like `childState`, except it provides initial request based on the workflow.
+ */
 export const rootState = (workflow: Workflow): WorkflowState =>
   childState({
     agent: 'supervisor',
@@ -41,6 +60,10 @@ export const rootState = (workflow: Workflow): WorkflowState =>
 
 export type WorkflowState = Required<WorkflowStateOptions>
 
+/**
+ * Finishes the current state.
+ * Result is a tuple of [request, response].
+ */
 export const finish = (state: WorkflowState, response: Response): WorkflowState => {
   return {
     ...state,
@@ -49,6 +72,10 @@ export const finish = (state: WorkflowState, response: Response): WorkflowState 
   }
 }
 
+/**
+ * Creates a new child state with given request.
+ * This effectively "delegates" the task to the given agent.
+ */
 type DelegationRequest = [AgentName, Request]
 export const delegate = (state: WorkflowState, requests: DelegationRequest[]): WorkflowState => {
   return {
@@ -63,6 +90,10 @@ export const delegate = (state: WorkflowState, requests: DelegationRequest[]): W
   }
 }
 
+/**
+ * Creates a new child state with the same messages and tools.
+ * This effectively "hands off" the task to the next agent.
+ */
 export const handoff = (state: WorkflowState, agent: AgentName): WorkflowState => {
   return childState({
     agent,

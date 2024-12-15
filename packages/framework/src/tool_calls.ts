@@ -5,6 +5,7 @@ import type {
 import { ChatCompletionToolMessageParam } from 'openai/resources/chat/completions'
 
 import { Message, toolResult } from './messages.js'
+import { Provider } from './models.js'
 import { WorkflowState } from './state.js'
 import { Workflow } from './workflow.js'
 
@@ -15,21 +16,28 @@ export function isToolCallRequest(message?: Message): message is ParsedChatCompl
   return message ? 'tool_calls' in message : false
 }
 
+/**
+ * Runs all the tools that are needed to complete the current task.
+ *
+ * This function should only be called when last message in the state is a tool call request,
+ * and state is `paused`. Otherwise, it will throw an error.
+ */
 export async function runTools(
+  provider: Provider,
   state: WorkflowState,
   context: Message[],
   workflow: Workflow
 ): Promise<ChatCompletionToolMessageParam[]> {
-  const toolRequests = getAllMissingToolCalls(state)
+  const toolRequest = state.messages.at(-1)
 
-  if (toolRequests.length === 0) {
+  if (!isToolCallRequest(toolRequest)) {
     throw new Error('Invalid tool request')
   }
 
-  const { tools, provider } = workflow.team[state.agent]
+  const { tools } = workflow.team[state.agent]
 
   const toolResults = await Promise.all(
-    toolRequests.map(async (toolCall) => {
+    toolRequest.tool_calls.map(async (toolCall) => {
       if (toolCall.type !== 'function') {
         throw new Error('Tool call is not a function')
       }

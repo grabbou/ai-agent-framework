@@ -1,5 +1,4 @@
 import s from 'dedent'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 import { agent, AgentOptions } from '../agent.js'
@@ -9,10 +8,10 @@ import { delegate } from '../state.js'
 
 export const supervisor = (options?: AgentOptions) => {
   return agent({
-    run: async (state, context, workflow) => {
+    run: async (provider, state) => {
       const [workflowRequest, ...messages] = state.messages
 
-      const response = await workflow.team[state.agent].provider.completions({
+      const response = await provider.chat({
         messages: [
           system(s`
             You are a planner that breaks down complex workflows into smaller, actionable steps.
@@ -31,33 +30,27 @@ export const supervisor = (options?: AgentOptions) => {
           ...getSteps(messages),
         ],
         temperature: 0.2,
-        response_format: zodResponseFormat(
-          z.object({
+        response_format: {
+          next_task: z.object({
             task: z
               .string()
-              .describe('The next task to be completed or null if the workflow is complete')
-              .nullable(),
+              .describe('The next task to be completed, or empty string if workflow is complete'),
             reasoning: z
               .string()
               .describe(
                 'The reasoning for selecting the next task or why the workflow is complete'
               ),
           }),
-          'next_task'
-        ),
+        },
       })
       try {
-        const content = response.choices[0].message.parsed
-        if (!content) {
-          throw new Error('No content in response')
-        }
-        if (!content.task) {
+        if (!response.value.task) {
           return {
             ...state,
             status: 'finished',
           }
         }
-        return delegate(state, [['resourcePlanner', user(content.task)]])
+        return delegate(state, [['resourcePlanner', user(response.value.task)]])
       } catch (error) {
         throw new Error('Failed to determine next task')
       }
