@@ -65,6 +65,7 @@ const researchTripWorkflow = workflow({
       - Hotel location: Hilton, Main Square, Wrocław
       - Flight information: Flight AA123, arriving on 2023-12-15
       - How long is the trip: 7 days
+      - Likes: history, italian food, vintage cars.
     
     Flights and hotels are already confirmed.
   `,

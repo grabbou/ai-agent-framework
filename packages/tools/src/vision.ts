@@ -58,8 +58,7 @@ export const visionTool = tool({
       .enum(['low', 'high'])
       .describe(
         'Fidelity of the analysis. For detailed analysis, use "high". For general questions, use "low".'
-      )
-      .default('high'),
+      ),
   }),
   execute: async ({ imagePathUrl, detail, prompt }, { provider }) => {
     const imageUrl = imagePathUrl.startsWith('http')
