@@ -1,8 +1,8 @@
 import { Provider } from '../models.js'
-import { OpenAIOptions } from './openai.js'
+import { OpenAIProviderOptions } from './openai.js'
 import { openai } from './openai_functions.js'
 
-export const grok = (options: OpenAIOptions = {}): Provider => {
+export const grok = (options: OpenAIProviderOptions = {}): Provider => {
   const { model = 'grok-beta', embeddingsModel = 'v1', options: clientOptions } = options
   return openai({
     model,

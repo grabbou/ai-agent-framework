@@ -1,16 +1,16 @@
-import OpenAI, { ClientOptions } from 'openai'
+import OpenAI, { ClientOptions as OpenAIOptions } from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod.js'
 import { z, ZodObject } from 'zod'
 
 import { Provider, toLLMTools } from '../models.js'
 
-export type OpenAIOptions = {
+export type OpenAIProviderOptions = {
   model?: string
   embeddingsModel?: string
-  options?: ClientOptions
+  options?: OpenAIOptions
 }
 
-export const openai = (options: OpenAIOptions = {}): Provider => {
+export const openai = (options: OpenAIProviderOptions = {}): Provider => {
   const {
     model = 'gpt-4o',
     embeddingsModel = 'text-embedding-ada-002',

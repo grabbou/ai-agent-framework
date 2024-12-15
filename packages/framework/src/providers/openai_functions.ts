@@ -5,9 +5,9 @@ import OpenAI from 'openai'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 
 import { Provider, toLLMTools } from '../models.js'
-import { OpenAIOptions } from './openai.js'
+import { OpenAIProviderOptions } from './openai.js'
 
-export const openai = (options: OpenAIOptions = {}): Provider => {
+export const openai = (options: OpenAIProviderOptions = {}): Provider => {
   const {
     model = 'gpt-4o',
     embeddingsModel = 'text-embedding-ada-002',
