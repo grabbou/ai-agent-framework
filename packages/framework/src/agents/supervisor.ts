@@ -26,8 +26,9 @@ export const supervisor = (options?: AgentOptions) => {
           `),
           assistant('What is the request?'),
           workflowRequest,
-          assistant('What has been completed so far?'),
-          ...getSteps(messages),
+          ...(messages.length > 0
+            ? [assistant('What has been completed so far?'), ...getSteps(messages)]
+            : []),
         ],
         temperature: 0.2,
         response_format: {

@@ -1,12 +1,19 @@
 import { Provider } from '../models.js'
-import { openai, OpenAIProviderOptions } from './openai.js'
+import { openai as openai_structured_output, OpenAIProviderOptions } from './openai.js'
+import { openai as openai_response_functions } from './openai_response_functions.js'
 
 /**
  * Required options for the OpenRouter provider.
  *
  * @see OpenAIProviderOptions
  */
-type OpenRouterOptions = Partial<OpenAIProviderOptions>
+type OpenRouterOptions = Partial<OpenAIProviderOptions> & {
+  /**
+   * Certain providers, such as Anthropic, do not support structured output.
+   * In this case, we use response functions instead.
+   */
+  structured_output?: boolean
+}
 
 /**
  * OpenRouter provider.
@@ -17,10 +24,11 @@ export const openrouter = (options: OpenRouterOptions = {}): Provider => {
   const {
     model = 'meta-llama/llama-3.1-405b-instruct',
     embeddingsModel = 'tbd',
+    structured_output = true,
     options: clientOptions,
     body = {},
   } = options
-  return openai({
+  const openAiOptions = {
     model,
     embeddingsModel,
     options: {
@@ -41,5 +49,10 @@ export const openrouter = (options: OpenRouterOptions = {}): Provider => {
       },
       ...body,
     },
-  })
+  }
+  if (structured_output) {
+    return openai_structured_output(openAiOptions)
+  } else {
+    return openai_response_functions(openAiOptions)
+  }
 }

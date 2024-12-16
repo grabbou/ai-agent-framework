@@ -70,6 +70,10 @@ const researchTripWorkflow = workflow({
     Comprehensive day-by-day plan for the trip to Wrocław, Poland.
     Ensure the plan includes flights, hotel information, and all planned activities and dining experiences.
   `,
+  provider: openrouter({
+    model: 'anthropic/claude-3.5-haiku-20241022:beta',
+    structured_output: false,
+  }),
 })
 
 const result = await teamwork(researchTripWorkflow)
