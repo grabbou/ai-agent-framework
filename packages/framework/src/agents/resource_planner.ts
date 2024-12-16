@@ -26,9 +26,10 @@ const defaults: AgentOptions = {
         user(s`
           Here are the available agents:
           <agents>
-            ${Object.entries(workflow.team).map(([name, agent]) =>
-              agent.description ? `<agent name="${name}">${agent.description}</agent>` : ''
-            )}
+            ${Object.entries(workflow.team)
+              .filter(([name]) => ['resourcePlanner', 'supervisor', 'final_boss'].includes(name))
+              .map(([name, agent]) => `<agent name="${name}">${agent.description}</agent>`)
+              .join('')}
           </agents>`),
         assistant('What is the task?'),
         ...state.messages,
