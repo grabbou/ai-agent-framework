@@ -5,9 +5,21 @@ export type TestCase = {
 }
 export type TestSuite = {
   description: string
-  tests: TestCase[]
+  workflow: TestCase[]
+  team: {
+    [key: string]: TestCase[]
+  }
 }
 export type TestSuiteOptions = TestSuite
+
+export type TestResultsSuccess = {
+  tests: {
+    checked: boolean
+    id: string
+  }[]
+}
+export type TestResulstsFailure = { reasoning: string }
+export type TestResults = TestResultsSuccess | TestResulstsFailure
 
 const defaults = {
   checked: false,

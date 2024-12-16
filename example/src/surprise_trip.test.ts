@@ -85,7 +85,15 @@ const result = await testwork(
   researchTripWorkflow,
   suite({
     description: 'Black box testing suite',
-    tests: [
+    team: {
+      landmarkScout: [
+        {
+          id: '4_wikipedia',
+          case: 'Should use "lookupWikipedia" tool',
+        },
+      ],
+    },
+    workflow: [
       {
         id: '1_personalizedActivityPlanner',
         case: 'Should use "personalizedActivityPlanner" to "Research activities and events in Wrocław"',
@@ -97,10 +105,6 @@ const result = await testwork(
       {
         id: '3_landmarkScout',
         case: 'Should use "landmarkScout" to "Research landmarks of Wrocław"',
-      },
-      {
-        id: '4_wikipedia',
-        case: 'Should use "lookupWikipedia" tool',
       },
       {
         id: '5_itineraryCompiler',
