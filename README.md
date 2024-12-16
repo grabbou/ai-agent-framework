@@ -341,9 +341,6 @@ const myProvider = (options: ProviderOptions): Provider => {
     chat: async () => {
       /** your implementation goes here */
     },
-    embeddings: async () => {
-      /** your implementation goes here */
-    },
   }
 }
 ```
