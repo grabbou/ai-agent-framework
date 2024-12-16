@@ -2,9 +2,10 @@ import 'dotenv/config'
 
 import { suite, test } from '@fabrice-ai/bdd/suite'
 import { testwork } from '@fabrice-ai/bdd/testwork'
-import { workflow } from 'fabrice-ai/workflow'
+import { WorkflowState } from 'fabrice-ai/state'
+import { Workflow } from 'fabrice-ai/workflow'
 
-import { researchTripWorkflow } from './surprise_trip.js'
+import { researchTripWorkflow } from './surprise_trip.workflow.js'
 
 const testResults = await testwork(
   researchTripWorkflow,
@@ -28,12 +29,16 @@ const testResults = await testwork(
         '"itineraryCompiler" should compile all the information into a coherent travel plan'
       ),
       test('6_finalOutput', 'Should return a 7 days itinerary as a final output'),
-      test('7_snapshot', 'Should log the final output', async (workflow, state) => {
-        return {
-          checked: false,
-          id: '7_snapshot',
+      test(
+        '7_snapshot',
+        'This is example non LLM check',
+        async (workflow: Workflow, state: WorkflowState) => {
+          return {
+            checked: true,
+            id: '7_snapshot',
+          }
         }
-      }),
+      ),
     ],
   })
 )

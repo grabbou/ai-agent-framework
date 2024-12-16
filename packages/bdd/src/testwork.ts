@@ -30,7 +30,7 @@ const makeTestingVisitor = (
 
     if (nextState.status === 'finished' && suite.team[nextState.agent]) {
       // test single agent - prevState is internal agent state
-      console.log(`🧪 Requesting test suite for agent [${nextState.agent}]\n\n`)
+      console.log(`🧪 Requesting test suite for agent [${nextState.agent}]\n`)
       testRequests.push({ workflow, state: prevState, tests: suite.team[nextState.agent] }) // add it only once
     }
     // printTree(nextState)
@@ -135,12 +135,11 @@ export async function testwork(
 ): Promise<TestSuiteResult> {
   const { testingVisitor, testRequests } = makeTestingVisitor(workflow, suite)
   workflow.snapshot = testingVisitor
-
   const nextState = await teamwork(workflow, await iterate(workflow, state), runTools)
   if (nextState.status === 'finished') {
     const overallResults = await Promise.all(
       testRequests.map((testRequest) => {
-        console.log(`🧪 Running test suite [${testRequest.tests.map((t) => t.id).join(', ')}}]\n\n`)
+        console.log(`🧪 Running test suite [${testRequest.tests.map((t) => t.id).join(', ')}}]\n`)
         return validate(workflow, testRequest.state, testRequest.tests)
       })
     )
