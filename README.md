@@ -144,14 +144,75 @@ TBD
 
 ## Providers
 
+Providers are responsible for sending requests to the LLM and handling the responses.
+
 ### Built-in Providers
-TBD
+
+Fabrice comes with a few built-in providers:
+- OpenAI (structured output)
+- OpenAI (using tools as response format)
+- Groq
+
+You can learn more about them [here](./packages/framework/src/providers/README.md).
+
+If you're working with OpenAI compatible provider, you can use `openai` provider with different base URL and API key, such as:
+
+```ts
+openai({
+  model: '<< your model >>',
+  strictMode: false,
+  options: {
+    apiKey: '<< your_api_key >>',
+    baseURL: '<< your_base_url >>',
+  },
+})
+```
 
 ### Using Different Providers
-TBD
+
+By default, Fabrice uses OpenAI gpt-4o model. You can change the default model either for the entire system, or for specific agent.
+
+To do it for the entire workflow:
+```ts
+import { grok } from 'fabrice-ai/providers/grok'
+
+workflow({
+  /** other options go here */
+  provider: grok()
+})
+```
+
+To change it for specific agent:
+
+```ts
+import { grok } from 'fabrice-ai/providers/grok'
+
+agent({
+  /** other options go here */
+  provider: grok()
+})
+```
+
+Note that agent provider always takes precedence over workflow provider. Tools always receive provider from the agent that triggered their execution.
 
 ### Creating Custom Providers
-TBD
+
+To create a custom provider, you need to implement the `Provider` interface. 
+
+```ts
+const myProvider = (options: ProviderOptions): Provider => {
+  return {
+    chat: async (options) => {
+      /** your implementation goes here */
+    },
+    embeddings: async (options) => {
+      /** your implementation goes here */
+    },
+  }
+}
+```
+
+You can learn more about the `Provider` interface [here](./packages/framework/src/models.ts).
 
 ## Tools
 
@@ -161,10 +222,28 @@ Tools extend agent capabilities by providing concrete actions they can perform. 
 - An execute function
 
 ### Built-in Tools
-TBD
+
+Fabrice comes with a few built-in tools via `@fabrice-ai/tools` package. For most up-to-date list, please refer to the [README](./packages/tools/README.md).
 
 ### Creating Custom Tools
-TBD
+
+To create a custom tool, you need to implement the `Tool` interface. You can either do it manually, or use our `tool` helper function to enforce type checking.
+
+```ts
+import { tool } from 'fabrice-ai/tools'
+
+const myTool = tool({
+  description: 'My tool description',
+  parameters: z.object({
+    /** your Zod schema goes here */
+  }),
+  execute: async (params, context) => {
+    /** your implementation goes here */
+  },
+})
+```
+
+Tools will use the same provider as the agent that triggered them. Additionally, you can access `context` object, which gives you accces to the provider, as well as current message history.
 
 ### Using Tools
 TBD
