@@ -26,7 +26,7 @@ const makeTestingVisitor = (
     nextState.children.forEach(async (childState) => {
       if (childState.messages.length > 0 && suite.team[childState.agent]) {
         // run tests for finished agents - if defined
-        if (nextState.status === 'idle') {
+        if (nextState.status === 'running') {
           if (!testRequests.find((testRequest) => testRequest.state.agent === childState.agent)) {
             testRequests.push({ workflow, state: childState, tests: suite.team[childState.agent] }) // add it only once
           }
@@ -130,9 +130,10 @@ export async function testwork(
         return test(workflow, testRequest.state, testRequest.tests)
       })
     )
+    console.log(overallResults)
     overallResults.forEach(displayTestResults)
     let passed = false
-    overallResults.forEach((result) => {
+    for (const result of overallResults) {
       displayTestResults(result)
       if ('tests' in result) {
         if (!result.tests.every((test) => test.checked)) {
@@ -140,8 +141,11 @@ export async function testwork(
         } else {
           passed = true
         }
+      } else {
+        passed = false
+        break
       }
-    })
+    }
     return { passed, results: overallResults }
   }
 
