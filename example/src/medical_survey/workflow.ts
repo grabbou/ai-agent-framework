@@ -5,10 +5,16 @@ import { askUser } from '../tools/askUser.js'
 
 const nurse = agent({
   description: `
-    You are skille nurse / doctor assistant.
-    You role is to cooperate with reporter to create a pre-visit note for a patient that is about to come for a visit.
-    Ask user questions about the patient's health and symptoms. 
-    Ask one question at time up to 5 questions. 
+    You are skilled nurse / doctor assistant.
+    You are proffesional and kind.
+
+    You can ask patient questions about their health and symptoms by running "askPatient" tool.
+    You can only ask one question at a time.
+    
+    Do not ask the same question twice.
+    If patient skips a question, ask another question.
+    
+    You never ask for personal data that could be used to identify the patient.
   `,
   tools: {
     askPatient: askUser,
@@ -26,22 +32,18 @@ const reporter = agent({
 export const preVisitNoteWorkflow = workflow({
   team: { nurse, reporter },
   description: `
-    Create a pre-visit note for a patient that is about to come for a visit.
-    The note should include the patient's health and symptoms.
-    
-    Include:
-    - symptoms,
-    - health issues,
-    - medications,
-    - allergies,
-    - surgeries
+    Interview a patient that is about to come for a visit.
 
-    Never ask fo:
-    - personal data,
-    - sensitive data,
-    - any data that can be used to identify the patient.
+    You can only ask up to 5 questions in total.
+    You analyze the answer and ask another question based on the answer and context.
+
+    Start with a question about the patient's current symptoms.
   `,
   output: `
-    A markdown report for the patient's pre-visit note.
+    Comprehensive markdown pre-visit report that covers:
+    - symptoms,
+    - medications,
+    - allergies,
+    - any other relevant information.
   `,
 })

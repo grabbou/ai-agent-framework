@@ -7,9 +7,7 @@ import { agent } from 'fabrice-ai/agent'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger } from 'fabrice-ai/telemetry'
-import { tool } from 'fabrice-ai/tool'
 import { workflow } from 'fabrice-ai/workflow'
-import { z } from 'zod'
 
 import { askUser } from './tools/askUser.js'
 
@@ -21,11 +19,10 @@ const { firecrawl } = createFireCrawlTool({
   apiKey,
 })
 
-const githubResearcher = agent({
+const webCrawler = agent({
   description: `
-    You are skilled at browsing Github pages.
-    You are saving the documents to vector store for later usage.
-    You don't do any other thing just these two tasks.
+    You are skilled at browsing Web pages.
+    You can save the documents to Vector store for later usage.
   `,
   tools: {
     firecrawl,
@@ -33,39 +30,42 @@ const githubResearcher = agent({
   },
 })
 
-const wrapupRedactor = agent({
+const human = agent({
   description: `
-    You ask users for which topic to focus on if it's defined in the task.
-    Then - you search relevant information in Vector Store and compile reports based on it.
-    You're famous of beautiful Markdown formatting.
+    You can ask user and get their answer to questions that are needed by other agents.
   `,
   tools: {
     askUser,
+  },
+})
+
+const reportCompiler = agent({
+  description: `
+    You can create a comprehensive report based on the information from Vector store.
+    You're famous for beautiful Markdown formatting.
+  `,
+  tools: {
     searchInVectorStore,
   },
 })
 
 const wrapUpTrending = workflow({
-  team: { githubResearcher, wrapupRedactor },
+  team: { webCrawler, human, reportCompiler },
   description: `
-    Research the URL "https://github.com/trending/typescript" page using firecrawl tool
-    Select 3 top projects. Browse for details about these projects on their subpages. 
-    Save it all to the vector store.
-
+    Research the "https://github.com/trending/typescript" page.
+    Select 3 top projects. 
+    For each project, browse details about it on their subpages.
+    Store each page in Vector store for later usage.
+  
     Ask user about which project he wants to learn more.
-    reate a comprehensive report markdown output:
-     - create a one, two sentence summary about every project.
-     - include detailed summary about the project selected by the user.
-
-    Here are some ground rules to follow: 
-      - Browser the pages onle once and store content in Vector Store. 
-      - Use Vector Store if you need information about the project.
-      - Before making up the record: ask user about which project he wants to learn more.
+   `,
+  knowledge: `
+    Each document in Vector store is a page from the website.
   `,
   output: `
-    Comprehensive markdown report including:
-    - summary on top trending Typescript projects.
-    - detailed info about the project selected by the user.
+    Create a comprehensive markdown report:
+     - create a one, two sentences summary about every project.
+     - include detailed summary about the project selected by the user. 
   `,
   snapshot: logger,
 })

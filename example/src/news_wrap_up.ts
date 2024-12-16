@@ -38,23 +38,19 @@ const wrapupRedactor = agent({
   description: `
     Your role is to wrap up the news and trends for the last week into a comprehensive report.
     Generalization is also one of your powerfull skills, however you're not a fortune teller.
-    You're famous of precisely getting the overal picture, trends and summarizing it all.
+    You're famous for precisely getting the overal picture, trends and summarizing it all.
   `,
 })
 
 const wrapUpTheNewsWorkflow = workflow({
   team: { newsResearcher, newsReader, wrapupRedactor },
   description: `
-    Research the top news and trends for the last week - get title and headline description.
-    Then summarize it all into a comprehensive report markdown output.
-
-    Here are some ground rules to follow: 
-      - Include one sentence summary for each article.
-      - Include top takeaways - bulletpoints from each article.
+    Research the top news and trends for the last week.
   `,
   output: `
-    Comprehensive markdown report with the top news and trends for the last week.
-    Add one sentence of "State of the Affairs" summary.
+    Comprehensive markdown report with the listing including top news headlines for the last week.
+    - Include one sentence summary for each article.
+    - Include top takeaways - bulletpoints from each article.
   `,
   snapshot: logger,
 })

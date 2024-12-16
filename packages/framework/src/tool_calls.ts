@@ -4,8 +4,9 @@ import type {
 } from 'openai/resources/beta/chat/completions'
 import { ChatCompletionToolMessageParam } from 'openai/resources/chat/completions'
 
+import { Message, toolResult } from './messages.js'
+import { Provider } from './models.js'
 import { WorkflowState } from './state.js'
-import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 /**
@@ -15,21 +16,28 @@ export function isToolCallRequest(message?: Message): message is ParsedChatCompl
   return message ? 'tool_calls' in message : false
 }
 
+/**
+ * Runs all the tools that are needed to complete the current task.
+ *
+ * This function should only be called when last message in the state is a tool call request,
+ * and state is `paused`. Otherwise, it will throw an error.
+ */
 export async function runTools(
+  provider: Provider,
   state: WorkflowState,
   context: Message[],
   workflow: Workflow
 ): Promise<ChatCompletionToolMessageParam[]> {
-  const toolRequests = getAllMissingToolCalls(state)
+  const toolRequest = state.messages.at(-1)
 
-  if (toolRequests.length === 0) {
+  if (!isToolCallRequest(toolRequest)) {
     throw new Error('Invalid tool request')
   }
 
-  const { tools, provider } = workflow.team[state.agent]
+  const { tools } = workflow.team[state.agent]
 
   const toolResults = await Promise.all(
-    toolRequests.map(async (toolCall) => {
+    toolRequest.tool_calls.map(async (toolCall) => {
       if (toolCall.type !== 'function') {
         throw new Error('Tool call is not a function')
       }
@@ -44,11 +52,7 @@ export async function runTools(
         messages: context.concat(state.messages),
       })
 
-      return {
-        role: 'tool' as const,
-        tool_call_id: toolCall.id,
-        content: JSON.stringify(content),
-      }
+      return toolResult(toolCall.id, content)
     })
   )
 
@@ -64,15 +68,14 @@ export const addToolResponse = (
   if (toolRequestMessage) {
     return {
       ...state,
-      messages: state.messages.concat({
-        role: 'tool',
-        tool_call_id: toolCallId,
-        content,
-      }),
+      messages: [...state.messages, toolResult(toolCallId, content)],
     }
   }
-  if (state.child) {
-    return addToolResponse(state.child, toolCallId, content)
+  if (state.children.length > 0) {
+    return {
+      ...state,
+      children: state.children.map((child) => addToolResponse(child, toolCallId, content)),
+    }
   }
   return state
 }
@@ -93,8 +96,11 @@ export const resumeCompletedToolCalls = (state: WorkflowState): WorkflowState =>
     }
     return state
   }
-  if (state.child) {
-    return resumeCompletedToolCalls(state.child)
+  if (state.children.length > 0) {
+    return {
+      ...state,
+      children: state.children.map(resumeCompletedToolCalls),
+    }
   }
   return state
 }
@@ -118,8 +124,8 @@ export const getAllMissingToolCalls = (state: WorkflowState): ParsedFunctionTool
     (toolRequest) => !toolResponses.includes(toolRequest.id)
   )
 
-  if (state.child) {
-    missingToolCalls.push(...getAllMissingToolCalls(state.child))
+  if (state.children.length > 0) {
+    missingToolCalls.push(...state.children.flatMap(getAllMissingToolCalls))
   }
 
   return missingToolCalls

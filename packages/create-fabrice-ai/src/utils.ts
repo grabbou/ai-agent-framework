@@ -9,6 +9,26 @@ export function formatTargetDir(targetDir: string) {
   return targetDir.trim().replace(/\/+$/g, '')
 }
 
+export async function latestReleaseDownloadLink(
+  organization: string,
+  repo: string
+): Promise<string> {
+  const response = await fetch(
+    `https://api.github.com/repos/${organization}/${repo}/releases/latest`
+  )
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch release info from ${response.url}.`)
+  }
+
+  const body = await response.json()
+  if (!('tarball_url' in body) || typeof body.tarball_url !== 'string') {
+    throw new Error(`Failed to get tarball url from ${response.url}.`)
+  }
+
+  return body.tarball_url
+}
+
 export async function downloadAndExtractTemplate(root: string, tarball: string, files: string[]) {
   const response = await fetch(tarball)
   if (!response.ok || !response.body) {
@@ -18,13 +38,10 @@ export async function downloadAndExtractTemplate(root: string, tarball: string, 
   await Stream.pipeline([
     // @ts-ignore
     Readable.fromWeb(response.body),
-    extract(
-      {
-        cwd: tmpdir(),
-        strip: 1,
-      },
-      ['fabrice-ai-main/example']
-    ),
+    extract({
+      cwd: tmpdir(),
+      strip: 1,
+    }),
   ])
 
   const filesToCopy = [...files, 'package.json']

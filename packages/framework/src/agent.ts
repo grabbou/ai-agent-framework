@@ -1,26 +1,32 @@
 import s from 'dedent'
-import { zodFunction, zodResponseFormat } from 'openai/helpers/zod.js'
 import { z } from 'zod'
 
-import { openai, Provider } from './models.js'
-import { WorkflowState } from './state.js'
+import { assistant, getSteps, system, toolCalls, user } from './messages.js'
+import { Provider } from './models.js'
+import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
 import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 export type AgentOptions = Partial<Agent>
 
+export type AgentName = string
 export type Agent = {
   description?: string
   tools: {
-    [key: string]: Tool
+    [key: AgentName]: Tool
   }
-  provider: Provider
-  run: (state: WorkflowState, context: Message[], workflow: Workflow) => Promise<WorkflowState>
+  provider?: Provider
+  run: (
+    provider: Provider,
+    state: WorkflowState,
+    context: Message[],
+    workflow: Workflow
+  ) => Promise<WorkflowState>
 }
 
 export const agent = (options: AgentOptions = {}): Agent => {
-  const { description, tools = {}, provider = openai() } = options
+  const { description, tools = {}, provider } = options
 
   return {
     description,
@@ -28,114 +34,73 @@ export const agent = (options: AgentOptions = {}): Agent => {
     provider,
     run:
       options.run ??
-      (async (state, context) => {
-        const mappedTools = tools
-          ? Object.entries(tools).map(([name, tool]) =>
-              zodFunction({
-                name,
-                parameters: tool.parameters,
-                description: tool.description,
-              })
-            )
-          : []
+      (async (provider, state, context, workflow) => {
+        const [, ...messages] = context
 
-        const response = await provider.completions({
+        const response = await provider.chat({
           messages: [
-            {
-              role: 'system',
-              content: s`
-                ${description}
+            system(s`
+              ${description}
 
-                Your job is to complete the assigned task:
-                - You can break down complex tasks into multiple steps if needed.
-                - You can use available tools if needed.
+              Your job is to complete the assigned task:
+              - You can break down complex tasks into multiple steps if needed.
+              - You can use available tools if needed.
 
-                If tool requires arguments, get them from the input, or use other tools to get them.
-                Do not fabricate or assume information not present in the input.
-
-                Try to complete the task on your own.
-              `,
-            },
-            {
-              role: 'assistant',
-              content: 'What have been done so far?',
-            },
-            {
-              role: 'user',
-              content: `Here is all the work done so far by other agents: ${JSON.stringify(context)}`,
-            },
-            {
-              role: 'assistant',
-              content: 'What do you want me to do now?',
-            },
+              Try to complete the task on your own.
+            `),
+            assistant('What have been done so far?'),
+            user(`Here is all the work done so far by other agents:`),
+            ...getSteps(messages),
+            assistant(`Is there anything else I need to know?`),
+            workflow.knowledge
+              ? user(`Here is all the knowledge available: ${workflow.knowledge}`)
+              : user(`No, I do not have any additional information.`),
+            assistant('What is the request?'),
             ...state.messages,
           ],
-          tools: mappedTools.length > 0 ? mappedTools : undefined,
-          response_format: zodResponseFormat(
-            z.object({
-              response: z.discriminatedUnion('kind', [
-                z.object({
-                  kind: z.literal('step'),
-                  name: z.string().describe('The name of the step'),
-                  result: z.string().describe('The result of the step'),
-                  reasoning: z.string().describe('The reasoning for this step'),
-                  nextStep: z
-                    .string()
-                    .nullable()
-                    .describe('The next step to complete the task, or null if task is complete'),
-                }),
-                z.object({
-                  kind: z.literal('error'),
-                  reasoning: z.string().describe('The reason why you cannot complete the task'),
-                }),
-              ]),
+          tools,
+          response_format: {
+            step: z.object({
+              name: z.string().describe('Name of the current step or action being performed'),
+              result: z
+                .string()
+                .describe('The output of this step. Include all relevant details and information.'),
+              reasoning: z.string().describe('The reasoning for performing this step.'),
+              nextStep: z.string().nullable().describe(s`
+                The next step ONLY if required by the original request.
+                Return null if you have fully answered the current request, even if
+                you can think of additional tasks.
+              `),
             }),
-            'task_result'
-          ),
+            error: z.object({
+              reasoning: z.string().describe('The reason why you cannot complete the task'),
+            }),
+          },
         })
 
-        if (response.choices[0].message.tool_calls.length > 0) {
+        if (response.type === 'tool_call') {
           return {
             ...state,
             status: 'paused',
-            messages: state.messages.concat(response.choices[0].message),
+            messages: [...state.messages, toolCalls(response.value)],
           }
         }
 
-        const result = response.choices[0].message.parsed
-        if (!result) {
-          throw new Error('No parsed response received')
+        if (response.type === 'error') {
+          throw new Error(response.value.reasoning)
         }
 
-        if (result.response.kind === 'error') {
-          throw new Error(result.response.reasoning)
-        }
+        const agentResponse = assistant(response.value.result)
 
-        const agentResponse = {
-          role: 'assistant' as const,
-          content: result.response.result,
-        }
-
-        if (result.response.nextStep) {
+        if (response.value.nextStep) {
           return {
             ...state,
             status: 'running',
-            messages: [
-              ...state.messages,
-              agentResponse,
-              {
-                role: 'user',
-                content: result.response.nextStep,
-              },
-            ],
+            messages: [...state.messages, agentResponse, user(response.value.nextStep)],
           }
         }
 
-        return {
-          ...state,
-          status: 'finished',
-          messages: [agentResponse],
-        }
+        return finish(state, agentResponse)
       }),
   }
 }

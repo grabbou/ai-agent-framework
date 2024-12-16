@@ -2,7 +2,8 @@ import { Agent } from './agent.js'
 import { finalBoss } from './agents/final_boss.js'
 import { resourcePlanner } from './agents/resource_planner.js'
 import { supervisor } from './agents/supervisor.js'
-import { openai, Provider } from './models.js'
+import { Provider } from './models.js'
+import { openai } from './providers/openai.js'
 import { logger, Telemetry } from './telemetry.js'
 
 type WorkflowOptions = {
@@ -11,6 +12,7 @@ type WorkflowOptions = {
 
   team: Team
 
+  knowledge?: string
   provider?: Provider
   maxIterations?: number
   snapshot?: Telemetry
@@ -37,4 +39,6 @@ export const workflow = (options: WorkflowOptions): Workflow => {
   }
 }
 
-export type Workflow = Required<WorkflowOptions>
+export type Workflow = Required<Omit<WorkflowOptions, 'knowledge'>> & {
+  knowledge?: string
+}

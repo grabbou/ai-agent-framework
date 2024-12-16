@@ -4,7 +4,6 @@ import path from 'node:path'
 import s from 'dedent'
 import { Provider } from 'fabrice-ai/models'
 import { tool } from 'fabrice-ai/tool'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 const encodeImage = async (imagePath: string): Promise<string> => {
@@ -18,7 +17,7 @@ async function callOpenAI(
   image_url: string,
   detail: 'low' | 'high'
 ) {
-  const response = await provider.completions({
+  const response = await provider.chat({
     messages: [
       {
         role: 'user',
@@ -31,30 +30,19 @@ async function callOpenAI(
         ],
       },
     ],
-    response_format: zodResponseFormat(
-      z.object({
-        response: z.discriminatedUnion('type', [
-          z.object({
-            type: z.literal('success'),
-            text: z.string(),
-          }),
-          z.object({
-            type: z.literal('failure'),
-            error: z.string(),
-          }),
-        ]),
+    response_format: {
+      vision_request_success: z.object({
+        text: z.string(),
       }),
-      'vision_request'
-    ),
+      vision_request_error: z.object({
+        message: z.string(),
+      }),
+    },
   })
-  const message = response.choices[0].message.parsed
-  if (!message) {
-    throw new Error('No message returned from OpenAI')
+  if (response.type === 'vision_request_error') {
+    throw new Error(response.value.message)
   }
-  if (message.response.type !== 'success') {
-    throw new Error(message.response.error)
-  }
-  return message.response.text
+  return response.value.text
 }
 
 export const visionTool = tool({
@@ -70,8 +58,7 @@ export const visionTool = tool({
       .enum(['low', 'high'])
       .describe(
         'Fidelity of the analysis. For detailed analysis, use "high". For general questions, use "low".'
-      )
-      .default('high'),
+      ),
   }),
   execute: async ({ imagePathUrl, detail, prompt }, { provider }) => {
     const imageUrl = imagePathUrl.startsWith('http')

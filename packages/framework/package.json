@@ -18,6 +18,12 @@
       "types": "./dist/types/*.d.ts",
       "require": "./dist/*.cjs",
       "import": "./dist/*.js"
+    },
+    "./providers/*": {
+      "bun": "./src/providers/*.ts",
+      "types": "./dist/providers/*.d.ts",
+      "require": "./dist/providers/*.cjs",
+      "import": "./dist/providers/*.js"
     }
   },
   "type": "module",
@@ -25,7 +31,8 @@
     "chalk": "^5.3.0",
     "dedent": "^1.5.3",
     "openai": "^4.76.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.24.1"
   },
   "license": "MIT",
   "repository": {
