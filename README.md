@@ -152,7 +152,7 @@ const myAgent = agent({
 })
 ```
 
-Additionally, you can pass `tools` property to the agent, which will give it access to the tools. You can learn more about tools [here](#tools). You can also set custom `provider` for each agent. You can learn more about providers [here](#providers).
+Additionally, you can give it access to tools by passing a `tools` property to the agent. You can learn more about tools [here](#tools). You can also set custom `provider` for each agent. You can learn more about providers [here](#providers).
 
 ### Built-in Agents
 
