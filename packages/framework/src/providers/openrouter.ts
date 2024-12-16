@@ -31,11 +31,12 @@ export const openrouter = (options: OpenRouterOptions = {}): Provider => {
     /**
      * Force OpenRouter to load-balance requests across providers that
      * support structured output.
-     *
-     * @see https://openrouter.ai/docs/provider-routing#required-parameters-_beta_
      */
     body: {
       provider: {
+        /**
+         * @see https://openrouter.ai/docs/provider-routing#required-parameters-_beta_
+         */
         require_parameters: true,
       },
       ...body,

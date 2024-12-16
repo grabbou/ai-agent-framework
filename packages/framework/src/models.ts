@@ -4,8 +4,8 @@ import { ParsedFunctionToolCall } from 'openai/resources/beta/chat/completions'
 import { z, ZodObject } from 'zod'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 
+import { Message } from './messages.js'
 import { Tool } from './tool.js'
-import { Message } from './types.js'
 
 /**
  * Resposne format for LLM calls is an object of Zod schemas.

@@ -30,7 +30,6 @@ const restaurantScout = agent({
     Your find highly-rated restaurants and dining experiences at the destination,
     and recommend scenic locations and fun activities.
   `,
-  provider: openrouter(),
 })
 
 const itineraryCompiler = agent({

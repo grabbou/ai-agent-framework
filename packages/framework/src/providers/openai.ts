@@ -3,9 +3,21 @@ import OpenAI, { ClientOptions as OpenAIOptions } from 'openai'
 import { Provider, responseAsStructuredOutput, toLLMTools } from '../models.js'
 
 export type OpenAIProviderOptions = {
+  /**
+   * Model to use.
+   */
   model?: string
+  /**
+   * Embeddings model to use.
+   */
   embeddingsModel?: string
+  /**
+   * Client options.
+   */
   options?: OpenAIOptions
+  /**
+   * Additional body parameters.
+   */
   body?: Record<string, any>
 }
 
@@ -40,7 +52,6 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
       })
 
       const message = response.choices[0].message
-
       if (message.tool_calls.length > 0) {
         return {
           type: 'tool_call',

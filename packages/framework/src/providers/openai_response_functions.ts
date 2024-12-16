@@ -1,31 +1,25 @@
 import { randomUUID } from 'node:crypto'
 
-import OpenAI, { ClientOptions } from 'openai'
+import OpenAI from 'openai'
 
 import { Provider, responseAsToolCall, toLLMTools } from '../models.js'
+import { OpenAIProviderOptions as BaseOpenAIProviderOptions } from './openai.js'
 
 /**
  * Required options for the OpenAI-compatible provider.
  */
-export type OpenAIProviderOptions = {
+export type OpenAIProviderOptions = BaseOpenAIProviderOptions &
   /**
-   * Model to use.
+   * Since this is meant to be used with OpenAI-compatible providers,
+   * we do not provide any defaults.
    */
-  model: string
-  /**
-   * Embeddings model to use.
-   */
-  embeddingsModel: string
-  /**
-   * Client options.
-   */
-  options: ClientOptions
-  /**
-   * Whether to use strict mode.
-   * @default false
-   */
-  strictMode?: boolean
-}
+  Required<Pick<BaseOpenAIProviderOptions, 'model' | 'embeddingsModel' | 'options'>> & {
+    /**
+     * Whether to use strict mode.
+     * @default false
+     */
+    strictMode?: boolean
+  }
 
 /**
  * OpenAI provider.
@@ -34,7 +28,7 @@ export type OpenAIProviderOptions = {
  * but tools as response to enforce the right JSON schema.
  */
 export const openai = (options: OpenAIProviderOptions): Provider => {
-  const { model, embeddingsModel, options: clientOptions, strictMode = false } = options
+  const { model, embeddingsModel, options: clientOptions, strictMode = false, body = {} } = options
   const client = new OpenAI(clientOptions)
 
   return {
@@ -47,6 +41,7 @@ export const openai = (options: OpenAIProviderOptions): Provider => {
         messages,
         temperature,
         tool_choice: 'required',
+        ...body,
       })
 
       /**
