@@ -5,6 +5,7 @@ export type TestCase = {
   case: string
   id: string
   checked?: boolean
+  run: ((workflow: Workflow, state: WorkflowState) => Promise<SingleTestResult>) | null
 }
 export type TestSuite = {
   description: string
@@ -15,11 +16,13 @@ export type TestSuite = {
 }
 export type TestSuiteOptions = TestSuite
 
+export type SingleTestResult = {
+  checked: boolean
+  id: string
+}
+
 export type TestResultsSuccess = {
-  tests: {
-    checked: boolean
-    id: string
-  }[]
+  tests: SingleTestResult[]
 }
 export type TestResulstsFailure = { reasoning: string }
 export type TestResults = TestResultsSuccess | TestResulstsFailure
@@ -43,5 +46,18 @@ export const suite = (options: TestSuiteOptions): TestSuite => {
   return {
     ...defaults,
     ...options,
+  }
+}
+
+export const test = (
+  id: string,
+  testCase: string,
+  run?: ((workflow: Workflow, state: WorkflowState) => Promise<SingleTestResult>) | null
+): TestCase => {
+  return {
+    id,
+    case: testCase,
+    checked: false,
+    run: run || null,
   }
 }

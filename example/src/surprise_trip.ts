@@ -41,7 +41,7 @@ const itineraryCompiler = agent({
   `,
 })
 
-const researchTripWorkflow = workflow({
+export const researchTripWorkflow = workflow({
   team: {
     personalizedActivityPlanner,
     restaurantScout,

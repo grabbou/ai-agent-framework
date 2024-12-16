@@ -20,31 +20,30 @@ const makeTestingVisitor = (
   const testingVisitor: Telemetry = async ({ prevState, nextState }) => {
     if (prevState === nextState) return
 
-    if (nextState.status === 'finished') {
+    if (
+      nextState.status === 'finished' &&
+      (nextState.agent === 'supervisor' || nextState.agent === 'finalBoss')
+    ) {
+      // test entire workflow
       testRequests.push({ workflow, state: nextState, tests: suite.workflow })
     }
-    nextState.children.forEach(async (childState) => {
-      if (childState.messages.length > 0 && suite.team[childState.agent]) {
-        // @tbd: @grabbou - how to check if the agent finished processing the task and get it's whole state (including tool responses)?
-        if (nextState.status === 'running') {
-          if (!testRequests.find((testRequest) => testRequest.state.agent === childState.agent)) {
-            testRequests.push({ workflow, state: childState, tests: suite.team[childState.agent] }) // add it only once
-          }
-        }
-      }
-    })
+
+    if (nextState.status === 'finished' && suite.team[nextState.agent]) {
+      // test single agent - prevState is internal agent state
+      console.log(`🧪 Requesting test suite for agent [${nextState.agent}]\n\n`)
+      testRequests.push({ workflow, state: prevState, tests: suite.team[nextState.agent] }) // add it only once
+    }
     // printTree(nextState)
     return logger({ prevState, nextState })
   }
   return { testingVisitor, testRequests }
 }
 
-export async function test(
+export async function validate(
   workflow: Workflow,
   state: WorkflowState,
   tests: TestCase[]
 ): Promise<TestResults> {
-  // tbd: move it to a specialized agent
   // evaluate test cases every iterate call - however it could be potentially optimized
   // to run once at the end.
   const testRequest = [
@@ -59,13 +58,15 @@ export async function test(
     Here is the test suite:
 
     <suite>
-      ${tests.map((test) => {
-        return `<test>
+      ${tests
+        .filter((test) => test.run === null) // only run tests that are not defined
+        .map((test) => {
+          return `<test>
                       <id>${test.id}</id>
                       <case>${test.case}</case>
                       <checked>${test.checked ? 'checked' : 'unchecked'}</checked>
                   </test>`
-      })}
+        })}
     </suite>
   `),
     assistant('What have been done so far?'),
@@ -78,7 +79,6 @@ export async function test(
       ? user(`Here is all the knowledge available: ${workflow.knowledge}`)
       : user(`No, I do not have any additional information.`),
   ]
-  console.log(testRequest)
   const suiteResults = await workflow.provider.chat({
     messages: testRequest,
     response_format: {
@@ -95,6 +95,20 @@ export async function test(
       }),
     },
   })
+
+  const testRunners = tests
+    .filter((test) => test.run !== null)
+    .map((test) => {
+      return test.run !== null ? test.run(workflow, state) : { checked: false, id: test.id }
+    })
+
+  const subResults = await Promise.all(testRunners)
+
+  if ('tests' in suiteResults.value) {
+    return {
+      tests: [...suiteResults.value.tests, ...subResults],
+    }
+  }
 
   return suiteResults.value
 }
@@ -126,8 +140,8 @@ export async function testwork(
   if (nextState.status === 'finished') {
     const overallResults = await Promise.all(
       testRequests.map((testRequest) => {
-        console.log(`🧪 Running test suite [${testRequest.tests.map((t) => t.id).join(', ')}}]`)
-        return test(workflow, testRequest.state, testRequest.tests)
+        console.log(`🧪 Running test suite [${testRequest.tests.map((t) => t.id).join(', ')}}]\n\n`)
+        return validate(workflow, testRequest.state, testRequest.tests)
       })
     )
     let passed = false
