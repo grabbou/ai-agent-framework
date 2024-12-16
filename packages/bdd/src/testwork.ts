@@ -44,7 +44,6 @@ export async function test(
   state: WorkflowState,
   tests: TestCase[]
 ): Promise<TestResults> {
-  console.log(`🧪 Running test suite [${tests.length} test(s)] `)
   // tbd: move it to a specialized agent
   // evaluate test cases every iterate call - however it could be potentially optimized
   // to run once at the end.
@@ -127,9 +126,7 @@ export async function testwork(
   if (nextState.status === 'finished') {
     const overallResults = await Promise.all(
       testRequests.map((testRequest) => {
-        console.log(
-          `🧪 Running test suite for agent [${testRequest.tests.map((t) => t.id).join(', ')}}]`
-        )
+        console.log(`🧪 Running test suite [${testRequest.tests.map((t) => t.id).join(', ')}}]`)
         return test(workflow, testRequest.state, testRequest.tests)
       })
     )
