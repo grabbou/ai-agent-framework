@@ -25,7 +25,7 @@ const makeTestingVisitor = (
     }
     nextState.children.forEach(async (childState) => {
       if (childState.messages.length > 0 && suite.team[childState.agent]) {
-        // run tests for finished agents - if defined
+        // @tbd: @grabbou - how to check if the agent finished processing the task and get it's whole state (including tool responses)?
         if (nextState.status === 'running') {
           if (!testRequests.find((testRequest) => testRequest.state.agent === childState.agent)) {
             testRequests.push({ workflow, state: childState, tests: suite.team[childState.agent] }) // add it only once
