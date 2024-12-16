@@ -13,11 +13,14 @@ Built with TypeScript and designed to be serverless-ready.
   - [Manual Installation](#manual-installation) 
 - [Why Another AI Agent Framework?](#why-another-ai-agent-framework)
 - [Core Concepts](#core-concepts)
-- [Workflows](#workflows)
 - [Agents](#agents)
   - [Creating Custom Agents](#creating-custom-agents)
   - [Built-in Agents](#built-in-agents)
   - [Replacing Built-in Agents](#replacing-built-in-agents)
+- [Workflows](#workflows)
+- [Workflow States](#workflow-states)
+  - [Delegating Tasks](#delegating-tasks)
+  - [Handing off Tasks](#handing-off-tasks)
 - [Providers](#providers)
   - [Built-in Providers](#built-in-providers)
   - [Using Different Providers](#using-different-providers)
@@ -117,14 +120,6 @@ The framework is designed around the idea that AI agents should be:
 
 [TBD]
 
-## Workflows
-
-Workflows define how agents collaborate to achieve a goal. They specify:
-- Team members
-- Task description
-- Expected output
-- Optional configuration
-
 ## Agents
 
 Agents are specialized workers with specific roles and capabilities. Agents can call available tools and complete assigned tasks. Depending on the task complexity, it can be done in a single step, or multiple steps.
@@ -169,6 +164,26 @@ workflow({
   team: { supervisor },
 })
 ```
+
+## Workflows
+
+Workflows define how agents collaborate to achieve a goal. They specify:
+- Team members
+- Task description
+- Expected output
+- Optional configuration
+
+## Workflow States
+
+[TBD]
+
+### Delegating Tasks
+
+[TBD]
+
+### Handing off Tasks
+
+[TBD]
 
 ## Providers
 
