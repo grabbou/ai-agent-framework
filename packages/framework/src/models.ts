@@ -1,11 +1,12 @@
 import s from 'dedent'
 import { zodResponseFormat } from 'openai/helpers/zod.mjs'
 import { ParsedFunctionToolCall } from 'openai/resources/beta/chat/completions'
+import { FunctionParameters } from 'openai/resources/shared.js'
 import { z, ZodObject } from 'zod'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 
+import { Message } from './messages.js'
 import { Tool } from './tool.js'
-import { Message } from './types.js'
 
 /**
  * Resposne format for LLM calls is an object of Zod schemas.
@@ -123,16 +124,31 @@ export const responseAsToolCall = (
   response_format: Record<string, any>,
   strict: boolean = true
 ) => {
-  return Object.entries(response_format).map(([name, schema]) => ({
-    type: 'function' as const,
-    function: {
-      name,
-      parameters: zodToJsonSchema(schema),
-      description: s`
-        Call this function when you are done processing user request
-        and want to return "${name}" as the result.
-      `,
-      strict,
-    },
-  }))
+  return Object.entries(response_format).map(([name, response]) => {
+    const schema: FunctionToolSchema = {
+      type: 'function' as const,
+      function: {
+        name,
+        parameters: zodToJsonSchema(response),
+        description: s`
+          Call this function when you are done processing user request
+          and want to return "${name}" as the result.
+        `,
+      },
+    }
+    if (strict) {
+      schema.function.strict = strict
+    }
+    return schema
+  })
+}
+
+type FunctionToolSchema = {
+  type: 'function'
+  function: {
+    name: string
+    parameters: FunctionParameters
+    description: string
+    strict?: boolean
+  }
 }

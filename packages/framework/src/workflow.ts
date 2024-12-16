@@ -20,14 +20,18 @@ type WorkflowOptions = {
 
 export type Team = Record<string, Agent>
 
+const coreTeam = {
+  supervisor: supervisor(),
+  resourcePlanner: resourcePlanner(),
+  finalBoss: finalBoss(),
+}
+
 /**
  * Helper utility to create a workflow with defaults.
  */
 export const workflow = (options: WorkflowOptions): Workflow => {
   const team = {
-    supervisor: supervisor(),
-    resourcePlanner: resourcePlanner(),
-    finalBoss: finalBoss(),
+    ...coreTeam,
     ...options.team,
   }
   return {
@@ -42,3 +46,5 @@ export const workflow = (options: WorkflowOptions): Workflow => {
 export type Workflow = Required<Omit<WorkflowOptions, 'knowledge'>> & {
   knowledge?: string
 }
+
+export const isCoreTeam = (name: string) => Object.keys(coreTeam).includes(name)

@@ -1,11 +1,10 @@
 import s from 'dedent'
 import { z } from 'zod'
 
-import { assistant, getSteps, system, toolCalls, user } from './messages.js'
+import { assistant, getSteps, Message, system, toolCalls, user } from './messages.js'
 import { Provider } from './models.js'
 import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
-import { Message } from './types.js'
 import { Workflow } from './workflow.js'
 
 export type AgentOptions = Partial<Agent>
@@ -66,11 +65,14 @@ export const agent = (options: AgentOptions = {}): Agent => {
                 .string()
                 .describe('The output of this step. Include all relevant details and information.'),
               reasoning: z.string().describe('The reasoning for performing this step.'),
-              nextStep: z.string().nullable().describe(s`
+              next_step: z.string().describe(s`
                 The next step ONLY if required by the original request.
-                Return null if you have fully answered the current request, even if
+                Return empty string if you have fully answered the current request, even if
                 you can think of additional tasks.
               `),
+              has_next_step: z
+                .boolean()
+                .describe('True if you provided next_step. False otherwise.'),
             }),
             error: z.object({
               reasoning: z.string().describe('The reason why you cannot complete the task'),
@@ -92,11 +94,11 @@ export const agent = (options: AgentOptions = {}): Agent => {
 
         const agentResponse = assistant(response.value.result)
 
-        if (response.value.nextStep) {
+        if (response.value.has_next_step) {
           return {
             ...state,
             status: 'running',
-            messages: [...state.messages, agentResponse, user(response.value.nextStep)],
+            messages: [...state.messages, agentResponse, user(response.value.next_step)],
           }
         }
 

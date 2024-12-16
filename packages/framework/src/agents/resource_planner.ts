@@ -5,6 +5,7 @@ import { agent, AgentOptions } from '../agent.js'
 import { assistant } from '../messages.js'
 import { user } from '../messages.js'
 import { handoff } from '../state.js'
+import { isCoreTeam } from '../workflow.js'
 
 const defaults: AgentOptions = {
   run: async (provider, state, context, workflow) => {
@@ -26,9 +27,14 @@ const defaults: AgentOptions = {
         user(s`
           Here are the available agents:
           <agents>
-            ${Object.entries(workflow.team).map(([name, agent]) =>
-              agent.description ? `<agent name="${name}">${agent.description}</agent>` : ''
-            )}
+            ${Object.entries(workflow.team)
+              /**
+               * Do not include core team agents in the list of available agents.
+               * We only assign to user-defined agents.
+               */
+              .filter(([name]) => !isCoreTeam(name))
+              .map(([name, agent]) => `<agent name="${name}">${agent.description}</agent>`)
+              .join('')}
           </agents>`),
         assistant('What is the task?'),
         ...state.messages,
