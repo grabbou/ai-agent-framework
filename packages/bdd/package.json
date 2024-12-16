@@ -1,0 +1,50 @@
+{
+  "name": "@fabrice-ai/bdd",
+  "description": "Tools that help you test AI agents",
+  "author": "Piotr Karwatka <piotr@catchthetornado.com>",
+  "scripts": {
+    "prepare": "bun run build",
+    "clean": "rm -rf dist",
+    "build": "bun run clean && bun run build:lib && bun run build:types",
+    "build:lib": "rslib build",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outdir dist/types"
+  },
+  "exports": {
+    "./*": {
+      "bun": "./src/*.ts",
+      "types": "./dist/types/*.d.ts",
+      "require": "./dist/*.cjs",
+      "import": "./dist/*.js"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@clack/prompts": "^0.8.2",
+    "axios": "^1.7.9",
+    "fabrice-ai": "0.4.4",
+    "zod": "^3.23.8"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callstackincubator/ai-agent-framework.git",
+    "directory": "packages/tools"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "ai",
+    "ai agents",
+    "ai tools"
+  ],
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "version": "0.4.4"
+}
