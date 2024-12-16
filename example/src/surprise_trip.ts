@@ -22,11 +22,6 @@ const landmarkScout = agent({
   tools: {
     lookupWikipedia,
   },
-  // Mistral
-  provider: openrouter({
-    model: 'mistralai/mistral-nemo',
-    structured_output: false,
-  }),
 })
 
 const restaurantScout = agent({
@@ -82,7 +77,7 @@ const researchTripWorkflow = workflow({
   //   structured_output: false,
   // }),
   // Grok
-  provider: grok(),
+  // provider: grok(),
 })
 
 const result = await teamwork(researchTripWorkflow)
