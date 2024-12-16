@@ -8,7 +8,6 @@ export async function run(
   context: Message[] = [],
   workflow: Workflow
 ): Promise<WorkflowState> {
-  state.step += 1
   if (state.messages.length > workflow.maxIterations) {
     return childState({
       ...state,

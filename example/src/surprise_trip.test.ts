@@ -81,7 +81,7 @@ const researchTripWorkflow = workflow({
   // provider: grok(),
 })
 
-const result = await testwork(
+const testResults = await testwork(
   researchTripWorkflow,
   suite({
     description: 'Black box testing suite',
@@ -118,4 +118,10 @@ const result = await testwork(
   })
 )
 
-console.log(solution(result))
+if (!testResults.passed) {
+  console.log('🚨 Test suite failed')
+  process.exit(-1)
+} else {
+  console.log('✅ Test suite passed')
+  process.exit(0)
+}
