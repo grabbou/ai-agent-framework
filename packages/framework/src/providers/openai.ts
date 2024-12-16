@@ -36,7 +36,6 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
         tools: mappedTools.length > 0 ? mappedTools : undefined,
         temperature,
         response_format: responseAsStructuredOutput(response_format),
-        ...body,
       })
 
       const message = response.choices[0].message

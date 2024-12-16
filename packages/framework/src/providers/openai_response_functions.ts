@@ -44,8 +44,7 @@ export const openai = (options: OpenAIProviderOptions): Provider => {
         tools: [...tools, ...responseAsToolCall(response_format, strictMode)],
         messages,
         temperature,
-        tool_choice: 'required',
-        ...body,
+        tool_choice: 'required'
       })
 
       /**

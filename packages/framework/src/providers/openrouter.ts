@@ -23,14 +23,11 @@ type OpenRouterOptions = Partial<OpenAIProviderOptions> & {
 export const openrouter = (options: OpenRouterOptions = {}): Provider => {
   const {
     model = 'meta-llama/llama-3.1-405b-instruct',
-    embeddingsModel = 'tbd',
     structured_output = true,
     options: clientOptions,
-    body = {},
   } = options
   const openAiOptions = {
     model,
-    embeddingsModel,
     options: {
       apiKey: process.env.OPENROUTER_API_KEY,
       baseURL: 'https://openrouter.ai/api/v1',
@@ -41,9 +38,7 @@ export const openrouter = (options: OpenRouterOptions = {}): Provider => {
      * support structured output.
      */
     body: {
-      ...body,
       provider: {
-        ...body?.provider,
         /**
          * @see https://openrouter.ai/docs/provider-routing#required-parameters-_beta_
          */
