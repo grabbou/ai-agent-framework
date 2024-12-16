@@ -141,7 +141,7 @@ Agents are specialized workers with specific roles and capabilities. Agents can 
 
 ### Creating Custom Agents
 
-To create a custom agent, you need to implement the `Agent` interface. You can either do it manually, or use our `agent` helper function to enforce type checking.
+To create a custom agent, you can use our `agent` helper function or implement the `Agent` interface manually.
 
 ```ts
 import { agent } from 'fabrice-ai/agent'
