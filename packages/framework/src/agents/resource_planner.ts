@@ -5,6 +5,7 @@ import { agent, AgentOptions } from '../agent.js'
 import { assistant } from '../messages.js'
 import { user } from '../messages.js'
 import { handoff } from '../state.js'
+import { isCoreTeam } from '../workflow.js'
 
 const defaults: AgentOptions = {
   run: async (provider, state, context, workflow) => {
@@ -27,7 +28,7 @@ const defaults: AgentOptions = {
           Here are the available agents:
           <agents>
             ${Object.entries(workflow.team)
-              .filter(([name]) => ['resourcePlanner', 'supervisor', 'final_boss'].includes(name))
+              .filter(([name]) => !isCoreTeam(name))
               .map(([name, agent]) => `<agent name="${name}">${agent.description}</agent>`)
               .join('')}
           </agents>`),
@@ -42,6 +43,7 @@ const defaults: AgentOptions = {
         }),
       },
     })
+    console.log(response.value)
     return handoff(state, response.value.agent)
   },
 }
