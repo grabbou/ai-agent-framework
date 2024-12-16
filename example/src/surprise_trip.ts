@@ -25,6 +25,7 @@ const landmarkScout = agent({
   // Mistral
   provider: openrouter({
     model: 'mistralai/mistral-nemo',
+    structured_output: false,
   }),
 })
 
