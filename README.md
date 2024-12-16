@@ -15,8 +15,8 @@ Built with TypeScript and designed to be serverless-ready.
 - [Core Concepts](#core-concepts)
 - [Workflows](#workflows)
 - [Agents](#agents)
-  - [Built-in Agents](#built-in-agents)
   - [Creating Custom Agents](#creating-custom-agents)
+  - [Built-in Agents](#built-in-agents)
   - [Replacing Built-in Agents](#replacing-built-in-agents)
 - [Providers](#providers)
   - [Built-in Providers](#built-in-providers)
@@ -89,13 +89,13 @@ Finally, you can run the example by simply executing the file.
 **Using `bun`**
 
 ```bash
-$ bun your_file.ts
+bun your_file.ts
 ```
 
 **Using `node`**
 
 ```bash
-$ node --import=tsx your_file.ts
+node --import=tsx your_file.ts
 ```
 
 ## Why Another AI Agent Framework?
@@ -127,20 +127,48 @@ Workflows define how agents collaborate to achieve a goal. They specify:
 
 ## Agents
 
-Agents are specialized workers with specific roles and capabilities. Each agent has:
-- A defined role
-- A clear description of capabilities
-- Optional tools they can use
-- A configured language model provider
-
-### Built-in Agents
-TBD
+Agents are specialized workers with specific roles and capabilities. Agents can call available tools and complete assigned tasks. Depending on the task complexity, it can be done in a single step, or multiple steps.
 
 ### Creating Custom Agents
-TBD
+
+To create a custom agent, you need to implement the `Agent` interface. You can either do it manually, or use our `agent` helper function to enforce type checking.
+
+```ts
+import { agent } from 'fabrice-ai/agent'
+
+const myAgent = agent({
+  role: '<< your role >>',
+  description: '<< your description >>',
+})
+```
+
+Additionally, you can pass `tools` property to the agent, which will give it access to the tools. You can learn more about tools [here](#tools). You can also set custom `provider` for each agent. You can learn more about providers [here](#providers).
+
+### Built-in Agents
+
+Fabrice comes with a few built-in agents that help it run your workflows out of the box.
+
+Supervisor, `supervisor`, is responsible for coordinating the workflow. 
+It splits your workflow into smaller, more manageable parts, and coordinates the execution.
+
+Resource Planner, `resourcePlanner`, is responsible for assigning tasks to available agents, based on their capabilities.
+
+Final Boss, `finalBoss`, is responsible for wrapping up the workflow and providing a final output,
+in case total number of iterations exeeceds available threshold.
 
 ### Replacing Built-in Agents
-TBD
+
+You can overwrite built-in agents by setting it in the workflow.
+
+For example, to replace built-in `supervisor` agent, you can do it like this:
+
+```ts
+import { supervisor } from './my-supervisor.js'
+
+workflow({
+  team: { supervisor },
+})
+```
 
 ## Providers
 
@@ -216,10 +244,7 @@ You can learn more about the `Provider` interface [here](./packages/framework/sr
 
 ## Tools
 
-Tools extend agent capabilities by providing concrete actions they can perform. Tools are pure functions with:
-- A description
-- Typed parameters (using Zod)
-- An execute function
+Tools extend agent capabilities by providing concrete actions they can perform.
 
 ### Built-in Tools
 
@@ -246,7 +271,17 @@ const myTool = tool({
 Tools will use the same provider as the agent that triggered them. Additionally, you can access `context` object, which gives you accces to the provider, as well as current message history.
 
 ### Using Tools
-TBD
+
+To give an agent access to a tool, you need to add it to the agent's `tools` property.
+
+```ts
+agent({
+  role: '<< your role >>',
+  tools: { searchWikipedia },
+})
+```
+
+Since tools are passed to an LLM and referred by their key, you should use meaningful names for them, for increased effectiveness.
 
 ## Server-side Usage
 
