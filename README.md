@@ -211,7 +211,7 @@ Workflow can have multiple states:
 
 When you run `teamwork(workflow)`, initial state is automatically created for you by calling `rootState(workflow)` behind the scenes. 
 
-> ![NOTE]
+> [!NOTE]
 > You can also provide your own initial state (for example, to resume a workflow from a previous state). You can learn more about it in the [server-side usage](#server-side-usage) section.
 
 ### Root State
@@ -233,7 +233,7 @@ const child = childState({
 })
 ```
 
-> ![TIP]
+> [!TIP]
 > Fabrice exposes a few helpers to facilitate creating messages, such as `user` and `assistant`. You can use them to create messages in a more readable way, although it is not required.
 
 ### Delegating Tasks
