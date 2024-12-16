@@ -28,6 +28,10 @@ const defaults: AgentOptions = {
           Here are the available agents:
           <agents>
             ${Object.entries(workflow.team)
+              /**
+               * Do not include core team agents in the list of available agents.
+               * We only assign to user-defined agents.
+               */
               .filter(([name]) => !isCoreTeam(name))
               .map(([name, agent]) => `<agent name="${name}">${agent.description}</agent>`)
               .join('')}

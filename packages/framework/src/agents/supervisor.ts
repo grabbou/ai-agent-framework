@@ -44,7 +44,7 @@ export const supervisor = (options?: AgentOptions) => {
           }),
         },
       })
-      console.log(response.value)
+
       try {
         if (!response.value.task) {
           return {
