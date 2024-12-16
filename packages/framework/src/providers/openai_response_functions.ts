@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import OpenAI from 'openai'
+import OpenAI, { ClientOptions } from 'openai'
 
 import { Provider, responseAsToolCall, toLLMTools } from '../models.js'
 import { OpenAIProviderOptions as BaseOpenAIProviderOptions } from './openai.js'
@@ -8,7 +8,7 @@ import { OpenAIProviderOptions as BaseOpenAIProviderOptions } from './openai.js'
 /**
  * Required options for the OpenAI-compatible provider.
  */
-export type OpenAIProviderOptions = BaseOpenAIProviderOptions &
+export type OpenAIProviderOptions = BaseOpenAIProviderOptions & {
   /**
    * Since this is meant to be used with OpenAI-compatible providers,
    * we do not provide any defaults.
@@ -44,7 +44,7 @@ export const openai = (options: OpenAIProviderOptions): Provider => {
         tools: [...tools, ...responseAsToolCall(response_format, strictMode)],
         messages,
         temperature,
-        tool_choice: 'required'
+        tool_choice: 'required',
       })
 
       /**
