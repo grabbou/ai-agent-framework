@@ -13,13 +13,17 @@ export type OpenAIProviderOptions = BaseOpenAIProviderOptions &
    * Since this is meant to be used with OpenAI-compatible providers,
    * we do not provide any defaults.
    */
-  Required<Pick<BaseOpenAIProviderOptions, 'model' | 'embeddingsModel' | 'options'>> & {
-    /**
-     * Whether to use strict mode.
-     * @default false
-     */
-    strictMode?: boolean
-  }
+  model: string
+  /**
+   * Client options.
+   */
+  options: ClientOptions
+  /**
+   * Whether to use strict mode.
+   * @default false
+   */
+  strictMode?: boolean
+}
 
 /**
  * OpenAI provider.
@@ -28,7 +32,7 @@ export type OpenAIProviderOptions = BaseOpenAIProviderOptions &
  * but tools as response to enforce the right JSON schema.
  */
 export const openai = (options: OpenAIProviderOptions): Provider => {
-  const { model, embeddingsModel, options: clientOptions, strictMode = false, body = {} } = options
+  const { model, options: clientOptions, strictMode = false } = options
   const client = new OpenAI(clientOptions)
 
   return {
@@ -94,13 +98,6 @@ export const openai = (options: OpenAIProviderOptions): Provider => {
           },
         })),
       }
-    },
-    embeddings: async (input: string) => {
-      const response = await client.embeddings.create({
-        model: embeddingsModel,
-        input,
-      })
-      return response.data[0].embedding
     },
   }
 }

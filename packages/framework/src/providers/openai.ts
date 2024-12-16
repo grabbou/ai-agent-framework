@@ -7,13 +7,6 @@ export type OpenAIProviderOptions = {
    * Model to use.
    */
   model?: string
-  /**
-   * Embeddings model to use.
-   */
-  embeddingsModel?: string
-  /**
-   * Client options.
-   */
   options?: OpenAIOptions
   /**
    * Additional body parameters.
@@ -30,12 +23,7 @@ export type OpenAIProviderOptions = {
  * otherwise you will get an error. Otherwise, use the one from `openai_response_functions.js` instead.
  */
 export const openai = (options: OpenAIProviderOptions = {}): Provider => {
-  const {
-    model = 'gpt-4o',
-    embeddingsModel = 'text-embedding-ada-002',
-    options: clientOptions,
-    body = {},
-  } = options
+  const { model = 'gpt-4o', options: clientOptions } = options
   const client = new OpenAI(clientOptions)
 
   return {
@@ -64,13 +52,6 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
       }
 
       return message.parsed.response
-    },
-    embeddings: async (input: string) => {
-      const response = await client.embeddings.create({
-        model: embeddingsModel,
-        input,
-      })
-      return response.data[0].embedding
     },
   }
 }

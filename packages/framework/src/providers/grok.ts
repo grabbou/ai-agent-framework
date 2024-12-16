@@ -19,10 +19,9 @@ type GrokOptions = Partial<OpenAIProviderOptions>
  * As of now, Grok doesn't support strict mode.
  */
 export const grok = (options: GrokOptions = {}): Provider => {
-  const { model = 'grok-beta', embeddingsModel = 'v1', options: clientOptions } = options
+  const { model = 'grok-beta', options: clientOptions } = options
   return openai({
     model,
-    embeddingsModel,
     strictMode: false,
     options: {
       apiKey: process.env.GROK_API_KEY,
