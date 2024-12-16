@@ -23,7 +23,7 @@ export type OpenAIProviderOptions = {
  * otherwise you will get an error. Otherwise, use the one from `openai_response_functions.js` instead.
  */
 export const openai = (options: OpenAIProviderOptions = {}): Provider => {
-  const { model = 'gpt-4o', options: clientOptions } = options
+  const { model = 'gpt-4o', options: clientOptions, body = {} } = options
   const client = new OpenAI(clientOptions)
 
   return {
@@ -36,6 +36,7 @@ export const openai = (options: OpenAIProviderOptions = {}): Provider => {
         tools: mappedTools.length > 0 ? mappedTools : undefined,
         temperature,
         response_format: responseAsStructuredOutput(response_format),
+        ...body,
       })
 
       const message = response.choices[0].message

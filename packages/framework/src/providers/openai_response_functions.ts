@@ -32,7 +32,7 @@ export type OpenAIProviderOptions = BaseOpenAIProviderOptions & {
  * but tools as response to enforce the right JSON schema.
  */
 export const openai = (options: OpenAIProviderOptions): Provider => {
-  const { model, options: clientOptions, strictMode = false } = options
+  const { model, options: clientOptions, strictMode = false, body = {} } = options
   const client = new OpenAI(clientOptions)
 
   return {
@@ -45,6 +45,7 @@ export const openai = (options: OpenAIProviderOptions): Provider => {
         messages,
         temperature,
         tool_choice: 'required',
+        ...body,
       })
 
       /**

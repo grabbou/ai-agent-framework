@@ -25,6 +25,7 @@ export const openrouter = (options: OpenRouterOptions = {}): Provider => {
     model = 'meta-llama/llama-3.1-405b-instruct',
     structured_output = true,
     options: clientOptions,
+    body = {},
   } = options
   const openAiOptions = {
     model,
@@ -38,11 +39,13 @@ export const openrouter = (options: OpenRouterOptions = {}): Provider => {
      * support structured output.
      */
     body: {
+      ...body,
       provider: {
         /**
          * @see https://openrouter.ai/docs/provider-routing#required-parameters-_beta_
          */
         require_parameters: true,
+        ...body?.provider,
       },
     },
   }
