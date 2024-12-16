@@ -26,8 +26,11 @@ const makeTestingVisitor = (
     nextState.children.forEach(async (childState) => {
       if (childState.messages.length > 0 && suite.team[childState.agent]) {
         // run tests for finished agents - if defined
-        console.log(childState.agent + ' ' + childState.status)
-        testRequests.push({ workflow, state: childState, tests: suite.team[childState.agent] })
+        if (nextState.status === 'idle') {
+          if (!testRequests.find((testRequest) => testRequest.state.agent === childState.agent)) {
+            testRequests.push({ workflow, state: childState, tests: suite.team[childState.agent] }) // add it only once
+          }
+        }
       }
     })
     // printTree(nextState)
@@ -137,6 +140,8 @@ export async function testwork(
       if ('tests' in result) {
         if (!result.tests.every((test) => test.checked)) {
           passed = false
+        } else {
+          passed = true
         }
       }
     })
