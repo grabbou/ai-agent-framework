@@ -1,4 +1,5 @@
 import { agent } from 'fabrice-ai/agent'
+import { grok } from 'fabrice-ai/providers/grok'
 import { openrouter } from 'fabrice-ai/providers/openrouter'
 import { solution } from 'fabrice-ai/solution'
 import { teamwork } from 'fabrice-ai/teamwork'
@@ -21,6 +22,10 @@ const landmarkScout = agent({
   tools: {
     lookupWikipedia,
   },
+  // Mistral
+  provider: openrouter({
+    model: 'mistralai/mistral-nemo',
+  }),
 })
 
 const restaurantScout = agent({
@@ -70,10 +75,13 @@ const researchTripWorkflow = workflow({
     Comprehensive day-by-day plan for the trip to Wrocław, Poland.
     Ensure the plan includes flights, hotel information, and all planned activities and dining experiences.
   `,
-  provider: openrouter({
-    model: 'anthropic/claude-3.5-haiku-20241022:beta',
-    structured_output: false,
-  }),
+  // Claude
+  // provider: openrouter({
+  //   model: 'anthropic/claude-3.5-haiku-20241022:beta',
+  //   structured_output: false,
+  // }),
+  // Grok
+  provider: grok(),
 })
 
 const result = await teamwork(researchTripWorkflow)

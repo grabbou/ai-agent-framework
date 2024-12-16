@@ -65,14 +65,14 @@ export const agent = (options: AgentOptions = {}): Agent => {
                 .string()
                 .describe('The output of this step. Include all relevant details and information.'),
               reasoning: z.string().describe('The reasoning for performing this step.'),
-              hasNextStep: z.boolean().describe(s`
+              next_step: z.string().describe(s`
                 The next step ONLY if required by the original request.
-                Return "true" if you have fully answered the current request, even if
+                Return empty string if you have fully answered the current request, even if
                 you can think of additional tasks.
               `),
-              nextStepName: z
-                .string()
-                .describe('The name of the next step to be performed, if any'),
+              has_next_step: z
+                .boolean()
+                .describe('True if you provided next_step. False otherwise.'),
             }),
             error: z.object({
               reasoning: z.string().describe('The reason why you cannot complete the task'),
@@ -94,11 +94,11 @@ export const agent = (options: AgentOptions = {}): Agent => {
 
         const agentResponse = assistant(response.value.result)
 
-        if (response.value.hasNextStep) {
+        if (response.value.has_next_step) {
           return {
             ...state,
             status: 'running',
-            messages: [...state.messages, agentResponse, user(response.value.nextStepName)],
+            messages: [...state.messages, agentResponse, user(response.value.next_step)],
           }
         }
 

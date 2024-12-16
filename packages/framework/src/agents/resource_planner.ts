@@ -47,7 +47,6 @@ const defaults: AgentOptions = {
         }),
       },
     })
-    console.log(response.value)
     return handoff(state, response.value.agent)
   },
 }

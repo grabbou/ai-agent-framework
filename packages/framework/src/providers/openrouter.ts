@@ -41,13 +41,14 @@ export const openrouter = (options: OpenRouterOptions = {}): Provider => {
      * support structured output.
      */
     body: {
+      ...body,
       provider: {
+        ...body?.provider,
         /**
          * @see https://openrouter.ai/docs/provider-routing#required-parameters-_beta_
          */
         require_parameters: true,
       },
-      ...body,
     },
   }
   if (structured_output) {
