@@ -121,7 +121,7 @@ Here are the core concepts of Fabrice:
 
 ### Easy to create and compose
 
-Team work should be easy and should be fun, just like in real life. It should not require you to learn a new framework and mental model to put up your AI team together.
+Teamwork should be easy and fun, just like in real life. It should not require you to learn a new framework and mental model to put your AI team together.
 
 ### Infrastructure-agnostic
 
