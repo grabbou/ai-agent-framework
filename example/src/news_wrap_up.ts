@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { getCurrentDate } from '@fabrice-ai/tools/date'
 import { getApiKey } from '@fabrice-ai/tools/utils'
 import { createWebSearchTools } from '@fabrice-ai/tools/webSearch'

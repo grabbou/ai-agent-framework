@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 /**
  * This example demonstrates using framework in server-side environments.
  */
