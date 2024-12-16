@@ -1,6 +1,7 @@
 import s from 'dedent'
 import { zodResponseFormat } from 'openai/helpers/zod.mjs'
 import { ParsedFunctionToolCall } from 'openai/resources/beta/chat/completions'
+import { FunctionParameters } from 'openai/resources/shared.js'
 import { z, ZodObject } from 'zod'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 
@@ -150,7 +151,7 @@ type FunctionToolSchema = {
   type: 'function'
   function: {
     name: string
-    parameters: object
+    parameters: FunctionParameters
     description: string
     strict?: boolean
   }
