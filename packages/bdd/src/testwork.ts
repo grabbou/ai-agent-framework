@@ -78,7 +78,7 @@ export async function test(
       ? user(`Here is all the knowledge available: ${workflow.knowledge}`)
       : user(`No, I do not have any additional information.`),
   ]
-  //  console.log(testRequest)
+  console.log(testRequest)
   const suiteResults = await workflow.provider.chat({
     messages: testRequest,
     response_format: {
@@ -130,7 +130,6 @@ export async function testwork(
         return test(workflow, testRequest.state, testRequest.tests)
       })
     )
-    console.log(overallResults)
     overallResults.forEach(displayTestResults)
     let passed = false
     for (const result of overallResults) {
