@@ -14,16 +14,57 @@ export interface VectorStore {
 /**
  * Represents a document with its embedding vector and associated metadata
  */
-export type EmbeddingResult = {
+type EmbeddingResult = {
   content: string
   embedding: number[]
   metadata: any
 }
 
+type GenerateEmbeddings = (content: string) => Promise<number[]>
+
+/**
+ * Use this function to create your own embeddings provider, with different model and API key.
+ */
+export const openAIEmbeddings = ({
+  model = 'text-embedding-ada-002',
+  baseUrl = 'https://api.openai.com/v1',
+  apiKey = process.env.OPENAI_API_KEY,
+}: {
+  model?: string
+  baseUrl?: string
+  apiKey?: string
+} = {}) => {
+  return async (content: string): Promise<number[]> => {
+    const response = await fetch(`${baseUrl}/embeddings`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input: content,
+        model,
+        encoding_format: 'float',
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(`OpenAI API error: ${error.error?.message || response.statusText}`)
+    }
+
+    const data = await response.json()
+    return data.data[0].embedding
+  }
+}
+
 /**
  * Creates a set of tools for interacting with a vector store.
  */
-export const createVectorStoreTools = (vectorStore: VectorStore = createInMemoryVectorStore()) => {
+export const createVectorStoreTools = (
+  vectorStore: VectorStore = createInMemoryVectorStore(),
+  generateEmbeddings: GenerateEmbeddings = openAIEmbeddings()
+) => {
   return {
     /**
      * Tool for saving a document and its metadata to the vector store.
@@ -36,8 +77,8 @@ export const createVectorStoreTools = (vectorStore: VectorStore = createInMemory
         content: z.string().describe('Content of the document'),
         metadata: z.string().describe('Additional metadata for the document'),
       }),
-      execute: async ({ id, content, metadata }, { provider }) => {
-        const embedding = await provider.embeddings(content)
+      execute: async ({ id, content, metadata }) => {
+        const embedding = await generateEmbeddings(content)
         vectorStore.set(id, { content, metadata, embedding })
         return `Document saved with id: ${id}`
       },
@@ -53,8 +94,8 @@ export const createVectorStoreTools = (vectorStore: VectorStore = createInMemory
         query: z.string().describe('Search query'),
         topK: z.number().describe('Number of top results to return'),
       }),
-      execute: async ({ query, topK }, { provider }) => {
-        const queryEmbedding = await provider.embeddings(query)
+      execute: async ({ query, topK }) => {
+        const queryEmbedding = await generateEmbeddings(query)
         const entries = await vectorStore.entries()
 
         const results = entries

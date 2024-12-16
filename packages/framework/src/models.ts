@@ -62,10 +62,6 @@ export interface Provider {
     args: LLMCallWithTools<T>
   ): Promise<FunctionToolCall | LLMResponse<T>>
   chat<T extends LLMResponseFormat>(args: LLMCall<T>): Promise<LLMResponse<T>>
-  /**
-   * Method for generating embeddings.
-   */
-  embeddings(input: string): Promise<number[]>
 }
 
 /**

@@ -13,10 +13,6 @@ export type OpenAIProviderOptions = {
    */
   model: string
   /**
-   * Embeddings model to use.
-   */
-  embeddingsModel: string
-  /**
    * Client options.
    */
   options: ClientOptions
@@ -34,7 +30,7 @@ export type OpenAIProviderOptions = {
  * but tools as response to enforce the right JSON schema.
  */
 export const openai = (options: OpenAIProviderOptions): Provider => {
-  const { model, embeddingsModel, options: clientOptions, strictMode = false } = options
+  const { model, options: clientOptions, strictMode = false } = options
   const client = new OpenAI(clientOptions)
 
   return {
@@ -99,13 +95,6 @@ export const openai = (options: OpenAIProviderOptions): Provider => {
           },
         })),
       }
-    },
-    embeddings: async (input: string) => {
-      const response = await client.embeddings.create({
-        model: embeddingsModel,
-        input,
-      })
-      return response.data[0].embedding
     },
   }
 }
