@@ -13,12 +13,18 @@ Built with TypeScript and designed to be serverless-ready.
   - [Manual Installation](#manual-installation) 
 - [Why Another AI Agent Framework?](#why-another-ai-agent-framework)
 - [Core Concepts](#core-concepts)
+  - [Easy to create and compose](#easy-to-create-and-compose)
+  - [Infrastructure-agnostic](#infrastructure-agnostic)
+  - [Stateless](#stateless)
+  - [Batteries included](#batteries-included)
 - [Agents](#agents)
   - [Creating Custom Agents](#creating-custom-agents)
   - [Built-in Agents](#built-in-agents)
   - [Replacing Built-in Agents](#replacing-built-in-agents)
 - [Workflows](#workflows)
 - [Workflow States](#workflow-states)
+  - [Root State](#root-state) 
+  - [Child State](#child-state)
   - [Delegating Tasks](#delegating-tasks)
   - [Handing off Tasks](#handing-off-tasks)
 - [Providers](#providers)
@@ -30,9 +36,9 @@ Built with TypeScript and designed to be serverless-ready.
   - [Creating Custom Tools](#creating-custom-tools)
   - [Using Tools](#using-tools)
 - [Execution](#execution)
-  - [Running Workflows](#running-workflows)
-  - [Long-running Operations](#long-running-operations)
-- [Examples](#examples)
+  - [Completing the workflow](#completing-the-workflow)
+  - [Long-running operations](#long-running-operations)
+  - [Custom execution](#custom-execution)
 - [Contributors](#contributors)
 - [Made with ❤️ at Callstack](#made-with-❤️-at-callstack)
 
@@ -111,14 +117,23 @@ We wanted something different - a framework that embraces functional programming
 
 ## Core Concepts
 
-The framework is designed around the idea that AI agents should be:
-- Easy to create and compose
-- Infrastructure-agnostic
-- Stateless by default
-- Minimal in dependencies
-- Focused on team collaboration
+Here are the core concepts of Fabrice:
 
-[TBD]
+### Easy to create and compose
+
+Team work should be easy and should be fun, just like in real life. It should not require you to learn a new framework and mental model to put up your AI team together.
+
+### Infrastructure-agnostic
+
+There should be no assumptions about the infrastructure you're using. You should be able to use any provider and any tools, in any environment.
+
+### Stateless
+
+No classes, no side effects. Every operation should be a function that returns a new state.
+
+### Batteries included
+
+We should provide you with all tools and features needed to build your AI team, locally and in the cloud.
 
 ## Agents
 
@@ -173,17 +188,96 @@ Workflows define how agents collaborate to achieve a goal. They specify:
 - Expected output
 - Optional configuration
 
-## Workflow States
+## Workflow State
 
-[TBD]
+Workflow state is a representation of the current state of the workflow. It is a tree of states, where each state represents a single agent's work. 
+
+At each level, we have the following properties:
+- `status`: status of the agent
+- `agent`: name of the agent that is working on the task
+- `messages`: message history
+- `children`: child states
+
+First element of the `messages` array is always a request to the agent, typically a user message. Everything that follows is a message history, including all the messages exchanged with the provider.
+
+Workflow can have multiple states:
+- `idle`: no work has been started yet
+- `running`: work is in progress
+- `paused`: work is paused and there are tools that must be called to resume
+- `finished`: work is complete
+- `failed`: work has failed due to an error
+
+### Initial State
+
+When you run `teamwork(workflow)`, initial state is automatically created for you by calling `rootState(workflow)` behind the scenes. 
+
+> ![NOTE]
+> You can also provide your own initial state (for example, to resume a workflow from a previous state). You can learn more about it in the [server-side usage](#server-side-usage) section.
+
+### Root State
+
+Root state is a special state that contains initial request based on the workflow and points to the `supervisor` agent. Supervisor is responsible for splitting the work into smaller, more manageable parts. 
+
+You can learn more about the `supervisor` agent [here](#built-in-agents).
+
+### Child State
+
+Child state is like root state, but it points to any agent, such as one from your team. 
+
+You can create it manually, or use `childState` function.
+
+```ts
+const child = childState({
+  agent: '<< agent name >>',
+  messages: user('<< task description >>'),
+})
+```
+
+> ![TIP]
+> Fabrice exposes a few helpers to facilitate creating messages, such as `user` and `assistant`. You can use them to create messages in a more readable way, although it is not required.
 
 ### Delegating Tasks
 
-[TBD]
+To delegate the task, just add a new child state to your agent's state.
+
+```ts
+const state = {
+  ...state,
+  children: [
+    ...state.children,
+    childState({
+      /** agent to work on the task */
+      agent: '<< agent name >>',
+      /** task description */
+      messages: [
+        {
+          role: 'user',
+          content: '<< task description >>',
+        }
+      ],
+    })
+  ]
+}
+```
+
+To make it easier, you can use `delegate` function to delegate the task.
+
+```ts
+const state = delegate(state, [agent, '<< task description >>'])
+```
 
 ### Handing off Tasks
 
-[TBD]
+To hand off the task, you can replace your agent's state with a new state, that points to a different agent.
+
+```ts
+const state = childState({
+  agent: '<< new agent name >>',
+  messages: state.messages,
+})
+```
+
+In the above example, we're passing entire message history to the new agent, including original request and all the work done by the previous agent. It is up to you to decide how much of the history to pass to the new agent.
 
 ## Providers
 
@@ -298,16 +392,43 @@ agent({
 
 Since tools are passed to an LLM and referred by their key, you should use meaningful names for them, for increased effectiveness.
 
-## Server-side Usage
+## Execution
 
-### Serverless Deployment
-TBD
+Execution is the process of running the workflow to completion. Completed workflow is a workflow with state "finished" at its root. 
 
-### Long-running Operations
-TBD
+### Completing the workflow
 
-## Examples
-TBD
+The easiest way to complete the workflow is to call `teamwork(workflow)` function. It will run the workflow to completion, and return the final state.
+
+```ts
+const state = await teamwork(workflow)
+console.log(solution(state))
+```
+
+Calling `solution(state)` will return the final output of the workflow, which is its last message.
+
+### Long-running operations
+
+If you are running workflows in the cloud, or any other environment where you want to handle tool execution manually, you can call teamwork the following way:
+
+```ts
+/** read state from the cache */
+
+/** run the workflow */
+const state = await teamwork(workflow, prevState, false)
+
+/** save state to the cache */
+```
+
+Passing second argument to `teamwork` is optional. If you don't provide it, root state will be created automatically. Otherwise, it will be used as a starting point for the next iteration.
+
+Last argument is a boolean flag that determines if tools should be executed. If you set it to `false`, you are responsible for calling tools manually. Teamwork will stop iterating over the workflow and return the current state with `paused` status.
+
+### Custom execution
+
+If you want to handle tool execution manually, you can use `iterate` function to build up your own recursive iteration logic over the workflow state.
+
+Have a look at how `teamwork` is implemented [here](./packages/framework/src/teamwork.ts) to understand how it works.
 
 ## Contributors
 
