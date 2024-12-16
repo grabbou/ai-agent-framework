@@ -193,8 +193,8 @@ Workflows define how agents collaborate to achieve a goal. They specify:
 Workflow state is a representation of the current state of the workflow. It is a tree of states, where each state represents a single agent's work. 
 
 At each level, we have the following properties:
-- `status`: status of the agent
 - `agent`: name of the agent that is working on the task
+- `status`: status of the agent
 - `messages`: message history
 - `children`: child states
 
@@ -216,7 +216,7 @@ When you run `teamwork(workflow)`, initial state is automatically created for yo
 
 ### Root State
 
-Root state is a special state that contains initial request based on the workflow and points to the `supervisor` agent. Supervisor is responsible for splitting the work into smaller, more manageable parts. 
+Root state is a special state that contains an initial request based on the workflow and points to the `supervisor` agent, which is responsible for splitting the work into smaller, more manageable parts. 
 
 You can learn more about the `supervisor` agent [here](#built-in-agents).
 
@@ -277,7 +277,7 @@ const state = childState({
 })
 ```
 
-In the above example, we're passing entire message history to the new agent, including original request and all the work done by the previous agent. It is up to you to decide how much of the history to pass to the new agent.
+In the example above, we're passing the entire message history to the new agent, including the original request and all the work done by any previous agent. It is up to you to decide how much of the history to pass to the new agent.
 
 ## Providers
 
@@ -292,12 +292,11 @@ Fabrice comes with a few built-in providers:
 
 You can learn more about them [here](./packages/framework/src/providers/README.md).
 
-If you're working with OpenAI compatible provider, you can use `openai` provider with different base URL and API key, such as:
+If you're working with an OpenAI compatible provider, you can use the `openai` provider with a different base URL and API key, such as:
 
 ```ts
 openai({
   model: '<< your model >>',
-  strictMode: false,
   options: {
     apiKey: '<< your_api_key >>',
     baseURL: '<< your_base_url >>',
@@ -307,7 +306,7 @@ openai({
 
 ### Using Different Providers
 
-By default, Fabrice uses OpenAI gpt-4o model. You can change the default model either for the entire system, or for specific agent.
+By default, Fabrice uses OpenAI gpt-4o model. You can change the default model or provider either for the entire system, or for specific agent.
 
 To do it for the entire workflow:
 ```ts
@@ -330,7 +329,7 @@ agent({
 })
 ```
 
-Note that agent provider always takes precedence over workflow provider. Tools always receive provider from the agent that triggered their execution.
+Note that an agent's provider always takes precedence over a workflow's provider. Tools always receive the provider from the agent that triggered their execution.
 
 ### Creating Custom Providers
 
@@ -339,10 +338,10 @@ To create a custom provider, you need to implement the `Provider` interface.
 ```ts
 const myProvider = (options: ProviderOptions): Provider => {
   return {
-    chat: async (options) => {
+    chat: async () => {
       /** your implementation goes here */
     },
-    embeddings: async (options) => {
+    embeddings: async () => {
       /** your implementation goes here */
     },
   }
@@ -361,7 +360,7 @@ Fabrice comes with a few built-in tools via `@fabrice-ai/tools` package. For mos
 
 ### Creating Custom Tools
 
-To create a custom tool, you need to implement the `Tool` interface. You can either do it manually, or use our `tool` helper function to enforce type checking.
+To create a custom tool, you can use our `tool` helper function or implement the `Tool` interface manually.
 
 ```ts
 import { tool } from 'fabrice-ai/tools'
@@ -371,13 +370,13 @@ const myTool = tool({
   parameters: z.object({
     /** your Zod schema goes here */
   }),
-  execute: async (params, context) => {
+  execute: async (parameters, context) => {
     /** your implementation goes here */
   },
 })
 ```
 
-Tools will use the same provider as the agent that triggered them. Additionally, you can access `context` object, which gives you accces to the provider, as well as current message history.
+Tools will use the same provider as the agent that triggered them. Additionally, you can access the `context` object, which gives you access to the provider, as well as current message history.
 
 ### Using Tools
 
@@ -394,11 +393,11 @@ Since tools are passed to an LLM and referred by their key, you should use meani
 
 ## Execution
 
-Execution is the process of running the workflow to completion. Completed workflow is a workflow with state "finished" at its root. 
+Execution is the process of running the workflow to completion. A completed workflow is a workflow with state "finished" at its root. 
 
 ### Completing the workflow
 
-The easiest way to complete the workflow is to call `teamwork(workflow)` function. It will run the workflow to completion, and return the final state.
+The easiest way to complete the workflow is to call `teamwork(workflow)` function. It will run the workflow to completion and return the final state.
 
 ```ts
 const state = await teamwork(workflow)
