@@ -130,7 +130,6 @@ export async function testwork(
         return test(workflow, testRequest.state, testRequest.tests)
       })
     )
-    overallResults.forEach(displayTestResults)
     let passed = false
     for (const result of overallResults) {
       displayTestResults(result)
