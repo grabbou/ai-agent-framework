@@ -21,7 +21,10 @@
     },
     "./providers/*": {
       "bun": "./src/providers/*.ts",
-      "types": "./dist/providers/*.d.ts",
+      "types": {
+        "import": "./dist/providers/*.d.ts",
+        "require": "./dist/providers/*.d.cts"
+      },
       "require": "./dist/providers/*.cjs",
       "import": "./dist/providers/*.js"
     }
@@ -56,5 +59,5 @@
   "engines": {
     "node": ">=22"
   },
-  "version": "0.5.1"
+  "version": "0.5.0"
 }
