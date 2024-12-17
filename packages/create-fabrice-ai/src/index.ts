@@ -108,12 +108,6 @@ const template = await select({
     },
     {
       value: {
-        files: ['src/github_trending.ts'],
-      },
-      label: 'GitHub Trending - Track and summarize hot Python projects on GitHub',
-    },
-    {
-      value: {
         files: ['src/github_trending_vector.ts', 'src/tools/askUser.ts'],
       },
       label:
