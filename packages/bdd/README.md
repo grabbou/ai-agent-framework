@@ -4,7 +4,7 @@ This guide provides an example of how to write BDD (Behavior-Driven Development)
 
 ## Example: Library Photo to Website
 
-This example demonstrates how to test a workflow that converts a photo of a library into a browsable web catalog.
+This example demonstrates how to test a workflow that converts a photo of a library into a browsable web catalog. [See full example](../../example/src/library_photo_to_website.test.ts).
 
 ### Step-by-Step Guide
 
@@ -19,6 +19,26 @@ import fs from 'fs/promises'
 
 import { bookLibraryWorkflow, outputPath, workingDir } from './library_photo_to_website.workflow.js'
 ```
+
+This example somewhat defines the rule convention of saving the workflow in the `*.workflow.ts` files - so it will be reusable - between tests and executable code. 
+
+Full set of executable/test/workflow files is:
+1. `example/src/library_photo_to_website.workflow.ts` - workflow definition,
+2. `example/src/library_photo_to_website.test.ts` - test suite,
+3. `example/src/library_photo_to_website.ts` - executable code.
+
+Having this in mind one could use the following commands to run:
+
+- Running tests:
+```ts
+$ tsx library_photo_to_website.test.ts
+```
+
+- Running workflow:
+```ts
+$ tsx library_photo_to_website.ts
+```
+
 
 2. **Define the test suite and test cases:**
 
@@ -89,7 +109,7 @@ if (!testResults.passed) {
 To run the tests, execute the following command:
 
 ```ts
-$ tsx [library_photo_to_website.test.ts](http://_vscodecontentref_/2)
+$ tsx library_photo_to_website.test.ts
 ```
 
 This will run the test suite and output the results to the console.
