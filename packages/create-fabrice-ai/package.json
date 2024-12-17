@@ -1,6 +1,6 @@
 {
   "name": "create-fabrice-ai",
-  "version": "0.4.4",
+  "version": "0.5.2",
   "license": "MIT",
   "description": "Create new AI agent application with Fabrice",
   "type": "module",
@@ -9,8 +9,7 @@
   },
   "scripts": {
     "prepare": "bun run build",
-    "clean": "rm -rf dist",
-    "build": "bun build ./src/index.ts --outdir dist --packages external"
+    "build": "tsup-node"
   },
   "files": [
     "dist",

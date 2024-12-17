@@ -151,7 +151,7 @@ s.stop('Downloaded and extracted template!')
  * If they choose to do it now, we will ask them to provide their API key.
  * If they do not provide the answer, we will continue to the next step.
  */
-if (!process.env.OPENAI_API_KEY2) {
+if (!process.env.OPENAI_API_KEY) {
   log.warning(
     'No OPENAI_API_KEY found in environment variables. Fabrice starter projects use OpenAI and require an API key.'
   )
