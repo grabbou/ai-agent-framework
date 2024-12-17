@@ -1,7 +1,7 @@
 import { agent } from 'fabrice-ai/agent'
 import { workflow } from 'fabrice-ai/workflow'
 
-import { askUser } from '../tools/askUser.js'
+import { askUser } from './tools/askUser.js'
 
 const nurse = agent({
   description: `

@@ -114,6 +114,56 @@ $ tsx library_photo_to_website.test.ts
 
 This will run the test suite and output the results to the console.
 
+## API
+
+The testing framework API is pretty straightforward.
+
+
+
+
+## Mocking tools
+
+You are able to very easily mock-up the tools used by the agents. For example: tools requesting user attention, or answers could be mocked using the LLM as answering machines - to keep the tests automatic.
+
+Here is just a quick example from the [medical_survey.test.ts](../../example/src/medical_survey.test.ts):
+
+```ts
+export const askUserMock = tool({
+  description: 'Tool for asking user a question',
+  parameters: z.object({
+    query: z.string().describe('The question to ask the user'),
+  }),
+  execute: async ({ query }, { provider }): Promise<string> => {
+    const response = await provider.chat({
+      messages: [
+        {
+          role: 'system',
+          content: `We are role playing - a nurse is asking a patient about their symptoms
+          and the patient is answering. The nurse will ask you a question and you should answer it.
+          Figure out something realistic! It's just a play!`,
+        },
+        {
+          role: 'user',
+          content: 'Try to answer this question in a single line: ' + query,
+        },
+      ],
+      response_format: {
+        result: z.object({
+          answer: z.string().describe('Answer to the question'),
+        }),
+      },
+    })
+    console.log(`😳 Mocked response: ${response.value.answer}\n`)
+    return Promise.resolve(response.value.answer)
+  },
+})
+
+preVisitNoteWorkflow.team['nurse'].tools = {
+  askPatient: askUserMock,
+}
+```
+
+
 ## Conclusion
 
 This example demonstrates how to write BDD tests using the Fabrice AI framework. By defining a test suite and test cases, you can validate the behavior of your workflows and ensure they meet the expected requirements. ```

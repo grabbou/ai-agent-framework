@@ -79,7 +79,7 @@ const template = await select({
     },
     {
       value: {
-        files: ['src/medical_survey.ts', 'src/medical_survey/workflow.ts'],
+        files: ['src/medical_survey.ts', 'src/medical_survey.workflow.ts'],
       },
       label: 'Medical Survey - Pre-visit patient questionnaire with report generation',
     },

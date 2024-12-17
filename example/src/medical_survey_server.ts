@@ -16,7 +16,7 @@ import {
 } from 'fabrice-ai/tool_calls'
 import fastify, { FastifyRequest } from 'fastify'
 
-import { preVisitNoteWorkflow } from './medical_survey/workflow.js'
+import { preVisitNoteWorkflow } from './medical_survey.workflow.js'
 
 const server = fastify({ logger: false })
 
