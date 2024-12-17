@@ -1,10 +1,11 @@
+import chalk from 'chalk'
 import s from 'dedent'
 import { iterate } from 'fabrice-ai/iterate'
-import { assistant, system, user } from 'fabrice-ai/messages'
+import { assistant, Conversation, system, user } from 'fabrice-ai/messages'
 import { rootState, WorkflowState } from 'fabrice-ai/state'
 import { teamwork } from 'fabrice-ai/teamwork'
 import { logger, Telemetry } from 'fabrice-ai/telemetry'
-import { Workflow } from 'fabrice-ai/workflow'
+import { Workflow, workflow } from 'fabrice-ai/workflow'
 import { z } from 'zod'
 
 import { TestCase, TestRequest, TestResults, TestSuite, TestSuiteResult } from './suite.js'
@@ -17,21 +18,29 @@ const makeTestingVisitor = (
   testRequests: TestRequest[]
 } => {
   const testRequests: TestRequest[] = []
+  const agentsRouting = new Array<string>()
   const testingVisitor: Telemetry = async ({ prevState, nextState }) => {
     if (prevState === nextState) return
+
+    agentsRouting.push(nextState.agent)
 
     if (
       nextState.status === 'finished' &&
       (nextState.agent === 'supervisor' || nextState.agent === 'finalBoss')
     ) {
       // test entire workflow
-      testRequests.push({ workflow, state: nextState, tests: suite.workflow })
+      testRequests.push({ workflow, state: nextState, tests: suite.workflow, agentsRouting })
     }
 
     if (nextState.status === 'finished' && suite.team[nextState.agent]) {
       // test single agent - prevState is internal agent state
       console.log(`🧪 Requesting test suite for agent [${nextState.agent}]\n`)
-      testRequests.push({ workflow, state: prevState, tests: suite.team[nextState.agent] }) // add it only once
+      testRequests.push({
+        workflow,
+        state: prevState,
+        tests: suite.team[nextState.agent],
+        agentsRouting: [],
+      }) // add it only once
     }
     // printTree(nextState)
     return logger({ prevState, nextState })
@@ -39,13 +48,10 @@ const makeTestingVisitor = (
   return { testingVisitor, testRequests }
 }
 
-export async function validate(
-  workflow: Workflow,
-  state: WorkflowState,
-  tests: TestCase[]
-): Promise<TestResults> {
+export async function validate(req: TestRequest): Promise<TestResults> {
   // evaluate test cases every iterate call - however it could be potentially optimized
   // to run once at the end.
+  const { workflow, state, tests, agentsRouting } = req
   const testRequest = [
     system(s`
     You are a LLM test agent.
@@ -63,8 +69,7 @@ export async function validate(
         .map((test) => {
           return `<test>
                       <id>${test.id}</id>
-                      <case>${test.case}</case>
-                      <passed>${test.passed ? 'passed' : 'unpassed'}</passed>
+                      <case>${test.case}</case>                     
                   </test>`
         })}
     </suite>
@@ -72,8 +77,10 @@ export async function validate(
     assistant('What have been done so far?'),
     user(`Here is the work flow so far:`),
     ...state.messages,
-    assistant(`Who is working on the task right now?`),
-    user(`Right now ${state.agent} is working on the task`),
+    assistant('What was the agent routing?'),
+    user(agentsRouting.join(' => ')),
+    assistant(`Who was finalizing the last task?`),
+    user(`${state.agent} was working on the last task`),
     assistant(`Is there anything else I need to know?`),
     workflow.knowledge
       ? user(`Here is all the knowledge available: ${workflow.knowledge}`)
@@ -86,6 +93,7 @@ export async function validate(
         tests: z.array(
           z.object({
             id: z.string().describe('The id of the test case'),
+            reasoning: z.string().describe('The reason - why this test passed or not'),
             passed: z.boolean().describe('The test case is passed or not'),
           })
         ),
@@ -99,7 +107,8 @@ export async function validate(
   const testRunners = tests
     .filter((test) => test.run !== null)
     .map((test) => {
-      return test.run !== null ? test.run(workflow, state) : { passed: false, id: test.id }
+      // @ts-ignore
+      return test.run(workflow, state)
     })
 
   const subResults = await Promise.all(testRunners)
@@ -113,11 +122,30 @@ export async function validate(
   return suiteResults.value
 }
 
+const printTestResult = (
+  level: number,
+  testId: string,
+  icon: string,
+  message: string,
+  reason: string
+) => {
+  const indent = '  '.repeat(level)
+  const arrow = level > 0 ? '└─▶ ' : ''
+  console.log(`${indent}${arrow}${icon}${chalk.bold(testId)}: ${message}`)
+  console.log(`${indent} 🧠 ${chalk.dim(reason)}`)
+}
+
 export const displayTestResults = (results: TestResults) => {
   if ('tests' in results) {
     console.log('🧪 Test results: ')
     results.tests.map((testResult) => {
-      console.log(`${testResult.passed ? '✅' : '🚨'} for test case [${testResult.id}]`)
+      printTestResult(
+        2,
+        testResult.id,
+        `${testResult.passed ? '✅' : '🚨'}`,
+        `${testResult.passed ? 'PASSED' : 'FAIL'}`,
+        testResult.reasoning
+      )
     })
   } else {
     console.error('🚨 Error: ' + results.reasoning)
@@ -140,7 +168,7 @@ export async function testwork(
     const overallResults = await Promise.all(
       testRequests.map((testRequest) => {
         console.log(`🧪 Running test suite [${testRequest.tests.map((t) => t.id).join(', ')}}]\n`)
-        return validate(workflow, testRequest.state, testRequest.tests)
+        return validate(testRequest)
       })
     )
     let passed = false
