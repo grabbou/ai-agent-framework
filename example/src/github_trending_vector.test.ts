@@ -10,7 +10,12 @@ const testResults = await testwork(
   suite({
     description: 'Black box testing suite',
     team: {
-      webCrawler: [test('0_webCrawler', 'Should use "firecrawl" and "saveDocumentInVectorStore"')],
+      webCrawler: [
+        test(
+          '0_webCrawler',
+          'Should use "firecrawl" to crawl Github and may store data in the vector store using "saveDocumentInVectorStore"'
+        ),
+      ],
     },
     workflow: [
       test('1_check_the_list', 'Should find 3 trending projects on Github'),
