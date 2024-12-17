@@ -427,6 +427,11 @@ If you want to handle tool execution manually, you can use `iterate` function to
 
 Have a look at how `teamwork` is implemented [here](./packages/framework/src/teamwork.ts) to understand how it works.
 
+
+### BDD Testing
+
+There's a packaged called `fabrice-ai/bdd` dedicated to unit testing - actually to Behavioral Driven Development. [Check the docs](./packages/bdd/README.md).
+
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START -->
