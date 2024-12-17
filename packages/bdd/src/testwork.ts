@@ -8,7 +8,14 @@ import { logger, Telemetry } from 'fabrice-ai/telemetry'
 import { Workflow, workflow } from 'fabrice-ai/workflow'
 import { z } from 'zod'
 
-import { TestCase, TestRequest, TestResults, TestSuite, TestSuiteResult } from './suite.js'
+import {
+  SingleTestResult,
+  TestCase,
+  TestRequest,
+  TestResults,
+  TestSuite,
+  TestSuiteResult,
+} from './suite.js'
 
 const makeTestingVisitor = (
   workflow: Workflow,
@@ -135,21 +142,17 @@ const printTestResult = (
   console.log(`${indent} 🧠 ${chalk.dim(reason)}`)
 }
 
-export const displayTestResults = (results: TestResults) => {
-  if ('tests' in results) {
-    console.log('🧪 Test results: ')
-    results.tests.map((testResult) => {
-      printTestResult(
-        2,
-        testResult.id,
-        `${testResult.passed ? '✅' : '🚨'}`,
-        `${testResult.passed ? 'PASSED' : 'FAIL'}`,
-        testResult.reasoning
-      )
-    })
-  } else {
-    console.error('🚨 Error: ' + results.reasoning)
-  }
+export const displayTestResults = (results: SingleTestResult[]) => {
+  console.log('🧪 Test results: ')
+  results.map((testResult) => {
+    printTestResult(
+      2,
+      testResult.id,
+      `${testResult.passed ? '✅' : '🚨'}`,
+      `${testResult.passed ? 'PASSED' : 'FAIL'}`,
+      testResult.reasoning
+    )
+  })
 }
 /**
  * Teamwork runs given workflow and continues iterating over the workflow until it finishes.
@@ -171,21 +174,25 @@ export async function testwork(
         return validate(testRequest)
       })
     )
-    let passed = false
-    for (const result of overallResults) {
-      displayTestResults(result)
-      if ('tests' in result) {
-        if (!result.tests.every((test) => test.passed)) {
-          passed = false
-        } else {
-          passed = true
+
+    // when there are multiple agent calls we're merging the results for the tests
+    const reducedResults = overallResults.reduce(
+      (acc, result) => {
+        if ('tests' in result) {
+          result.tests.forEach((test) => {
+            if (!acc[test.id] || test.passed) {
+              acc[test.id] = test
+            }
+          })
         }
-      } else {
-        passed = false
-        break
-      }
-    }
-    return { passed, results: overallResults }
+        return acc
+      },
+      {} as { [key: string]: { id: string; reasoning: string; passed: boolean } }
+    )
+
+    const finalResults = Object.values(reducedResults)
+    displayTestResults(finalResults)
+    return { passed: finalResults.every((test) => test.passed), results: overallResults }
   }
 
   if (nextState.status === 'failed') {
