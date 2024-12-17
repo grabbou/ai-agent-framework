@@ -2,7 +2,7 @@ import 'dotenv/config'
 
 import { suite, test } from '@fabrice-ai/bdd/suite'
 import { testwork } from '@fabrice-ai/bdd/testwork'
-import fs from 'fs/promises'
+import fs from 'fs'
 
 import { bookLibraryWorkflow, outputPath, workingDir } from './library_photo_to_website.workflow.js'
 
@@ -38,7 +38,14 @@ const testResults = await testwork(
         '6_finalOutput',
         `Final output consist "Female Masculinity" title in the ${outputPath} file`,
         async (workflow, state) => {
-          const htmlContent = await fs.readFile(outputPath, 'utf-8')
+          if (!fs.existsSync(outputPath)) {
+            return {
+              passed: false,
+              reasoning: `Output file ${outputPath} does not exist`,
+              id: '6_finalOutput',
+            }
+          }
+          const htmlContent = fs.readFile(outputPath, 'utf-8')
           return {
             reasoning: "Output file includes the 'Female Masculinity' title",
             passed: htmlContent.includes('Female Masculinity'),
