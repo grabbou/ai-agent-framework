@@ -118,8 +118,100 @@ This will run the test suite and output the results to the console.
 
 The testing framework API is pretty straightforward.
 
+### `testwork`
+
+Runs the given workflow and continues iterating over the workflow until it finishes. If you handle running tools manually, you can set `runTools` to false.
+
+#### Parameters
+
+- `workflow: Workflow`: The workflow to be tested.
+- `suite: TestSuite`: The test suite containing the test cases.
+- `state: WorkflowState`: The initial state of the workflow. Defaults to `rootState(workflow)`.
+- `runTools: boolean`: Whether to run tools automatically. Defaults to `true`.
+
+#### Returns
+
+- `Promise<TestSuiteResult>`: The overall result of the test suite.
+
+#### Example Usage
+
+```ts
+import { testwork } from '@fabrice-ai/bdd/testwork'
+const testResults = await testwork(
+  bookLibraryWorkflow,
+  suite({ ... })
+)
+if (!testResults.passed) {
+  console.log('🚨 Test suite failed')
+  process.exit(-1)
+} else {
+  console.log('✅ Test suite passed')
+  process.exit(0)
+}
+```
+
+### `suite`
+
+Creates a test suite with the given options.
+
+#### Parameters
+
+- `options: TestSuiteOptions`: The options for creating the test suite.
+
+#### Returns
+
+- `TestSuite`: The created test suite.
+
+#### Example Usage
+
+```ts
+import { suite, test } from '@fabrice-ai/bdd/suite'
+
+const myTestSuite = suite({
+  description: 'Example test suite',
+  workflow: [
+    test('1_exampleTest', 'This is an example test case'),
+  ],
+  team: {
+    exampleAgent: [
+      test('2_exampleAgentTest', 'This is an example test case for an agent'),
+    ],
+  },
+})
+```
 
 
+### `test`
+Creates a test case with the given id, description, and optional run function.
+
+#### Parameters
+`id: string`: The unique identifier for the test case.
+`testCase: string`: The description of the test case.
+r`un?: ((workflow: Workflow, state: WorkflowState) => Promise<SingleTestResult>) | null`: The optional function to run the test case.
+
+### Returns
+`TestCase`: The created test case.
+
+### Example usage
+
+```ts
+import { test } from '@fabrice-ai/bdd/suite'
+
+const exampleTestCase = test('1_exampleTest', 'This is an example test case')
+
+const exampleAgentTestCase = test(
+  '2_exampleAgentTest',
+  'This is an example test case for an agent',
+  async (workflow, state) => {
+    // Custom test logic
+    return {
+      passed: true,
+      reasoning: 'Test passed successfully',
+      id: '2_exampleAgentTest',
+    }
+  }
+)
+```
 
 ## Mocking tools
 

@@ -45,7 +45,7 @@ const testResults = await testwork(
               id: '6_finalOutput',
             }
           }
-          const htmlContent = fs.readFile(outputPath, 'utf-8')
+          const htmlContent = fs.readFileSync(outputPath, 'utf-8')
           return {
             reasoning: "Output file includes the 'Female Masculinity' title",
             passed: htmlContent.includes('Female Masculinity'),

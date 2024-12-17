@@ -164,7 +164,7 @@ export async function testwork(
   if (nextState.status === 'finished') {
     const overallResults = await Promise.all(
       testRequests.map((testRequest) => {
-        console.log(`🧪 Running test suite [${testRequest.tests.map((t) => t.id).join(', ')}}]\n`)
+        console.log(`🧪 Running test suite [${testRequest.tests.map((t) => t.id).join(', ')}]\n`)
         return validate(testRequest)
       })
     )
