@@ -12,7 +12,7 @@ const testResults = await testwork(
   suite({
     description: 'Black box testing suite',
     team: {
-      landmarkScout: [test('4_wikipedia', 'Should use "lookupWikipedia" tool')],
+      landmarkScout: [test('0_wikipedia', 'Should use "lookupWikipedia" tool')],
     },
     workflow: [
       test(
@@ -35,6 +35,7 @@ const testResults = await testwork(
         async (workflow: Workflow, state: WorkflowState) => {
           return {
             passed: true,
+            reasoning: 'This is example non LLM check',
             id: '7_snapshot',
           }
         }

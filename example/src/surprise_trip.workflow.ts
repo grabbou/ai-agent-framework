@@ -1,8 +1,6 @@
 import 'dotenv/config'
 
 import { agent } from 'fabrice-ai/agent'
-import { grok } from 'fabrice-ai/providers/grok'
-import { openrouter } from 'fabrice-ai/providers/openrouter'
 import { workflow } from 'fabrice-ai/workflow'
 
 import { lookupWikipedia } from './tools/wikipedia.js'

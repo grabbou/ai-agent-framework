@@ -39,6 +39,7 @@ Built with TypeScript and designed to be serverless-ready.
   - [Completing the workflow](#completing-the-workflow)
   - [Long-running operations](#long-running-operations)
   - [Custom execution](#custom-execution)
+- [Test framework](./packages/bdd/README.md)
 - [Contributors](#contributors)
 - [Made with ❤️ at Callstack](#made-with-❤️-at-callstack)
 

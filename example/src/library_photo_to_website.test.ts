@@ -19,24 +19,21 @@ const testResults = await testwork(
       ],
       webmaster: [
         test(
-          '2_listFilesFromDirectory',
-          'Webmaster should list the files from working directory using "listFilesFromDirectory" tool'
-        ),
-        test(
-          '3_saveFile',
-          `Webmaster should modify and save final HTML to ${outputPath} file using "saveFile" tool`
+          '2_file_operations',
+          `Webmaster is using saveFile, readFile or listFilesFromDirectory tools to operate only within the ${workingDir} directory`
         ),
       ],
     },
     workflow: [
       test(
-        '4_search_template',
+        '3_search_template',
         `Webmaster should search and MUST choose the "book_library_template.html" template from inside the ${workingDir} directory.`
       ),
       test(
-        '5_finalOutput',
+        '4_finalOutput',
         'Final list of the books should be at least 5 books long and saved to the HTML file'
       ),
+      test('5_agent_routing', `The correct agent routing is librarian -> webmaster -> webmaster`),
       test(
         '6_finalOutput',
         `Final output consist "Female Masculinity" title in the ${outputPath} file`,
