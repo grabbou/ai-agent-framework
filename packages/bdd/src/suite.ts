@@ -4,7 +4,7 @@ import { Workflow } from 'fabrice-ai/workflow'
 export type TestCase = {
   case: string
   id: string
-  checked?: boolean
+  passed?: boolean
   run: ((workflow: Workflow, state: WorkflowState) => Promise<SingleTestResult>) | null
 }
 export type TestSuite = {
@@ -17,7 +17,7 @@ export type TestSuite = {
 export type TestSuiteOptions = TestSuite
 
 export type SingleTestResult = {
-  checked: boolean
+  passed: boolean
   id: string
 }
 
@@ -33,7 +33,7 @@ export type TestSuiteResult = {
 }
 
 const defaults = {
-  checked: false,
+  passed: false,
 }
 
 export type TestRequest = {
@@ -57,7 +57,7 @@ export const test = (
   return {
     id,
     case: testCase,
-    checked: false,
+    passed: false,
     run: run || null,
   }
 }

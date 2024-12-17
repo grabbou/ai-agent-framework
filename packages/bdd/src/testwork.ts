@@ -51,9 +51,9 @@ export async function validate(
     You are a LLM test agent.
 
     Your job is to go thru test cases and evaluate them against the current state.
-    If test case is satisfied mark it checked.
+    If test case is satisfied mark it passed.
 
-    If you cannot mark the test case as checked, please return it as a unchecked by default.
+    If you cannot mark the test case as passed, please return it as a unpassed by default.
 
     Here is the test suite:
 
@@ -64,7 +64,7 @@ export async function validate(
           return `<test>
                       <id>${test.id}</id>
                       <case>${test.case}</case>
-                      <checked>${test.checked ? 'checked' : 'unchecked'}</checked>
+                      <passed>${test.passed ? 'passed' : 'unpassed'}</passed>
                   </test>`
         })}
     </suite>
@@ -86,7 +86,7 @@ export async function validate(
         tests: z.array(
           z.object({
             id: z.string().describe('The id of the test case'),
-            checked: z.boolean().describe('The test case is checked or not'),
+            passed: z.boolean().describe('The test case is passed or not'),
           })
         ),
       }),
@@ -99,7 +99,7 @@ export async function validate(
   const testRunners = tests
     .filter((test) => test.run !== null)
     .map((test) => {
-      return test.run !== null ? test.run(workflow, state) : { checked: false, id: test.id }
+      return test.run !== null ? test.run(workflow, state) : { passed: false, id: test.id }
     })
 
   const subResults = await Promise.all(testRunners)
@@ -117,7 +117,7 @@ export const displayTestResults = (results: TestResults) => {
   if ('tests' in results) {
     console.log('🧪 Test results: ')
     results.tests.map((testResult) => {
-      console.log(`${testResult.checked ? '✅' : '🚨'} for test case [${testResult.id}]`)
+      console.log(`${testResult.passed ? '✅' : '🚨'} for test case [${testResult.id}]`)
     })
   } else {
     console.error('🚨 Error: ' + results.reasoning)
@@ -147,7 +147,7 @@ export async function testwork(
     for (const result of overallResults) {
       displayTestResults(result)
       if ('tests' in result) {
-        if (!result.tests.every((test) => test.checked)) {
+        if (!result.tests.every((test) => test.passed)) {
           passed = false
         } else {
           passed = true

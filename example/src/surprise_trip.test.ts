@@ -34,7 +34,7 @@ const testResults = await testwork(
         'This is example non LLM check',
         async (workflow: Workflow, state: WorkflowState) => {
           return {
-            checked: true,
+            passed: true,
             id: '7_snapshot',
           }
         }
