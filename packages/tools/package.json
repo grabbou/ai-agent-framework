@@ -5,14 +5,15 @@
   "scripts": {
     "prepare": "bun run build",
     "clean": "rm -rf dist",
-    "build": "bun run clean && bun run build:lib && bun run build:types",
-    "build:lib": "rslib build",
-    "build:types": "tsc --emitDeclarationOnly --declaration --outdir dist/types"
+    "build": "tsup-node"
   },
   "exports": {
     "./*": {
       "bun": "./src/*.ts",
-      "types": "./dist/types/*.d.ts",
+      "types": {
+        "import": "./dist/*.d.ts",
+        "require": "./dist/*.d.cts"
+      },
       "require": "./dist/*.cjs",
       "import": "./dist/*.js"
     }
@@ -46,5 +47,8 @@
   "engines": {
     "node": ">=22"
   },
-  "version": "0.5.0"
+  "version": "0.5.0",
+  "devDependencies": {
+    "tsup": "^8.3.5"
+  }
 }

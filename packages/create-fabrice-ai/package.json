@@ -9,8 +9,7 @@
   },
   "scripts": {
     "prepare": "bun run build",
-    "clean": "rm -rf dist",
-    "build": "bun build ./src/index.ts --outdir dist --packages external"
+    "build": "tsup-node"
   },
   "files": [
     "dist",
