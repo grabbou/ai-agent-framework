@@ -1,6 +1,6 @@
-import { tool } from '@dead-simple-ai-agent/framework/tool'
 import { execSync } from 'child_process'
 import docker from 'dockerode'
+import { tool } from 'fabrice-ai/tool'
 import fs from 'fs'
 import { z } from 'zod'
 
