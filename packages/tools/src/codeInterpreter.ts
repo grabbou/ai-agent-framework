@@ -1,5 +1,4 @@
 import { execSync } from 'child_process'
-import docker from 'dockerode'
 import { tool } from 'fabrice-ai/tool'
 import fs from 'fs'
 import { z } from 'zod'
@@ -20,12 +19,31 @@ const interpreterOptions: CodeInterpreterOptions = {
   unsafeMode: false,
 }
 
-const verifyDockerImage = async (): Promise<void> => {
-  const client = new docker()
-
+/**
+ * Helper function to run shell commands using execSync with consistent error/output handling.
+ * Returns stdout on success, and a detailed error message (including stdout/stderr) on failure.
+ */
+function runCommand(
+  command: string,
+  options: { stdio?: any; encoding?: string } = { stdio: 'pipe', encoding: 'utf-8' }
+): string {
   try {
-    await client.getImage(interpreterOptions.defaultImageTag).inspect()
-  } catch (error) {
+    return execSync(command, options).toString()
+  } catch (error: any) {
+    const stdout = error.stdout ? error.stdout.toString() : ''
+    const stderr = error.stderr ? error.stderr.toString() : ''
+    return `Command failed: ${command}\nError: ${error.message}\nStdout: ${stdout}\nStderr: ${stderr}`
+  }
+}
+
+const verifyDockerImage = (): string | void => {
+  let output = runCommand(`docker image inspect ${interpreterOptions.defaultImageTag}`, {
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  })
+
+  if (output.startsWith('Command failed')) {
+    // Need to build the image
     let dockerfilePath: string
     if (
       interpreterOptions.userDockerfilePath &&
@@ -33,106 +51,120 @@ const verifyDockerImage = async (): Promise<void> => {
     ) {
       dockerfilePath = interpreterOptions.userDockerfilePath
     } else {
-      dockerfilePath = import.meta.dirname
-
+      dockerfilePath = process.cwd()
       if (!fs.existsSync(dockerfilePath)) {
-        console.log(dockerfilePath + ' does not exist')
         throw new Error(`Dockerfile not found in ${dockerfilePath}`)
       }
     }
-    await client.buildImage(
-      {
-        context: dockerfilePath,
-        src: ['Dockerfile'],
-      },
-      { t: interpreterOptions.defaultImageTag }
-    )
-  }
-}
 
-const initDockerContainer = async (): Promise<docker.Container> => {
-  const client = new docker()
-  const containerName = 'code-interpreter'
-  const currentPath = process.cwd()
-
-  // Remove existing container if running
-  try {
-    const existingContainer = await client.getContainer(containerName)
-    await existingContainer.stop()
-    await existingContainer.remove()
-  } catch (error) {
-    // No action needed if container doesn't exist
-  }
-
-  return client.createContainer({
-    Image: interpreterOptions.defaultImageTag,
-    name: containerName,
-    Tty: false,
-    HostConfig: {
-      Binds: [`${currentPath}:/workspace`],
-    },
-    WorkingDir: '/workspace',
-  })
-}
-
-const installLibraries = async (
-  container: docker.Container,
-  libraries: string[]
-): Promise<void> => {
-  for (const library of libraries) {
-    await container.exec({
-      Cmd: ['pip', 'install', library],
-      AttachStdout: true,
-      AttachStderr: true,
+    output = runCommand(`docker build -t ${interpreterOptions.defaultImageTag} ${dockerfilePath}`, {
+      stdio: 'pipe',
+      encoding: 'utf-8',
     })
+    if (output.startsWith('Command failed')) {
+      throw new Error(output)
+    }
+  }
+
+  // Remove existing container if it exists
+  output = runCommand('docker rm -f code-interpreter', { stdio: 'pipe', encoding: 'utf-8' })
+  // It's okay if it fails because the container might not exist, we won't throw here.
+
+  // Create a new container that keeps running
+  output = runCommand(
+    `docker create --name code-interpreter -w /workspace -v ${process.cwd()}:/workspace ${interpreterOptions.defaultImageTag} tail -f /dev/null`,
+    { stdio: 'pipe', encoding: 'utf-8' }
+  )
+  if (output.startsWith('Command failed')) {
+    throw new Error(output)
   }
 }
 
-const runCodeInDocker = async (code: string, librariesUsed: string[]): Promise<string> => {
-  await verifyDockerImage()
-  const container = await initDockerContainer()
-  await container.start()
-  await installLibraries(container, librariesUsed)
-
-  const exec = await container.exec({
-    Cmd: ['python3', '-c', code],
-    AttachStdout: true,
-    AttachStderr: true,
-    AttachStdin: false,
+const initDockerContainer = (): void => {
+  // Remove existing container if running
+  const removeOutput = runCommand('docker rm -f code-interpreter', {
+    stdio: 'pipe',
+    encoding: 'utf-8',
   })
+  // No need to throw, container might not exist
 
-  const result = await exec.start({
-    hijack: false,
-    stdin: false,
-  })
-
-  await container.stop()
-  await container.remove()
-
-  return result.readable ? result.readable.toString() : 'Execution failed'
+  // Create a new container that keeps running
+  const createOutput = runCommand(
+    `docker create --name code-interpreter -w /workspace -v ${process.cwd()}:/workspace ${interpreterOptions.defaultImageTag} tail -f /dev/null`,
+    { stdio: 'pipe', encoding: 'utf-8' }
+  )
+  if (createOutput.startsWith('Command failed')) {
+    throw new Error(createOutput)
+  }
 }
 
-const runCodeUnsafe = async (code: string, librariesUsed: string[]): Promise<string> => {
+const runCodeInDocker = (code: string, librariesUsed: string[]): string => {
+  const verifyOutput = verifyDockerImage()
+  if (typeof verifyOutput === 'string' && verifyOutput.startsWith('Command failed')) {
+    return verifyOutput
+  }
+
+  try {
+    initDockerContainer()
+
+    let output = runCommand('docker start code-interpreter', { stdio: 'pipe', encoding: 'utf-8' })
+    if (output.startsWith('Command failed')) {
+      return output
+    }
+
+    // Install required libraries
+    for (const library of librariesUsed) {
+      if (library) {
+        output = runCommand(`docker exec code-interpreter pip install ${library}`, {
+          stdio: 'pipe',
+          encoding: 'utf-8',
+        })
+        if (output.startsWith('Command failed')) {
+          return output
+        }
+      }
+    }
+
+    // Run the code
+    const codeOutput = runCommand(
+      `docker exec code-interpreter python3 -c "${code.replace(/"/g, '\\"')}"`,
+      { stdio: 'pipe', encoding: 'utf-8' }
+    )
+
+    // Stop and remove the container
+    runCommand('docker stop code-interpreter', { stdio: 'pipe', encoding: 'utf-8' })
+    runCommand('docker rm code-interpreter', { stdio: 'pipe', encoding: 'utf-8' })
+
+    return codeOutput
+  } catch (error: any) {
+    return `Unexpected error: ${error.message}`
+  }
+}
+
+const runCodeUnsafe = (code: string, librariesUsed: string[]): string => {
   for (const library of librariesUsed) {
-    execSync(`pip install ${library}`)
+    const output = runCommand(`pip install ${library}`, { stdio: 'pipe', encoding: 'utf-8' })
+    if (output.startsWith('Command failed')) {
+      return output
+    }
   }
 
   try {
     const result = eval(code)
     return result ? result.toString() : 'No result variable found.'
-  } catch (error) {
-    return `An error occurred: ${error}`
+  } catch (error: any) {
+    return `An error occurred during evaluation: ${error.message}`
   }
 }
 
 const runCode = async (args: { code?: string; librariesUsed?: string[] }): Promise<string> => {
-  const code = args.code || args.code
+  const code = args.code || ''
   const librariesUsed = args.librariesUsed || []
 
   if (interpreterOptions.unsafeMode) {
-    return runCodeUnsafe(code!, librariesUsed)
+    return runCodeUnsafe(code, librariesUsed)
   } else {
-    return await runCodeInDocker(code!, librariesUsed)
+    return runCodeInDocker(code, librariesUsed)
   }
 }
 
@@ -140,7 +172,9 @@ export const codeInterpreter = tool({
   description: 'Interprets Python3 code strings with a final print statement.',
   parameters: z.object({
     code: z.string().describe('Python3 code to be interpreted.'),
-    librariesUsed: z.array(z.string()).describe('Python3 libraries used in the code.'),
+    librariesUsed: z
+      .array(z.string())
+      .describe('Python3 non built-in libraries used in the code, to be installed using"pip"'),
   }),
   execute: ({ code, librariesUsed }) => {
     if (!code) {
