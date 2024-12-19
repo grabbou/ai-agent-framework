@@ -1,6 +1,3 @@
-/**
- * Example borrowed from CrewAI.
- */
 import { codeInterpreter } from '@fabrice-ai/tools/codeInterpreter'
 import { agent } from 'fabrice-ai/agent'
 import { solution } from 'fabrice-ai/solution'
