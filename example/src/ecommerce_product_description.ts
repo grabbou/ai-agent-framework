@@ -1,17 +1,15 @@
-/**
- * Example borrowed from CrewAI.
- */
+import 'dotenv/config'
 
-import { agent } from '@dead-simple-ai-agent/framework/agent'
-import { teamwork } from '@dead-simple-ai-agent/framework/teamwork'
-import { workflow } from '@dead-simple-ai-agent/framework/workflow'
-import { visionTool } from '@dead-simple-ai-agent/tools'
+import { visionTool } from '@fabrice-ai/tools/vision'
+import { agent } from 'fabrice-ai/agent'
+import { solution } from 'fabrice-ai/solution'
+import { teamwork } from 'fabrice-ai/teamwork'
+import { workflow } from 'fabrice-ai/workflow'
+import path from 'path'
 
 const techExpert = agent({
-  role: 'Technical expert',
   description: `
-    You are skilled at extracting and describing most detailed
-    technical information about the product from the photo.
+    You are skilled at extracting and describing most detailed technical information about the product from the photo.
   `,
   tools: {
     visionTool,
@@ -19,34 +17,26 @@ const techExpert = agent({
 })
 
 const marketingManager = agent({
-  role: 'Marketing content writer',
   description: `
-    You are skilled at writing catchy product descriptions
-    making customers to instantly fall in love with the product. 
-    Use the technical information provided by the technical expert to create a compelling product description. 
+    You are skilled at writing catchy product descriptions making customers to instantly fall in love with the product.
+    You always answer why they should buy the product, how it will make their life better, 
+    and what emotions it will evoke.
   `,
 })
 
 const productDescriptionWorkflow = workflow({
-  members: [techExpert, marketingManager],
+  team: { techExpert, marketingManager },
   description: `
-    Based on the picture './example/example-sneakers.jpg' make the eCommerce product to 
-    list this product on the website.
-
-    Focus:
-      - find all technical features of the product
-      - color, size, material, brand if possible, etc.
-      - write a compelling product description
-      - why they should buy this product?
-      - how it will make their life better?
-      - emotions?
+    Based on the picture of the product, make the product description to list it on the website.
+  `,
+  knowledge: `
+    Focus on all technical features of the product, including color, size, material, brand if possible, etc.
+    Picture is at "${path.resolve(import.meta.dirname, '../assets/example-sneakers.jpg')}". 
   `,
   output: `
-    Catchy, yet detailed product description that will make customers to instantly fall in love with the product.
-    Should contain all the product features + marketing description.
+    Catchy product description covering all the product features.
   `,
 })
-
 const result = await teamwork(productDescriptionWorkflow)
 
-console.log(result)
+console.log(solution(result))

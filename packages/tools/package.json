@@ -1,22 +1,56 @@
 {
-  "name": "@dead-simple-ai-agent/tools",
-  "version": "0.0.1",
-  "description": "A dead simple AI agent tools",
+  "name": "@fabrice-ai/tools",
+  "description": "Tools that help you build AI agents",
   "author": "Piotr Karwatka <piotr@catchthetornado.com>",
+  "scripts": {
+    "prepare": "bun run build",
+    "clean": "rm -rf dist",
+    "build": "tsup-node"
+  },
   "exports": {
-    ".": {
-      "bun": "./src/index.ts"
-    },
-    "./tools": {
-      "bun": "./src/index.ts"
+    "./*": {
+      "bun": "./src/*.ts",
+      "types": {
+        "import": "./dist/*.d.ts",
+        "require": "./dist/*.d.cts"
+      },
+      "require": "./dist/*.cjs",
+      "import": "./dist/*.js"
     }
   },
   "type": "module",
   "dependencies": {
     "@types/dockerode": "^3.3.32",
-    "dedent": "^1.5.3",
+    "@clack/prompts": "^0.8.2",
+    "axios": "^1.7.9",
     "dockerode": "^4.0.2",
-    "openai": "^4.76.0",
+    "fabrice-ai": "0.5.2",
     "zod": "^3.23.8"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callstackincubator/ai-agent-framework.git",
+    "directory": "packages/tools"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "ai",
+    "ai agents",
+    "ai tools"
+  ],
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "version": "0.5.2",
+  "devDependencies": {
+    "tsup": "^8.3.5"
   }
 }

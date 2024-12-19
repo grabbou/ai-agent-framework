@@ -1,41 +1,63 @@
 {
-  "name": "@dead-simple-ai-agent/framework",
-  "version": "0.0.1",
-  "description": "A dead simple AI agent framework",
+  "name": "fabrice-ai",
+  "description": "A lightweight, functional, and composable framework for building AI agents.",
   "author": "Mike Grabowski <mike@callstack.com>",
+  "contributors": [
+    "Piotr Karwatka <piotr@catchthetornado.com>"
+  ],
+  "scripts": {
+    "prepare": "bun run build",
+    "build": "tsup-node"
+  },
   "exports": {
-    ".": {
-      "bun": "./src/index.ts"
+    "./*": {
+      "bun": "./src/*.ts",
+      "types": {
+        "import": "./dist/*.d.ts",
+        "require": "./dist/*.d.cts"
+      },
+      "require": "./dist/*.cjs",
+      "import": "./dist/*.js"
     },
-    "./tool": {
-      "bun": "./src/tool.ts"
-    },
-    "./executor": {
-      "bun": "./src/executor.ts"
-    },
-    "./workflow": {
-      "bun": "./src/workflow.ts"
-    },
-    "./agent": {
-      "bun": "./src/agent.ts"
-    },
-    "./step": {
-      "bun": "./src/step.ts"
-    },
-    "./memory": {
-      "bun": "./src/memory.ts"
-    },
-    "./teamwork": {
-      "bun": "./src/teamwork.ts"
-    },
-    "./models/openai": {
-      "bun": "./src/models/openai.ts"
+    "./providers/*": {
+      "bun": "./src/providers/*.ts",
+      "types": {
+        "import": "./dist/providers/*.d.ts",
+        "require": "./dist/providers/*.d.cts"
+      },
+      "require": "./dist/providers/*.cjs",
+      "import": "./dist/providers/*.js"
     }
   },
   "type": "module",
   "dependencies": {
+    "chalk": "^5.3.0",
     "dedent": "^1.5.3",
     "openai": "^4.76.0",
-    "zod": "^3.23.8"
-  }
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.24.1"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callstackincubator/ai-agent-framework.git",
+    "directory": "packages/framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "ai",
+    "ai agents",
+    "ai tools"
+  ],
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "version": "0.5.2"
 }

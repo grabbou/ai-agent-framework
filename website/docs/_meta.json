@@ -1,0 +1,12 @@
+[
+  {
+    "text": "Getting Started",
+    "link": "/getting-started/",
+    "activeMatch": "/getting-started/"
+  },
+  {
+    "text": "Concepts",
+    "link": "/concepts/",
+    "activeMatch": "/concepts/"
+  }
+]
