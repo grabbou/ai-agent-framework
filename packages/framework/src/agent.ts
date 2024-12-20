@@ -1,7 +1,7 @@
 import s from 'dedent'
 import { z } from 'zod'
 
-import { assistant, getSteps, Message, system, toolCalls, user } from './messages.js'
+import { assistant, Conversation, getSteps, Message, system, toolCalls, user } from './messages.js'
 import { Provider } from './models.js'
 import { finish, WorkflowState } from './state.js'
 import { Tool } from './tool.js'
@@ -102,7 +102,18 @@ export const agent = (options: AgentOptions = {}): Agent => {
           }
         }
 
-        return finish(state, agentResponse)
+        const prevState: WorkflowState = {
+          ...state,
+          status: 'running',
+          messages: [
+            ...state.messages,
+            agentResponse,
+            user(response.value.next_step),
+          ] as Conversation,
+        }
+        const nextState = finish(state, agentResponse)
+        workflow.snapshot({ prevState, nextState })
+        return nextState
       }),
   }
 }

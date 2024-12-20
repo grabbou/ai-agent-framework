@@ -73,13 +73,22 @@ const template = await select({
   options: [
     {
       value: {
-        files: ['src/surprise_trip.ts', 'src/tools/wikipedia.ts'],
+        files: [
+          'src/surprise_trip.ts',
+          'src/surprise_trip.test.ts',
+          'src/surprise_trip.config.ts',
+          'src/tools/wikipedia.ts',
+        ],
       },
       label: 'Surprise Trip Planner - travel agent creating personalized city adventures',
     },
     {
       value: {
-        files: ['src/medical_survey.ts', 'src/medical_survey/workflow.ts'],
+        files: [
+          'src/medical_survey.ts',
+          'src/medical_survey.test.ts',
+          'src/medical_survey.config.ts',
+        ],
       },
       label: 'Medical Survey - Pre-visit patient questionnaire with report generation',
     },
@@ -87,6 +96,8 @@ const template = await select({
       value: {
         files: [
           'src/library_photo_to_website.ts',
+          'src/library_photo_to_website.test.ts',
+          'src/library_photo_to_website.config.ts',
           'assets/photo-library.jpg',
           'assets/book_library_template.html',
         ],
@@ -95,33 +106,42 @@ const template = await select({
     },
     {
       value: {
-        files: ['src/ecommerce_product_description.ts', 'assets/example-sneakers.jpg'],
+        files: [
+          'src/ecommerce_product_description.ts',
+          'src/ecommerce_product_description.test.ts',
+          'src/ecommerce_product_description.config.ts',
+          'assets/example-sneakers.jpg',
+        ],
       },
       label:
         'E-commerce Product Description - Convert product photos into compelling store listings',
     },
     {
       value: {
-        files: ['src/news_wrap_up.ts'],
+        files: ['src/news_wrap_up.ts', 'src/news_wrap_up.config.ts', 'src/news_wrap_up.test.ts'],
       },
       label: 'News Wrap Up - Weekly news digest generator with smart summaries',
     },
     {
       value: {
-        files: ['src/github_trending.ts'],
-      },
-      label: 'GitHub Trending - Track and summarize hot Python projects on GitHub',
-    },
-    {
-      value: {
-        files: ['src/github_trending_vector.ts', 'src/tools/askUser.ts'],
+        files: [
+          'src/github_trending_vector.ts',
+          'src/github_trending_vector.config.ts',
+          'src/github_trending_vector.test.ts',
+          'src/tools/askUser.ts',
+        ],
       },
       label:
         'GitHub Trending + Vector Store - Track and summarize hot Typescript projects on GitHub + get project details from vector store',
     },
     {
       value: {
-        files: ['src/wikipedia_vector.ts', 'src/tools/wikipedia.ts'],
+        files: [
+          'src/wikipedia_vector.ts',
+          'src/wikipedia_vector.test.ts',
+          'src/wikipedia_vector.config.ts',
+          'src/tools/wikipedia.ts',
+        ],
       },
       label: 'Wikipedia Vector - Search and summarize Wikipedia articles',
     },

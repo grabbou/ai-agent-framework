@@ -15,7 +15,7 @@ export const logger: Telemetry = ({ prevState, nextState }) => {
   if (prevState === nextState) return
 
   const getStatusText = (state: WorkflowState) => {
-    if (state.agent === 'supervisor') {
+    if (state.agent === 'supervisor' && (state.status === 'idle' || state.status === 'running')) {
       return 'Looking for next task...'
     }
     if (state.agent === 'resourcePlanner') {

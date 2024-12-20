@@ -39,6 +39,7 @@ Built with TypeScript and designed to be serverless-ready.
   - [Completing the workflow](#completing-the-workflow)
   - [Long-running operations](#long-running-operations)
   - [Custom execution](#custom-execution)
+- [Test framework](./packages/bdd/README.md)
 - [Contributors](#contributors)
 - [Made with ❤️ at Callstack](#made-with-❤️-at-callstack)
 
@@ -425,6 +426,11 @@ Last argument is a boolean flag that determines if tools should be executed. If 
 If you want to handle tool execution manually, you can use `iterate` function to build up your own recursive iteration logic over the workflow state.
 
 Have a look at how `teamwork` is implemented [here](./packages/framework/src/teamwork.ts) to understand how it works.
+
+
+### BDD Testing
+
+There's a packaged called `fabrice-ai/bdd` dedicated to unit testing - actually to Behavioral Driven Development. [Check the docs](./packages/bdd/README.md).
 
 ## Contributors
 
