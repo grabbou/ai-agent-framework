@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { suite, test } from '@fabrice-ai/bdd/suite'
 import { testwork } from '@fabrice-ai/bdd/testwork'
 
-import { wrapUpTrending } from './github_trending_vector.workflow.js'
+import { wrapUpTrending } from './github_trending_vector.config.js'
 
 const testResults = await testwork(
   wrapUpTrending,

@@ -76,7 +76,7 @@ const template = await select({
         files: [
           'src/surprise_trip.ts',
           'src/surprise_trip.test.ts',
-          'src/surprise_trip.workflow.ts',
+          'src/surprise_trip.config.ts',
           'src/tools/wikipedia.ts',
         ],
       },
@@ -87,7 +87,7 @@ const template = await select({
         files: [
           'src/medical_survey.ts',
           'src/medical_survey.test.ts',
-          'src/medical_survey.workflow.ts',
+          'src/medical_survey.config.ts',
         ],
       },
       label: 'Medical Survey - Pre-visit patient questionnaire with report generation',
@@ -97,7 +97,7 @@ const template = await select({
         files: [
           'src/library_photo_to_website.ts',
           'src/library_photo_to_website.test.ts',
-          'src/library_photo_to_website.workflow.ts',
+          'src/library_photo_to_website.config.ts',
           'assets/photo-library.jpg',
           'assets/book_library_template.html',
         ],
@@ -109,7 +109,7 @@ const template = await select({
         files: [
           'src/ecommerce_product_description.ts',
           'src/ecommerce_product_description.test.ts',
-          'src/ecommerce_product_description.workflow.ts',
+          'src/ecommerce_product_description.config.ts',
           'assets/example-sneakers.jpg',
         ],
       },
@@ -118,7 +118,7 @@ const template = await select({
     },
     {
       value: {
-        files: ['src/news_wrap_up.ts', 'src/news_wrap_up.workflow.ts', 'src/news_wrap_up.test.ts'],
+        files: ['src/news_wrap_up.ts', 'src/news_wrap_up.config.ts', 'src/news_wrap_up.test.ts'],
       },
       label: 'News Wrap Up - Weekly news digest generator with smart summaries',
     },
@@ -126,7 +126,7 @@ const template = await select({
       value: {
         files: [
           'src/github_trending_vector.ts',
-          'src/github_trending_vector.workflow.ts',
+          'src/github_trending_vector.config.ts',
           'src/github_trending_vector.test.ts',
           'src/tools/askUser.ts',
         ],
@@ -139,7 +139,7 @@ const template = await select({
         files: [
           'src/wikipedia_vector.ts',
           'src/wikipedia_vector.test.ts',
-          'src/wikipedia_vector.workflow.ts',
+          'src/wikipedia_vector.config.ts',
           'src/tools/wikipedia.ts',
         ],
       },

@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { suite, test } from '@fabrice-ai/bdd/suite'
 import { testwork } from '@fabrice-ai/bdd/testwork'
 
-import { wikipediaResearch } from './wikipedia_vector.workflow.js'
+import { wikipediaResearch } from './wikipedia_vector.config.js'
 
 const testResults = await testwork(
   wikipediaResearch,

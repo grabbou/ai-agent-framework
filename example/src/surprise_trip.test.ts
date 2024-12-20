@@ -5,7 +5,7 @@ import { testwork } from '@fabrice-ai/bdd/testwork'
 import { WorkflowState } from 'fabrice-ai/state'
 import { Workflow } from 'fabrice-ai/workflow'
 
-import { researchTripWorkflow } from './surprise_trip.workflow.js'
+import { researchTripWorkflow } from './surprise_trip.config.js'
 
 const testResults = await testwork(
   researchTripWorkflow,

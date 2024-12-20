@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { suite, test } from '@fabrice-ai/bdd/suite'
 import { testwork } from '@fabrice-ai/bdd/testwork'
 
-import { wrapUpTheNewsWorkflow } from './news_wrap_up.workflow.js'
+import { wrapUpTheNewsWorkflow } from './news_wrap_up.config.js'
 
 const testResults = await testwork(
   wrapUpTheNewsWorkflow,

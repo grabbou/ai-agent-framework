@@ -4,7 +4,7 @@ import { suite, test } from '@fabrice-ai/bdd/suite'
 import { testwork } from '@fabrice-ai/bdd/testwork'
 import fs from 'fs'
 
-import { bookLibraryWorkflow, outputPath, workingDir } from './library_photo_to_website.workflow.js'
+import { bookLibraryWorkflow, outputPath, workingDir } from './library_photo_to_website.config.js'
 
 const testResults = await testwork(
   bookLibraryWorkflow,

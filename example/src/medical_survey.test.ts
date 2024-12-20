@@ -5,7 +5,7 @@ import { testwork } from '@fabrice-ai/bdd/testwork'
 import { tool } from 'fabrice-ai/tool'
 import { z } from 'zod'
 
-import { preVisitNoteWorkflow } from './medical_survey.workflow.js'
+import { preVisitNoteWorkflow } from './medical_survey.config.js'
 
 export const askUserMock = tool({
   description: 'Tool for asking user a question',

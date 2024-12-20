@@ -17,13 +17,13 @@ import { suite, test } from '@fabrice-ai/bdd/suite'
 import { testwork } from '@fabrice-ai/bdd/testwork'
 import fs from 'fs/promises'
 
-import { bookLibraryWorkflow, outputPath, workingDir } from './library_photo_to_website.workflow.js'
+import { bookLibraryWorkflow, outputPath, workingDir } from './library_photo_to_website.config.js'
 ```
 
-This example somewhat defines the rule convention of saving the workflow in the `*.workflow.ts` files - so it will be reusable - between tests and executable code. 
+This example somewhat defines the rule convention of saving the workflow in the `*.config.ts` files - so it will be reusable - between tests and executable code. 
 
 Full set of executable/test/workflow files is:
-1. `example/src/library_photo_to_website.workflow.ts` - workflow definition,
+1. `example/src/library_photo_to_website.config.ts` - workflow definition,
 2. `example/src/library_photo_to_website.test.ts` - test suite,
 3. `example/src/library_photo_to_website.ts` - executable code.
 

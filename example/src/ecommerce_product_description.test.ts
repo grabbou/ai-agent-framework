@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { suite, test } from '@fabrice-ai/bdd/suite'
 import { testwork } from '@fabrice-ai/bdd/testwork'
 
-import { productDescriptionWorkflow } from './ecommerce_product_description.workflow.js'
+import { productDescriptionWorkflow } from './ecommerce_product_description.config.js'
 
 const testResults = await testwork(
   productDescriptionWorkflow,
