@@ -1,6 +1,7 @@
 import { execSync } from 'child_process'
 import { tool } from 'fabrice-ai/tool'
 import fs from 'fs'
+import path from 'path'
 import { z } from 'zod'
 
 type CodeInterpreterOptions = {
@@ -51,7 +52,7 @@ const verifyDockerImage = (): string | void => {
     ) {
       dockerfilePath = interpreterOptions.userDockerfilePath
     } else {
-      dockerfilePath = process.cwd()
+      dockerfilePath = path.resolve(import.meta.dirname, 'code-interpreter')
       if (!fs.existsSync(dockerfilePath)) {
         throw new Error(`Dockerfile not found in ${dockerfilePath}`)
       }
