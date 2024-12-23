@@ -1,6 +1,7 @@
 import { execSync } from 'child_process'
 import { tool } from 'fabrice-ai/tool'
 import fs from 'fs'
+import * as path from 'path'
 import { z } from 'zod'
 
 // You can reuse or rename these options depending on your needs.
@@ -54,7 +55,7 @@ function verifyDockerImageAndContainer(storagePath: string) {
       dockerfilePath = shellToolOptions.userDockerfilePath
     } else {
       // Otherwise assume there's a Dockerfile in the current directory
-      dockerfilePath = process.cwd()
+      dockerfilePath = path.resolve(import.meta.dirname, 'shell')
       if (!fs.existsSync(dockerfilePath)) {
         throw new Error(`Dockerfile not found in ${dockerfilePath}`)
       }
