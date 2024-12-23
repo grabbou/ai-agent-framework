@@ -13,7 +13,7 @@ const testResults = await testwork(
       coder: [test('2_jokes', 'Two jokes should be generated and passed within the Python code')],
       runner: [
         test(
-          '1_codeInterpreter',
+          '1_interpreter',
           'The "codeInterpreter" tool should be called once to run the Python script'
         ),
       ],
