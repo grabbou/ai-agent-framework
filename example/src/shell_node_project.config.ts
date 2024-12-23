@@ -6,6 +6,7 @@ import { logger } from 'fabrice-ai/telemetry'
 import { workflow } from 'fabrice-ai/workflow'
 import * as path from 'path'
 
+// @ts-ignore
 export const workingDir = path.resolve(import.meta.dirname, '../assets/')
 const shellTools = createShellTools({
   mountPointDir: 'mnt',

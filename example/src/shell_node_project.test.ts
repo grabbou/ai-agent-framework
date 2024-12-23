@@ -5,7 +5,6 @@ import { testwork } from '@fabrice-ai/bdd/testwork'
 import fs from 'fs'
 import path from 'path'
 
-import { workingDir } from './library_photo_to_website.config.js'
 import { createHelloworldNodeProject, workingDir } from './shell_node_project.config.js'
 
 const testResults = await testwork(

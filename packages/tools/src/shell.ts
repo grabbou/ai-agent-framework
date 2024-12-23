@@ -17,7 +17,7 @@ type DockerOptions = {
  */
 function runCommand(
   command: string,
-  options: { stdio?: any; encoding?: string } = { stdio: 'pipe', encoding: 'utf-8' }
+  options: { stdio?: any; encoding?: BufferEncoding } = { stdio: 'pipe', encoding: 'utf-8' }
 ): string {
   try {
     return execSync(command, options).toString()
@@ -46,6 +46,7 @@ function verifyOrBuildDockerImage(dockerContext: DockerOptions) {
       dockerfilePath = dockerContext.userDockerfilePath
     } else {
       // Otherwise assume there's a Dockerfile in the current directory or a subfolder
+      // @ts-ignore
       dockerfilePath = path.resolve(import.meta.dirname, dockerContext.name ?? 'shell')
       if (!fs.existsSync(dockerfilePath)) {
         throw new Error(`Dockerfile not found in ${dockerfilePath}`)
@@ -115,8 +116,16 @@ function startContainer(dockerContext: DockerOptions) {
 /**
  * Runs the given shell command inside the container, returning stdout or error info.
  */
-function runShellInDocker(dockerContext: DockerOptions, command: string): string {
-  return runCommand(`docker exec ${dockerContext.name} sh -c "${command.replace(/"/g, '\\"')}"`, {
+function runShellInDocker(
+  dockerContext: DockerOptions,
+  command: string,
+  escapeCommand: boolean
+): string {
+  const commandToExecute = escapeCommand
+    ? `docker exec ${dockerContext.name} sh -c "${command.replace(/"/g, '\\"')}"`
+    : `docker exec ${dockerContext.name} sh -c ${command}`
+
+  return runCommand(command, {
     stdio: 'pipe',
     encoding: 'utf-8',
   })
@@ -137,6 +146,7 @@ export function cleanupContainer(dockerContext: DockerOptions) {
  */
 async function runShellCommand(args: {
   command: string
+  escapeCommand: boolean
   storagePath: string
   storageMountPoint: string
   dockerContext: DockerOptions
@@ -154,7 +164,7 @@ async function runShellCommand(args: {
     startContainer(args.dockerContext)
 
     // Execute the command in container
-    const output = runShellInDocker(args.dockerContext, command)
+    const output = runShellInDocker(args.dockerContext, command, args.escapeCommand)
     return output
   } catch (error: any) {
     return `Unexpected error: ${error.message}`
@@ -165,7 +175,7 @@ async function runShellCommand(args: {
  * Exported shellTool, which runs arbitrary shell commands in a container
  * and allows configuring the container-mounted path (default "workspace").
  */
-interface ShellOptions {
+export interface ShellOptions {
   workingDir: string
   mountPointDir: string
   dockerOptions: DockerOptions
@@ -185,8 +195,13 @@ export const createShellTools = ({ workingDir, mountPointDir, dockerOptions }: S
         'Executes a shell command inside a Docker container. Storage path is configurable.',
       parameters: z.object({
         command: z.string().describe('The shell command to run inside the container.'),
+        escapeCommand: z
+          .boolean()
+          .describe(
+            'When true (should be by default) the command is safely escaped before execution'
+          ),
       }),
-      execute: async ({ command }) => {
+      execute: async ({ command, escapeCommand }) => {
         if (!command) {
           throw new Error('A shell command is required.')
         }
@@ -198,6 +213,7 @@ export const createShellTools = ({ workingDir, mountPointDir, dockerOptions }: S
 
         return runShellCommand({
           command,
+          escapeCommand,
           storagePath: workingDir,
           storageMountPoint: mountPointDir,
           dockerContext,
