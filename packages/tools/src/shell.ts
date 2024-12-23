@@ -125,7 +125,7 @@ function runShellInDocker(
     ? `docker exec ${dockerContext.name} sh -c "${command.replace(/"/g, '\\"')}"`
     : `docker exec ${dockerContext.name} sh -c ${command}`
 
-  return runCommand(command, {
+  return runCommand(commandToExecute, {
     stdio: 'pipe',
     encoding: 'utf-8',
   })
