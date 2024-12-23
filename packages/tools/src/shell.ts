@@ -121,7 +121,6 @@ function runShellInDocker(
   command: string,
   escapeCommand: boolean
 ): string {
-  console.log(command)
   const commandToExecute = escapeCommand
     ? `docker exec ${dockerContext.name} sh -c "${command.replace(/"/g, '\\"')}"`
     : `docker exec ${dockerContext.name} sh -c ${command}`
