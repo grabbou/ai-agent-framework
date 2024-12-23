@@ -1,1 +1,1 @@
-console.log('Hello World ' + Math.random());
+console.log('Hello World', Math.random());
