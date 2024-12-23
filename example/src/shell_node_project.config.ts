@@ -44,8 +44,9 @@ export const createHelloworldNodeProject = workflow({
   knowledge: `
     - You are on Alpine linux and have "shellExec" tool to run any shell command you want
     - Check if the directories or folders you are about to create doesn't exist and if so remove them.
-    - Create folder "nodejs-app" for the project in the current working directory.
-    - Work relatively to "/mnt/nodejs-app" (which is the default cwd + "nodejs-app")
+    - Create folder "/mnt/nodejs-app" for the project in the current working directory.
+    - Use the created follder for all subsequent operations
+    - Create and run app inside "/mnt/nodejs-app" folder only
     - The Docker container persist between the calls so you can change directories etc. 
     - You can install required packages like nodejs, npm using "apk add --update <packagename>"
     - You should create files and directories using standard linux tools
