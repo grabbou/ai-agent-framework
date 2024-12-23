@@ -80,6 +80,7 @@ export const createCodeInterpreter = ({
       ...dockerOptions,
       name: 'interpreter-docker',
     },
+    escapeCommand: false, // to avoid double escape - we need to escape Python code first
   })
 
   return {

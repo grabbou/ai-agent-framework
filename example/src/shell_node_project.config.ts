@@ -12,6 +12,7 @@ const shellTools = createShellTools({
   mountPointDir: 'mnt',
   workingDir,
   dockerOptions: {},
+  escapeCommand: true,
 })
 
 const devops = agent({

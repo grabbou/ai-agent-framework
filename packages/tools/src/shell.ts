@@ -179,9 +179,15 @@ export interface ShellOptions {
   workingDir: string
   mountPointDir: string
   dockerOptions: DockerOptions
+  escapeCommand: boolean
 }
 
-export const createShellTools = ({ workingDir, mountPointDir, dockerOptions }: ShellOptions) => {
+export const createShellTools = ({
+  workingDir,
+  mountPointDir,
+  dockerOptions,
+  escapeCommand,
+}: ShellOptions) => {
   const dockerContext: DockerOptions = {
     name: 'shell-docker',
     defaultImageTag: 'shell:latest',
@@ -195,13 +201,8 @@ export const createShellTools = ({ workingDir, mountPointDir, dockerOptions }: S
         'Executes a shell command inside a Docker container. Storage path is configurable.',
       parameters: z.object({
         command: z.string().describe('The shell command to run inside the container.'),
-        escapeCommand: z
-          .boolean()
-          .describe(
-            'When true (should be by default) the command is safely escaped before execution'
-          ),
       }),
-      execute: async ({ command, escapeCommand }) => {
+      execute: async ({ command }) => {
         if (!command) {
           throw new Error('A shell command is required.')
         }
