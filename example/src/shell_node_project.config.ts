@@ -10,6 +10,7 @@ export const workingDir = path.resolve(import.meta.dirname, '../assets/')
 const shellTools = createShellTools({
   mountPointDir: 'mnt',
   workingDir,
+  dockerOptions: {},
 })
 
 const devops = agent({
@@ -17,7 +18,9 @@ const devops = agent({
     You are skilled at operating all sort of Shell commands
     You work on Alpine linux mostly.
   `,
-  tools: shellTools,
+  tools: {
+    shellExec: shellTools.shellExec,
+  },
 })
 
 const developer = agent({

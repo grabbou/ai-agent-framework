@@ -5,19 +5,10 @@ import * as path from 'path'
 import { z } from 'zod'
 
 // You can reuse or rename these options depending on your needs.
-type ShellToolOptions = {
-  name: string
-  description: string
-  defaultImageTag: string
-  userDockerfilePath: string | null
-}
-
-// Default options for your shell tool
-const shellToolOptions: ShellToolOptions = {
-  name: 'Shell Tool',
-  description: 'Executes arbitrary shell commands inside a Docker container.',
-  defaultImageTag: 'shell-tool:latest',
-  userDockerfilePath: null,
+type DockerOptions = {
+  name?: string
+  defaultImageTag?: string
+  userDockerfilePath?: string | null
 }
 
 /**
@@ -41,8 +32,8 @@ function runCommand(
  * Check if an image by shellToolOptions.defaultImageTag is present.
  * If not, build it.
  */
-function verifyOrBuildDockerImage() {
-  let output = runCommand(`docker image inspect ${shellToolOptions.defaultImageTag}`, {
+function verifyOrBuildDockerImage(dockerContext: DockerOptions) {
+  let output = runCommand(`docker image inspect ${dockerContext.defaultImageTag}`, {
     stdio: 'pipe',
     encoding: 'utf-8',
   })
@@ -51,17 +42,17 @@ function verifyOrBuildDockerImage() {
   if (output.startsWith('Command failed')) {
     let dockerfilePath: string
 
-    if (shellToolOptions.userDockerfilePath && fs.existsSync(shellToolOptions.userDockerfilePath)) {
-      dockerfilePath = shellToolOptions.userDockerfilePath
+    if (dockerContext.userDockerfilePath && fs.existsSync(dockerContext.userDockerfilePath)) {
+      dockerfilePath = dockerContext.userDockerfilePath
     } else {
       // Otherwise assume there's a Dockerfile in the current directory or a subfolder
-      dockerfilePath = path.resolve(import.meta.dirname, 'shell')
+      dockerfilePath = path.resolve(import.meta.dirname, dockerContext.name ?? 'shell')
       if (!fs.existsSync(dockerfilePath)) {
         throw new Error(`Dockerfile not found in ${dockerfilePath}`)
       }
     }
 
-    output = runCommand(`docker build -t ${shellToolOptions.defaultImageTag} ${dockerfilePath}`, {
+    output = runCommand(`docker build -t ${dockerContext.defaultImageTag} ${dockerfilePath}`, {
       stdio: 'pipe',
       encoding: 'utf-8',
     })
@@ -72,19 +63,26 @@ function verifyOrBuildDockerImage() {
 }
 
 /**
- * Check if the "shell-runner" container exists. If not, create it.
+ * Check if the container exists. If not, create it.
  * Does NOT start or remove the container.
  */
-function verifyOrCreateContainer(storagePath: string, storageMountPoint: string) {
+function verifyOrCreateContainer(
+  dockerContext: DockerOptions,
+  storagePath: string,
+  storageMountPoint: string
+) {
   // Check if container exists
-  let output = runCommand(`docker inspect shell-runner`, { stdio: 'pipe', encoding: 'utf-8' })
+  let output = runCommand(`docker container inspect ${dockerContext.name}`, {
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  })
 
   // If container does not exist, create it
   if (output.startsWith('Command failed')) {
     output = runCommand(
-      `docker create --name shell-runner -w /${storageMountPoint} ` +
+      `docker create --name ${dockerContext.name} -w /${storageMountPoint} ` +
         `-v ${storagePath}:/${storageMountPoint} ` +
-        `${shellToolOptions.defaultImageTag} tail -f /dev/null`,
+        `${dockerContext.defaultImageTag} tail -f /dev/null`,
       { stdio: 'pipe', encoding: 'utf-8' }
     )
     if (output.startsWith('Command failed')) {
@@ -96,16 +94,18 @@ function verifyOrCreateContainer(storagePath: string, storageMountPoint: string)
 /**
  * Start the container if it is stopped.
  */
-function startContainer() {
+function startContainer(dockerContext: DockerOptions) {
   // Check container status
-  const inspectOutput = runCommand(`docker inspect -f '{{.State.Running}}' shell-runner`, {
+  const inspectOutput = runCommand(`docker inspect -f '{{.State.Running}}' ${dockerContext.name}`, {
     stdio: 'pipe',
     encoding: 'utf-8',
   })
-
   // If container is not running, start it
   if (inspectOutput.trim() !== 'true') {
-    const output = runCommand('docker start shell-runner', { stdio: 'pipe', encoding: 'utf-8' })
+    const output = runCommand(`docker start ${dockerContext.name}`, {
+      stdio: 'pipe',
+      encoding: 'utf-8',
+    })
     if (output.startsWith('Command failed')) {
       throw new Error(output)
     }
@@ -115,8 +115,8 @@ function startContainer() {
 /**
  * Runs the given shell command inside the container, returning stdout or error info.
  */
-function runShellInDocker(command: string): string {
-  return runCommand(`docker exec shell-runner sh -c "${command.replace(/"/g, '\\"')}"`, {
+function runShellInDocker(dockerContext: DockerOptions, command: string): string {
+  return runCommand(`docker exec ${dockerContext.name} sh -c "${command.replace(/"/g, '\\"')}"`, {
     stdio: 'pipe',
     encoding: 'utf-8',
   })
@@ -126,9 +126,9 @@ function runShellInDocker(command: string): string {
  * Optional cleanup function to stop and remove the container.
  * Call this manually if you want to remove the container from the system.
  */
-export function cleanupContainer() {
-  runCommand('docker stop shell-runner', { stdio: 'pipe', encoding: 'utf-8' })
-  runCommand('docker rm shell-runner', { stdio: 'pipe', encoding: 'utf-8' })
+export function cleanupContainer(dockerContext: DockerOptions) {
+  runCommand(`docker stop ${dockerContext.name}`, { stdio: 'pipe', encoding: 'utf-8' })
+  runCommand(`docker rm ${dockerContext.name}`, { stdio: 'pipe', encoding: 'utf-8' })
 }
 
 /**
@@ -139,21 +139,22 @@ async function runShellCommand(args: {
   command: string
   storagePath: string
   storageMountPoint: string
+  dockerContext: DockerOptions
 }): Promise<string> {
   const { command, storagePath, storageMountPoint } = args
 
   try {
     // Ensure Docker image is built
-    verifyOrBuildDockerImage()
+    verifyOrBuildDockerImage(args.dockerContext)
 
     // Ensure container is created (if needed)
-    verifyOrCreateContainer(storagePath, storageMountPoint)
+    verifyOrCreateContainer(args.dockerContext, storagePath, storageMountPoint)
 
     // Start container if not running
-    startContainer()
+    startContainer(args.dockerContext)
 
     // Execute the command in container
-    const output = runShellInDocker(command)
+    const output = runShellInDocker(args.dockerContext, command)
     return output
   } catch (error: any) {
     return `Unexpected error: ${error.message}`
@@ -164,13 +165,20 @@ async function runShellCommand(args: {
  * Exported shellTool, which runs arbitrary shell commands in a container
  * and allows configuring the container-mounted path (default "workspace").
  */
-
 interface ShellOptions {
   workingDir: string
   mountPointDir: string
+  dockerOptions: DockerOptions
 }
 
-export const createShellTools = ({ workingDir, mountPointDir }: ShellOptions) => {
+export const createShellTools = ({ workingDir, mountPointDir, dockerOptions }: ShellOptions) => {
+  const dockerContext: DockerOptions = {
+    name: 'shell-docker',
+    defaultImageTag: 'shell:latest',
+    userDockerfilePath: null,
+    ...dockerOptions,
+  }
+
   return {
     shellExec: tool({
       description:
@@ -192,16 +200,17 @@ export const createShellTools = ({ workingDir, mountPointDir }: ShellOptions) =>
           command,
           storagePath: workingDir,
           storageMountPoint: mountPointDir,
+          dockerContext,
         })
       },
     }),
-    // Optionally export a cleanup tool if you want to manually remove the container
-    cleanupShellRunner: tool({
-      description: 'Stops and removes the "shell-runner" container if it exists.',
+    // a cleanup tool if you want to manually remove the container
+    cleanupDockerRunner: tool({
+      description: `Stops and removes the "${dockerContext.name}" container if it exists.`,
       parameters: z.object({}),
       execute: async () => {
-        cleanupContainer()
-        return 'Container shell-runner has been stopped and removed.'
+        cleanupContainer(dockerContext)
+        return `Container ${dockerContext.name} has been stopped and removed.`
       },
     }),
   }
