@@ -38,23 +38,23 @@ function runCommand(
 }
 
 /**
- * Verifies (and if needed, builds) the Docker image. Then creates an (initially stopped) container.
+ * Check if an image by shellToolOptions.defaultImageTag is present.
+ * If not, build it.
  */
-function verifyDockerImageAndContainer(storagePath: string) {
-  // Step 1: Check if image is present
+function verifyOrBuildDockerImage() {
   let output = runCommand(`docker image inspect ${shellToolOptions.defaultImageTag}`, {
     stdio: 'pipe',
     encoding: 'utf-8',
   })
 
-  // Step 2: If not present, try to build
+  // If image not found, try to build it
   if (output.startsWith('Command failed')) {
     let dockerfilePath: string
+
     if (shellToolOptions.userDockerfilePath && fs.existsSync(shellToolOptions.userDockerfilePath)) {
-      // Use user-provided Dockerfile
       dockerfilePath = shellToolOptions.userDockerfilePath
     } else {
-      // Otherwise assume there's a Dockerfile in the current directory
+      // Otherwise assume there's a Dockerfile in the current directory or a subfolder
       dockerfilePath = path.resolve(import.meta.dirname, 'shell')
       if (!fs.existsSync(dockerfilePath)) {
         throw new Error(`Dockerfile not found in ${dockerfilePath}`)
@@ -69,28 +69,46 @@ function verifyDockerImageAndContainer(storagePath: string) {
       throw new Error(output)
     }
   }
+}
 
-  // Step 3: Remove existing container if it exists (ignore failures)
-  runCommand('docker rm -f shell-runner', { stdio: 'pipe', encoding: 'utf-8' })
+/**
+ * Check if the "shell-runner" container exists. If not, create it.
+ * Does NOT start or remove the container.
+ */
+function verifyOrCreateContainer(storagePath: string, storageMountPoint: string) {
+  // Check if container exists
+  let output = runCommand(`docker inspect shell-runner`, { stdio: 'pipe', encoding: 'utf-8' })
 
-  // Step 4: Create a new container (stopped) that we will start/exec into
-  output = runCommand(
-    `docker create --name shell-runner -w /${storagePath} -v ${process.cwd()}:/${storagePath} ` +
-      `${shellToolOptions.defaultImageTag} tail -f /dev/null`,
-    { stdio: 'pipe', encoding: 'utf-8' }
-  )
+  // If container does not exist, create it
   if (output.startsWith('Command failed')) {
-    throw new Error(output)
+    output = runCommand(
+      `docker create --name shell-runner -w /${storageMountPoint} ` +
+        `-v ${storagePath}:/${storageMountPoint} ` +
+        `${shellToolOptions.defaultImageTag} tail -f /dev/null`,
+      { stdio: 'pipe', encoding: 'utf-8' }
+    )
+    if (output.startsWith('Command failed')) {
+      throw new Error(output)
+    }
   }
 }
 
 /**
- * Start the container if it is stopped or not started yet.
+ * Start the container if it is stopped.
  */
 function startContainer() {
-  const output = runCommand('docker start shell-runner', { stdio: 'pipe', encoding: 'utf-8' })
-  if (output.startsWith('Command failed')) {
-    throw new Error(output)
+  // Check container status
+  const inspectOutput = runCommand(`docker inspect -f '{{.State.Running}}' shell-runner`, {
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  })
+
+  // If container is not running, start it
+  if (inspectOutput.trim() !== 'true') {
+    const output = runCommand('docker start shell-runner', { stdio: 'pipe', encoding: 'utf-8' })
+    if (output.startsWith('Command failed')) {
+      throw new Error(output)
+    }
   }
 }
 
@@ -105,35 +123,39 @@ function runShellInDocker(command: string): string {
 }
 
 /**
- * Cleanup function to stop and remove the container.
+ * Optional cleanup function to stop and remove the container.
+ * Call this manually if you want to remove the container from the system.
  */
-function cleanupContainer() {
+export function cleanupContainer() {
   runCommand('docker stop shell-runner', { stdio: 'pipe', encoding: 'utf-8' })
   runCommand('docker rm shell-runner', { stdio: 'pipe', encoding: 'utf-8' })
 }
 
 /**
- * The core function that orchestrates the "verify or build image" + "run command" + "cleanup".
+ * The core function that orchestrates "verify/build image" + "create container if needed" + "start container if stopped" + "run command".
+ * Note: We do NOT clean up the container automatically, so we can reuse it for subsequent commands.
  */
-async function runShellCommand(args: { command: string; storagePath: string }): Promise<string> {
-  const { command, storagePath } = args
+async function runShellCommand(args: {
+  command: string
+  storagePath: string
+  storageMountPoint: string
+}): Promise<string> {
+  const { command, storagePath, storageMountPoint } = args
 
   try {
-    // Ensure Docker image is present and container is created
-    verifyDockerImageAndContainer(storagePath)
+    // Ensure Docker image is built
+    verifyOrBuildDockerImage()
+
+    // Ensure container is created (if needed)
+    verifyOrCreateContainer(storagePath, storageMountPoint)
+
     // Start container if not running
     startContainer()
 
     // Execute the command in container
     const output = runShellInDocker(command)
-
-    // Finally, stop & remove container
-    cleanupContainer()
-
     return output
   } catch (error: any) {
-    // Attempt cleanup if anything goes wrong
-    cleanupContainer()
     return `Unexpected error: ${error.message}`
   }
 }
@@ -145,9 +167,10 @@ async function runShellCommand(args: { command: string; storagePath: string }): 
 
 interface ShellOptions {
   workingDir: string
+  mountPointDir: string
 }
 
-export const createShellTools = ({ workingDir }: ShellOptions) => {
+export const createShellTools = ({ workingDir, mountPointDir }: ShellOptions) => {
   return {
     shellExec: tool({
       description:
@@ -159,7 +182,26 @@ export const createShellTools = ({ workingDir }: ShellOptions) => {
         if (!command) {
           throw new Error('A shell command is required.')
         }
-        return runShellCommand({ command, storagePath: workingDir })
+
+        // Default if not provided
+        if (!mountPointDir) mountPointDir = 'mnt'
+        // Remove leading/trailing slash from mountPointDir
+        mountPointDir = mountPointDir.replace(/^\/|\/$/g, '')
+
+        return runShellCommand({
+          command,
+          storagePath: workingDir,
+          storageMountPoint: mountPointDir,
+        })
+      },
+    }),
+    // Optionally export a cleanup tool if you want to manually remove the container
+    cleanupShellRunner: tool({
+      description: 'Stops and removes the "shell-runner" container if it exists.',
+      parameters: z.object({}),
+      execute: async () => {
+        cleanupContainer()
+        return 'Container shell-runner has been stopped and removed.'
       },
     }),
   }
