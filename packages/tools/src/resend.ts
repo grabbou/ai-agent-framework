@@ -53,8 +53,8 @@ export const createEmailTool = (options: EmailToolOptions) => {
           .array(z.string())
           .describe('The list of recipient email addresses, e.g. ["user@example.com"].'),
         subject: z.string().describe('The subject of the email.'),
-        text: z.string().optional().describe('Plaintext body content of the email.'),
-        html: z.string().optional().describe('HTML body content of the email.'),
+        text: z.string().describe('Plaintext body content of the email.'),
+        html: z.string().describe('HTML body content of the email.'),
       }),
       execute: async ({ from, to, subject, text, html }) => {
         try {
