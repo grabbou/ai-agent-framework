@@ -41,7 +41,9 @@ function ensurePandocExists(pandocPath: string) {
     // If it fails, it will throw.
     execFileSync(pandocPath, ['--version'], { stdio: 'ignore' })
   } catch (error) {
-    throw new Error(`Pandoc not found or not executable at path: ${pandocPath}`)
+    throw new Error(
+      `Pandoc not found or not executable at path: ${pandocPath}. Go to https://pandoc.org for installation details. Use "homebrew install pandoc" if you are on MacOS and using Homebrew.`
+    )
   }
 }
 
@@ -177,7 +179,6 @@ export function createPandocTool(options?: PandocToolOptions) {
         content: z.string().describe('Raw content to convert.'),
         returnAsBase64: z
           .boolean()
-          .default(true)
           .describe(
             'If true (default), returns base64 (useful for docx/pdf). Otherwise, returns plain text.'
           ),
